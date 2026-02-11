@@ -19,7 +19,7 @@ import {
     View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import ArsdScraper from '../../services/ArsdScraper';
+import ArsdScraper from '../services/ArsdScraper';
 
 const handleFeedback = () => {
     const email = "arsdsaathi.help@gmail.com"; 
@@ -89,7 +89,7 @@ export default function Login({ navigation }) {
         >
             <SafeAreaView style={styles.headerContent}>
                 <View style={styles.logoCircle}>
-                    <Image source={require("../../assets/images/icon.png")} style={{ width: '70%', height: '70%' }} />
+                    <Image source={require("../assets/images/icon.png")} style={{ width: '70%', height: '70%' }} />
                 </View>
                 <Text style={styles.appName}>ArsdSaathi</Text>
                 <Text style={styles.tagline}>Your College Companion</Text>

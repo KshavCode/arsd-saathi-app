@@ -4,11 +4,11 @@ import * as NavigationBar from 'expo-navigation-bar'; // <--- Import this
 import React, { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 
-import Attendance from './tab1/AttendanceTab';
-import Details from './tab1/DetailsTab';
-import Faculty from './tab1/FacultyTab';
-import Home from './tab1/HomeTab';
-import Login from './tab1/LoginTab';
+import Attendance from './attendance';
+import Details from './basic';
+import Faculty from './faculty';
+import Home from './home';
+import Login from './index';
 
 const Stack = createStackNavigator();
 
