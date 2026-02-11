@@ -1,26 +1,25 @@
 {
   "expo": {
     "name": "ArsdSaathi",
-    "slug": "ArsdSaathi",
+    "slug": "arsdsaathi",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "arsdsaathi",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.keshav.arsdsaathi"
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/icon.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/images/icon.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.ArsdSaathi"
+      "package": "com.keshav.arsdsaathi",
+      "versionCode": 1
     },
     "web": {
       "output": "static",
@@ -42,8 +41,13 @@
       ]
     ],
     "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "46d75500-c0b1-4209-be34-625a90ced4d1"
+      }
     }
   }
 }
