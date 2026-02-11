@@ -1,136 +1,76 @@
 # ArsdSaathi 🎓
-**ArsdSaathi** is a cross-platform mobile application designed for students of ARSD College. It allows students to log in using their college credentials and seamlessly sync their **Attendance**, **Faculty Details**, and **Basic Profile Information** directly to their device for offline access.
 
-The project uses a **"Offline-First"** architecture: data is scraped once upon login and stored locally, ensuring instant access without constant loading screens.
+**Your College Companion**
 
-## 🚀 Tech Stack
-### Frontend (Mobile App)
-* **Framework:** React Native (via Expo)
-* **Navigation:** React Navigation (Stack)
-* **Storage:** Async Storage (Persisted offline data)
-* **Networking:** Axios & NetInfo (Smart connectivity checks)
-* **UI/Theming:** Custom Dark/Light mode support
+ArsdSaathi is a mobile application designed specifically for students of **Atma Ram Sanatan Dharma (ARSD) College**. It provides a seamless, mobile-friendly interface to access the college portal, allowing students to sync their attendance, view their profile, and stay updated without navigating the legacy website every time.
+Built with **React Native** and **Expo**, it utilizes a secure, client-side scraping architecture to fetch data directly from the college portal, ensuring user privacy and zero server costs.
 
-### Backend (Scraper API)
-* **Server:** FastAPI
-* **Scraper:** Selenium WebDriver (Optimized for ASP.NET portals)
-* **Concurrency:** ThreadPoolExecutor (Non-blocking processing)
+---
+## 🚀 Features
+
+* **📊 Real-time Sync:** Fetches your latest attendance and internal marks directly from the college portal.
+* **🔒 Privacy First:** Your data (Roll No, DOB, Name) is stored **locally** on your device using `AsyncStorage`. No external database or server stores your credentials.
+* **📱 Offline Access:** Once synced, view your attendance history even without an internet connection.
+* **🎨 Modern UI:** A clean, responsive interface built with `React Native` and `Expo Router`.
+* **🛠️ Zero-Maintenance:** Uses client-side scraping logic, eliminating the need for a dedicated backend server.
+
+---
+## 📥 Download & Install
+
+The app is currently available as a direct APK download for Android devices.
+
+1.  **Download:** Get the latest version from the [Releases Page](#) (or the link provided).
+2.  **Open:** Tap on the downloaded `ArsdSaathi.apk` file.
+3.  **Permission:** If prompted with *"For your security, your phone is not allowed to install unknown apps from this source,"* tap **Settings** and toggle on **Allow from this source**.
+4.  **Install:** Tap **Install** and wait for the process to finish.
+5.  **Launch:** Open the app and log in with your College Roll Number.
+
+> **Note:** You might see a "Play Protect" warning since this app is not yet on the Play Store. Click **"More Details"** -> **"Install Anyway"** to proceed.
 
 ---
 
-## 🛠️ Prerequisites
+## 📖 How to Use
 
-Before running the project, ensure you have the following installed:
-1.  **Node.js** (v14 or higher)
-2.  **Python** (v3.8 or higher)
-3.  **Google Chrome** (Latest version)
-4.  **Expo Go** app installed on your physical Android/iOS device.
+1.  **Login:** Enter your **College Roll No.** (e.g., `23/38046`), **Full Name**, and **Date of Birth** exactly as they appear on your College ID Card.
+2.  **Sync:** Tap **"Connect & Sync"**. The app will securely connect to the ARSD portal to verify your identity and fetch your latest data.
+3.  **Dashboard:** Once logged in, you will see your **Attendance Summary**, **Subject-wise Breakdown**, and **Internal Assessment Marks**.
+4.  **Logout:** Go to **Profile > Logout** to clear your data from the device.
 
 ---
 
-## 📦 Installation Guide
-### 1. Backend Setup (Python)
+## 🛠️ Tech Stack
 
-Navigate to the `BACKEND` folder and set up the environment.
+* **Framework:** [React Native](https://reactnative.dev/) (via [Expo SDK](https://expo.dev/))
+* **Language:** JavaScript (ES6+)
+* **Navigation:** [Expo Router](https://docs.expo.dev/router/introduction/) (File-based routing)
+* **Storage:** `AsyncStorage` (Local data persistence)
+* **Networking:** Native `fetch` API with custom DOM parsing logic
+* **Build Tool:** EAS (Expo Application Services)
+* **Key Libraries:** `expo-linear-gradient`, `react-native-safe-area-context`, `expo-vector-icons`
 
-```bash
-cd BACKEND
+---
 
-# 1. Create a virtual environment (Optional but recommended)
-python -m venv venv
+## ⚠️ Disclaimer
 
-# 2. Activate the virtual environment
-# Windows:
-venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
+* **Unofficial App:** ArsdSaathi is a student-developed project and is **not** currently affiliated with, endorsed by, or connected to the official administration of Atma Ram Sanatan Dharma College.
+* **Data Source:** All data displayed (Attendance, Marks, Profile) is retrieved directly from the official ARSD College Student Portal. The app acts solely as a user-friendly interface for this data.
+* **Data Privacy:** Your login credentials (Roll No, Name, DOB) are stored **locally on your device** only. They are never transmitted to any third-party server.
 
-# 3. Install dependencies
-pip install -r requrements.txt
+---
 
-```
+## 📞 Contact & Support
 
-### 2. Frontend Setup (React Native)
+**Have questions or found a bug?**
 
-Navigate to the ArsdSaathi folder.
+* **Email:** [arsdsaathi.help@gmail.com](mailto:arsdsaathi.help@gmail.com)
+* **Issues:** Please report any bugs or feature requests on the [GitHub Issues](https://github.com/KshavCode/ArsdSaathi/issues) page.
 
-```bash
-cd ../ArsdSaathi
+---
 
-cd .. 
+## 📄 License & Copyright
 
-# 1. Install Node modules
-npm install
+**Copyright © 2026 Keshav Pal. All Rights Reserved.**
 
-# 2. Install specific native dependencies
-npx expo install @react-native-async-storage/async-storage @react-native-community/netinfo expo-navigation-bar axios
+This project is proprietary software. Unauthorized copying, modification, distribution, or use of this source code or assets, via any medium, is strictly prohibited without the express written permission of the copyright holder.
 
-```
-
-## ⚙️ Configuration (Critical Step)
-Since the mobile app runs on your phone and the backend runs on your laptop, you must tell the phone where to look.
-1. Open Command Prompt (Windows) or Terminal (Mac) and run:
-```bash
-ipconfig  # (Windows)
-# OR
-ifconfig  # (Mac/Linux)
-```
-2. Find your IPv4 Address (e.g., 192.168.1.5).
-3. Open ./services/api.js in your code editor.
-4. Create ./secret.js file and export IP_ADD of your computer
-```bash
-const BASE_URL = 'http://192.16X.XX.X:8000'; // <--- Replace this with YOUR IP
-```
-
-## ▶️ Running the App
-Step 1: Start the Backend
-Open a terminal in the BACKEND folder:
-```bash
-python api.py
-You should see: Uvicorn running on http://0.0.0.0:8000
-```
-
-Step 2: Start the Frontend
-Open a new terminal in the main project folder:
-Bash
-```bash
-npx expo start
-# OR
-npx expo start --tunnel
-```
-Scan the QR code with the Expo Go app on your phone.
-*Note: Ensure your phone and laptop are connected to the same Wi-Fi network.*
-
-## 🐛 Troubleshooting
-### 1. "Server Unreachable" / Network Error
-Firewall: Windows Firewall often blocks Python. Search "Allow an app through Windows Firewall" and enable python.exe for both Private and Public networks.
-
-Same Wi-Fi: Ensure phone and PC are on the same network.
-
-Wrong IP: Re-check your IP address (ipconfig) and update api.js.
-
-### 2. Chrome/Selenium Crash
-Run pip install --upgrade webdriver-manager selenium to ensure your drivers match your Chrome version.
-If using Headless mode (headless=True), ensure window size arguments are set to prevent layout issues.
-
-### 3. "Loading Forever"
-The college server might be slow. The app has a 60s timeout.
-Check the Python terminal. If you don't see "Login attempt", the request isn't reaching the server (see Network Error).
-
-## 📂 Project Structure
-```
-REPOSITORY_DIRECTORY
-├── BACKEND/
-│   ├── api.py            # FastAPI Server & Endpoints
-│   ├── extract.py        # Selenium Scraper Logic
-│   ├── requirements.txt  # Requirements
-│   └── venv/             # Python Virtual Environment
-├── ArsdSaathi/
-│   ├── app/              # Main resource of layout
-│   ├── components/       # Reusable UI (DashboardCard, ActionButton)
-│   └── services/         # api.js (Axios & AsyncStorage logic)
-├── app.json              # Expo Configuration
-└── package.json          # Node Dependencies
-```
-<br>
-Made with ❤️ By Keshav Pal.
+"ArsdSaathi"™ and its associated logo are trademarks of the developer.
