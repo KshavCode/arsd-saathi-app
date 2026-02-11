@@ -28,7 +28,6 @@ export default function Stack1() {
         }
     }, [isDarkMode]);
 
-    // 3. Define the background color for the Navigator itself (Fixes the white flash)
     const currentBackgroundColor = isDarkMode ? Colors.dark.background : Colors.light.background;
 
     const themeProps = {
