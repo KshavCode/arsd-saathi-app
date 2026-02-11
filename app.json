@@ -4,7 +4,7 @@
     "slug": "arsdsaathi",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.webp",
+    "icon": "./assets/images/icon.png",
     "scheme": "arsdsaathi",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -15,7 +15,7 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/icon.webp"
+        "foregroundImage": "./assets/images/icon.png"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.keshav.arsdsaathi",
@@ -23,14 +23,14 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/icon.webp"
+      "favicon": "./assets/images/icon.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/icon.webp",
+          "image": "./assets/images/icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
