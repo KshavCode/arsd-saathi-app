@@ -1,5 +1,5 @@
 ## 📲 Download
-[![Latest Release](https://img.shields.io/github/v/release/KshavCode/arsd-saathi-app?include_prereleases&label=Latest%20APK&color=green)](https://github.com/KshavCode/arsd-saathi-app/releases/latest)
+[![Latest Release](https://img.shields.io/github/v/release/KshavCode/arsd-saathi-app?include_prereleases&label=Latest%20APK&color=blue)](https://github.com/KshavCode/arsd-saathi-app/releases/latest)
 
 Download the latest version from the [Releases Page](https://github.com/KshavCode/arsd-saathi-app/releases).
 
@@ -13,7 +13,7 @@ Built with **React Native** and **Expo**, it utilizes a secure, client-side scra
 ---
 ## 🚀 Features
 
-* **📊 Real-time Sync:** Fetches your latest attendance and internal marks directly from the college portal.
+* **📊 Real-time Sync:** Fetches your latest attendance and details directly from the college portal.
 * **🔒 Privacy First:** Your data (Roll No, DOB, Name) is stored **locally** on your device using `AsyncStorage`. No external database or server stores your credentials.
 * **📱 Offline Access:** Once synced, view your attendance history even without an internet connection.
 * **🎨 Modern UI:** A clean, responsive interface built with `React Native` and `Expo Router`.
