@@ -1,9 +1,10 @@
 import { Colors } from '@/constants/themeStyle';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Added direct import
+import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const handleFeedback = () => {
@@ -11,6 +12,38 @@ const handleFeedback = () => {
     const subject = `ArsdSaathi Feedback`;
     const body = "Name: \nRoll Number: \nDOB (optional, for testing): \n\nIssue/Feedback: ";
     Linking.openURL(`mailto:${email}?subject=${subject}&body=${body}`);
+};
+
+const handleUpdate = async () => {
+  try {
+    const currentVersion = Constants.expoConfig.version;
+    const response = await fetch(
+      'https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest'
+    );
+    const data = await response.json();
+    
+    // GitHub tags usually look like "v1.0.1", so we remove the 'v'
+    const latestVersion = data.tag_name.replace('v', '');
+
+    if (latestVersion !== currentVersion) {
+      Alert.alert(
+        "Update Available 🚀",
+        `A new version (${latestVersion}) is available. Would you like to download it now?`,
+        [
+          { text: "Later", style: "cancel" },
+          { 
+            text: "Download", 
+            onPress: () => Linking.openURL(data.assets[0].browser_download_url)
+          }
+        ]
+      );
+    } else {
+      Alert.alert("Up to Date", "You are already using the latest version of ArsdSaathi!");
+    }
+  } catch (error) {
+    console.error(error);
+    Alert.alert("Error", "Could not check for updates. Please check your internet connection.");
+  }
 };
 
 
@@ -189,7 +222,15 @@ export default function HomeTab({ navigation, setIsDarkMode, isDarkMode }) {
           />
         </View>
 
-        <View style={{ marginTop: 20 }}>
+        <View style={{ marginTop: 20, backgroundColor: theme.primary }}>
+          <ActionButton 
+            title="Check for Updates" 
+            icon="build" 
+            onPress={handleUpdate}
+            theme={theme}
+          />
+        </View>
+        <View style={{ marginTop: 10 }}>
           <ActionButton 
             title="Logout" 
             icon="log-out" 
@@ -203,6 +244,10 @@ export default function HomeTab({ navigation, setIsDarkMode, isDarkMode }) {
           </Text>
         </TouchableOpacity>
         <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, marginTop:20}}>
+          <Text style={{ color: theme.primary, fontStyle:'italic', fontSize:13}}>ArsdSaathi v1.0.0
+          </Text>
+        </View>
+        <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, marginTop:10}}>
           <Text style={{ color: theme.secondary, fontSize:15}}>Developed by
           </Text>
           <TouchableOpacity onPress={()=>Linking.openURL("https://kshavcodes.netlify.app")}>

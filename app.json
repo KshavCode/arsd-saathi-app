@@ -4,6 +4,7 @@
     "slug": "arsdsaathi",
     "version": "1.0.0",
     "orientation": "portrait",
+    "jsEngine": "hermes",
     "icon": "./assets/images/icon.png",
     "scheme": "arsdsaathi",
     "userInterfaceStyle": "automatic",
