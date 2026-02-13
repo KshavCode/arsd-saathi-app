@@ -1,4 +1,4 @@
-import { Colors } from '@/constants/themeStyle';
+import { Colors } from '../constants/themeStyle';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useMemo, useState } from 'react';

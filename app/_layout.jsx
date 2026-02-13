@@ -1,4 +1,4 @@
-import { Colors } from '@/constants/themeStyle';
+import { Colors } from '../constants/themeStyle';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // <--- Import this
 import { createStackNavigator } from '@react-navigation/stack';
 import * as NavigationBar from 'expo-navigation-bar';
