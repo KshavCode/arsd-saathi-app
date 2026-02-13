@@ -1,5 +1,6 @@
 import { Colors } from '@/constants/themeStyle';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Linking from 'expo-linking';
 import React, { useState } from 'react';
@@ -61,18 +62,25 @@ export default function Login({ navigation }) {
         setIsScraping(true);
     };
 
-    const handleCompletion = (status) => {
-        if (status === 'DONE') {
-            setProgressMsg("Sync Complete!");
-            setTimeout(() => {
-                setIsScraping(false);
-                navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'Home' }],
-                });
-            }, 800);
-        }
-    };
+    const handleCompletion = async (status) => {
+    if (status === 'DONE') {
+        setProgressMsg("Sync Complete!");
+        
+        // --- ADD THESE TIMESTAMP SAVES ---
+        const now = Date.now().toString();
+        await AsyncStorage.setItem('LOGIN_TIMESTAMP', now);
+        await AsyncStorage.setItem('DATA_TIMESTAMP', now); 
+        // ---------------------------------
+
+        setTimeout(() => {
+            setIsScraping(false);
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'Home' }],
+            });
+        }, 800);
+    }
+};
 
     const handleError = (errorMsg) => {
         setIsScraping(false);

@@ -1,17 +1,18 @@
 import { Colors } from '@/constants/themeStyle';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Added direct import
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
 import React, { useEffect, useState } from 'react';
-import { Alert, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ArsdScraper from '../services/ArsdScraper';
 
 const handleFeedback = () => {
-    const email = "arsdsaathi.help@gmail.com"; 
-    const subject = `ArsdSaathi Feedback`;
-    const body = "Name: \nRoll Number: \nDOB (optional, for testing): \n\nIssue/Feedback: ";
-    Linking.openURL(`mailto:${email}?subject=${subject}&body=${body}`);
+  const email = "arsdsaathi.help@gmail.com"; 
+  const subject = `ArsdSaathi Feedback`;
+  const body = "Name: \nRoll Number: \nDOB (optional, for testing): \n\nIssue/Feedback: ";
+  Linking.openURL(`mailto:${email}?subject=${subject}&body=${body}`);
 };
 
 const handleUpdate = async () => {
@@ -22,7 +23,6 @@ const handleUpdate = async () => {
     );
     const data = await response.json();
     
-    // GitHub tags usually look like "v1.0.1", so we remove the 'v'
     const latestVersion = data.tag_name.replace('v', '');
 
     if (latestVersion !== currentVersion) {
@@ -46,8 +46,8 @@ const handleUpdate = async () => {
   }
 };
 
+// --- Sub-Components ---
 
-// Keep DashboardCard and ActionButton components as they were...
 const DashboardCard = ({ title, value, icon, color, subValue, highlight, theme }) => (
   <View style={[styles.card, { backgroundColor: theme.card }]}>
     <View style={styles.cardHeader}>
@@ -85,7 +85,9 @@ const ActionButton = ({ title, icon, onPress, isDestructive, theme }) => (
   </TouchableOpacity>
 );
 
-export default function HomeTab({ navigation, setIsDarkMode, isDarkMode }) {
+// --- Main Screen ---
+
+export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }) {
   const theme = {
     background: isDarkMode ? Colors.dark.background : Colors.light.background,
     card: isDarkMode ? Colors.dark.card : Colors.light.card, 
@@ -103,37 +105,61 @@ export default function HomeTab({ navigation, setIsDarkMode, isDarkMode }) {
   };
 
   const [userData, setUserData] = useState({ name: "Loading...", rollNo: "...", enrollmentNumber: "..." });
+  const [savedCredentials, setSavedCredentials] = useState(null);
+  const [isSyncing, setIsSyncing] = useState(false);
 
-  useEffect(() => {
-    const loadData = async () => {
+  const loadData = async () => {
       try {
         const basicRaw = await AsyncStorage.getItem('BASIC_DETAILS');
         const credsRaw = await AsyncStorage.getItem('USER_CREDENTIALS');
         const attRaw = await AsyncStorage.getItem('ATTENDANCE_DATA');
+        const mentorRaw = await AsyncStorage.getItem('MENTOR_DATA');
 
         const basic = basicRaw ? JSON.parse(basicRaw) : null;
         const creds = credsRaw ? JSON.parse(credsRaw) : null;
         const att = attRaw ? JSON.parse(attRaw) : null;
+        const mentor = mentorRaw ? JSON.parse(mentorRaw) : null;
+
+        if (creds) setSavedCredentials(creds); 
 
         if (basic || creds) {
           setUserData({ 
             name: basic?.name || creds?.name || "Student", 
             rollNo: basic?.rollNo || creds?.rollNo || "N/A",
             enrollmentNumber: basic?.enrollmentNumber || "N/A",
-            percent_attendance: att?.overall_percentage || 0
+            percent_attendance: att?.overall_percentage || 0,
+            mentor_name: mentor?.mentor || "N/A"
           });
         }
       } catch (error) {
         console.error("Error loading Dashboard data:", error);
       }
-    };
-    
+  };
+
+  useEffect(() => {
     loadData();
-  }, []);
+
+    if (route.params?.requiresSync) {
+        setIsSyncing(true);
+    }
+  }, [route.params]);
+
+  const handleSyncCompletion = async (status) => {
+      if (status === 'DONE') {
+          await AsyncStorage.setItem('DATA_TIMESTAMP', Date.now().toString());
+          await loadData();
+          setIsSyncing(false);
+          navigation.setParams({ requiresSync: false });
+      }
+  };
+
+  const handleSyncError = (errorMsg) => {
+      setIsSyncing(false);
+      console.warn("Background sync failed:", errorMsg); 
+  };
 
   const handleLogout = async () => {
-      // Clear specific keys or clear all
-      await AsyncStorage.multiRemove(['USER_CREDENTIALS', 'BASIC_DETAILS', 'ATTENDANCE_DATA', 'FACULTY_DATA']);
+      await AsyncStorage.multiRemove(['USER_CREDENTIALS', 'BASIC_DETAILS', 'ATTENDANCE_DATA', 'FACULTY_DATA', 'MENTOR_DATA', 'LOGIN_TIMESTAMP', 'DATA_TIMESTAMP']);
       navigation.reset({
         index: 0,
         routes: [{ name: 'Login' }],
@@ -146,12 +172,26 @@ export default function HomeTab({ navigation, setIsDarkMode, isDarkMode }) {
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
       
+      {/* Background Scraper Component */}
+      {isSyncing && savedCredentials && (
+          <ArsdScraper
+              credentials={savedCredentials}
+              onProgress={(msg) => console.log("Background Sync:", msg)}
+              onFinish={handleSyncCompletion}
+              onError={handleSyncError}
+          />
+      )}
+
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         
+        {/* Header Section */}
         <View style={styles.header}>
           <View>
             <Text style={[styles.greeting, { color: theme.textSecondary }]}>Welcome back,</Text>
-            <Text style={[styles.username, { color: theme.text }]}>{userData.name}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Text style={[styles.username, { color: theme.text }]}>{userData.name}</Text>
+                {isSyncing && <ActivityIndicator size="small" color={theme.primary} />}
+            </View>
           </View>
           
           <TouchableOpacity 
@@ -162,6 +202,7 @@ export default function HomeTab({ navigation, setIsDarkMode, isDarkMode }) {
           </TouchableOpacity>
         </View>
 
+        {/* Top Statistics Grid */}
         <View style={styles.statsGrid}>
           <View style={styles.heroCardContainer}>
             <DashboardCard 
@@ -169,7 +210,7 @@ export default function HomeTab({ navigation, setIsDarkMode, isDarkMode }) {
               value={userData.percent_attendance}
               subValue={isAttendanceLow ? "Below required 67%" : ""}
               icon="pie-chart"
-              color={isAttendanceLow ? theme.error : "#10B981"} // Emerald Green
+              color={isAttendanceLow ? theme.error : "#10B981"}
               highlight={isAttendanceLow}
               theme={theme}
             />
@@ -196,8 +237,17 @@ export default function HomeTab({ navigation, setIsDarkMode, isDarkMode }) {
                 />
             </View>
           </View>
+          <View style={styles.heroCardContainer}>
+            <DashboardCard 
+              title="Mentor" 
+              value={userData.mentor_name}
+              icon="book"
+              theme={theme}
+            />
+          </View>
         </View>
 
+        {/* Navigation Actions */}
         <Text style={[styles.sectionHeader, { color: theme.text }]}>Quick Actions</Text>
         <View style={[styles.actionContainer, { backgroundColor: theme.card }]}>
            <ActionButton 
@@ -222,7 +272,8 @@ export default function HomeTab({ navigation, setIsDarkMode, isDarkMode }) {
           />
         </View>
 
-        <View style={{ marginTop: 20, backgroundColor: theme.primary }}>
+        {/* Utility Actions */}
+        <View style={{ marginTop: 20, backgroundColor: theme.primary, borderRadius: 12 }}>
           <ActionButton 
             title="Check for Updates" 
             icon="build" 
@@ -239,34 +290,32 @@ export default function HomeTab({ navigation, setIsDarkMode, isDarkMode }) {
             theme={theme}
           />
         </View>
+
+        {/* Footer Section */}
         <TouchableOpacity onPress={() => handleFeedback()}>
           <Text style={[styles.footerText, { color: theme.footer, fontWeight: 'bold', marginTop: 10 }]}>Having trouble? Report an Issue
           </Text>
         </TouchableOpacity>
-        <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, marginTop:20}}>
-          <Text style={{ color: theme.primary, fontStyle:'italic', fontSize:13}}>ArsdSaathi v1.0.0
-          </Text>
-        </View>
+        
         <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, marginTop:10}}>
-          <Text style={{ color: theme.secondary, fontSize:15}}>Developed by
-          </Text>
+          <Text style={{ color: theme.secondary, fontSize:15}}>Developed by</Text>
           <TouchableOpacity onPress={()=>Linking.openURL("https://kshavcodes.netlify.app")}>
-              <Text style={{ color: theme.footer, fontWeight: 'bold', fontSize:15 }}>Keshav Pal
-              </Text>
+              <Text style={{ color: theme.footer, fontWeight: 'bold', fontSize:15 }}>Keshav Pal</Text>
           </TouchableOpacity>
         </View>
         <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4}}>
-          <Text style={{ color: theme.secondary, fontSize:13}}>with
-          </Text>
+          <Text style={{ color: theme.secondary, fontSize:13}}>with</Text>
           <TouchableOpacity onPress={()=>Linking.openURL("https://github.com/SHIVAMY007")}>
-              <Text style={{ color: theme.footer, fontWeight: 'bold', fontSize:13 }}>Shivam Yadav
-              </Text>
+              <Text style={{ color: theme.footer, fontWeight: 'bold', fontSize:13 }}>Shivam Yadav</Text>
           </TouchableOpacity>
         </View>
+
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+// --- Stylesheet ---
 
 const styles = StyleSheet.create({
     container: { flex: 1 },
@@ -290,4 +339,5 @@ const styles = StyleSheet.create({
     actionIconCtx: { width: 36, height: 36, borderRadius: 8, alignItems: 'center', justifyContent: 'center', marginRight: 15 },
     actionText: { flex: 1, fontSize: 15, fontWeight: '600' },
     separator: { height: 1, marginLeft: 60 },
+    footerText: { textAlign: 'center', color: '#9CA3AF', fontSize: 12 },
 });

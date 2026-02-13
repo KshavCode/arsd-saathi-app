@@ -125,12 +125,25 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
           sendData("data_basic", profile);
           
           setTimeout(() => {
+            window.location.href = "https://www.arsdcollege.in/Internet/Student/Mentor_Details.aspx";
+          }, 800);
+        });
+      }
+
+      // --- 3. MENTOR DETAILS ---
+      else if (url.includes("Mentor_Details.aspx")) {
+        waitForElement("lblmentor_name", (el) => {
+          if (!el) return;
+          const mentorData = { mentor: getText("lblmentor_name") };
+          sendData("data_mentor", mentorData);
+
+          setTimeout(() => {
             window.location.href = "https://www.arsdcollege.in/Internet/Student/Attendance_Report_Monthly.aspx";
           }, 800);
         });
       }
 
-      // --- 3. ATTENDANCE ---
+      // --- 4. ATTENDANCE ---
       else if (url.includes("Attendance_Report_Monthly.aspx")) {
         const table = document.getElementById("gvshow");
         
@@ -182,7 +195,7 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
         }
       }
 
-      // --- 4. FACULTY ---
+      // --- 5. FACULTY ---
       else if (url.includes("Check_Student_Faculty_Details.aspx")) {
         waitForElement("gvshow", (table) => {
           log("Extracting faculty details...");
@@ -237,6 +250,9 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
       } 
       else if (type === 'data_faculty') {
         await AsyncStorage.setItem('FACULTY_DATA', JSON.stringify(payload));
+      } 
+      else if (type === 'data_mentor') {
+        await AsyncStorage.setItem('MENTOR_DATA', JSON.stringify(payload));
       } 
       else if (type === 'complete') {
         await AsyncStorage.setItem('USER_CREDENTIALS', JSON.stringify(credentials));
