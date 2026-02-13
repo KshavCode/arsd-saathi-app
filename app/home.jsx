@@ -1,4 +1,3 @@
-import { Colors } from '../constants/themeStyle';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
@@ -6,6 +5,7 @@ import * as Linking from 'expo-linking';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Colors } from '../constants/themeStyle';
 import ArsdScraper from '../services/ArsdScraper';
 
 const handleFeedback = () => {
@@ -166,6 +166,15 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
       });
   }
 
+  // Saving Dark Theme
+  const handleTheme = async () => {
+    const nextMode = !isDarkMode;
+    setIsDarkMode(nextMode); 
+    
+    // 3. Save the new value as a string
+    await AsyncStorage.setItem('DARK_THEME', JSON.stringify(nextMode));
+};
+
   const isAttendanceLow = Number(userData.percent_attendance) < 67;
 
   return (
@@ -196,7 +205,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
           
           <TouchableOpacity 
             style={[styles.themeButton, { backgroundColor: theme.card }]} 
-            onPress={() => setIsDarkMode(!isDarkMode)}
+            onPress={handleTheme}
           >
              <Ionicons name={isDarkMode ? "sunny" : "moon"} size={22} color={isDarkMode ? "#FBBF24" : theme.primary} />
           </TouchableOpacity>
@@ -299,7 +308,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
         
         <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, marginTop:10}}>
           <Text style={{ color: theme.secondary, fontSize:15}}>Developed by</Text>
-          <TouchableOpacity onPress={()=>Linking.openURL("https://kshavcodes.netlify.app")}>
+          <TouchableOpacity onPress={()=>Linking.openURL("kshavcode.me")}>
               <Text style={{ color: theme.footer, fontWeight: 'bold', fontSize:15 }}>Keshav Pal</Text>
           </TouchableOpacity>
         </View>

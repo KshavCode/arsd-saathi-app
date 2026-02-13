@@ -35,9 +35,9 @@ const handleFeedback = () => {
 
 export default function Login({ navigation }) {
 
-    const [roll, setRoll] = useState('23/38046');
-    const [fullName, setFullName] = useState('Keshav Pal');
-    const [dob, setDob] = useState('02-08-2005');
+    const [roll, setRoll] = useState('');
+    const [fullName, setFullName] = useState('');
+    const [dob, setDob] = useState('');
 
     const [isScraping, setIsScraping] = useState(false);
     const [progressMsg, setProgressMsg] = useState('');
@@ -70,6 +70,7 @@ export default function Login({ navigation }) {
         const now = Date.now().toString();
         await AsyncStorage.setItem('LOGIN_TIMESTAMP', now);
         await AsyncStorage.setItem('DATA_TIMESTAMP', now); 
+
         // ---------------------------------
 
         setTimeout(() => {
@@ -99,7 +100,7 @@ export default function Login({ navigation }) {
             >
                 <ScrollView 
                     style={{ flex: 1 }}
-                    contentContainerStyle={{ flexGrow: 1, paddingBottom: 150 }} // 👈 Extra padding for scrolling space
+                    contentContainerStyle={{ flexGrow: 1, paddingBottom: 150 }} // Extra padding for scrolling space
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                     bounces={false}

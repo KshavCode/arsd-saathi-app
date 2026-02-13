@@ -1,9 +1,9 @@
-import { Colors } from '../constants/themeStyle';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // <--- Import this
 import { createStackNavigator } from '@react-navigation/stack';
 import * as NavigationBar from 'expo-navigation-bar';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, View } from 'react-native'; // <--- Added View and ActivityIndicator
+import { Colors } from '../constants/themeStyle';
 
 import Attendance from './attendance';
 import Details from './basic';
@@ -33,6 +33,11 @@ export default function Stack1() {
                 const credentialsStr = await AsyncStorage.getItem('USER_CREDENTIALS');
                 const loginTimestampStr = await AsyncStorage.getItem('LOGIN_TIMESTAMP');
                 const dataTimestampStr = await AsyncStorage.getItem('DATA_TIMESTAMP');
+                const savedTheme = await AsyncStorage.getItem('DARK_THEME');
+
+                if (savedTheme !== null) {
+                    setIsDarkMode(JSON.parse(savedTheme));
+                }
 
                 // Check 1: Do we have credentials at all?
                 if (!credentialsStr || !loginTimestampStr) {
@@ -68,7 +73,6 @@ export default function Stack1() {
         verifySession();
     }, []);
 
-    // 2. Control the Bottom Navigation Bar (Android Only)
     useEffect(() => {
         if (Platform.OS === 'android') {
             const color = isDarkMode ? Colors.dark.background : Colors.light.background;
