@@ -1,5 +1,10 @@
-1. Compressed the apk 
-2. A button to check for latest update of ArsdSaathi
-3. CHANGELOG.md created to track changes
-4. Mentor Name added
-5. Login button, Theme selection and data fetch fixed, to make user experience faster & smoother
+# 🚀 ArsdSaathi v1.1.0 is Here!
+## 💫 What's New?
+- **Seamless Access**: Say goodbye to constant log-ins; your credentials remain securely saved so you only need to sign in once a month.
+- **Reliable Offline Access**: Your data is automatically refreshed every two days when you have a connection, allowing you to view your attendance and profile anytime, even in areas with poor internet.
+- **Centralized Student Dashboard**: Access all your essential information through a clean, organized interface, bypassing the need to navigate unresponsive portal pages.
+
+## 🛠️ Technical Improvements
+- **Optimized Performance**: Significant APK size reduction via Hermes bytecode pre-compilation.
+- **Smart Sync**: Implemented background synchronization for credentials and various details.
+- **Stability**: Fixed label extraction bugs for mobile-view consistency.
