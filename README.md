@@ -3,6 +3,8 @@
 
 Download the latest version from the [Releases Page](https://github.com/KshavCode/arsd-saathi-app/releases).
 
+---
+
 # ArsdSaathi 🎓
 
 **Your College Companion**
@@ -11,6 +13,7 @@ ArsdSaathi is a mobile application designed specifically for students of **Atma 
 Built with **React Native** and **Expo**, it utilizes a secure, client-side scraping architecture to fetch data directly from the college portal, ensuring user privacy and zero server costs.
 
 ---
+
 ## 🚀 Features
 
 * **📊 Real-time Sync:** Fetches your latest attendance and details directly from the college portal.
@@ -20,6 +23,23 @@ Built with **React Native** and **Expo**, it utilizes a secure, client-side scra
 * **🛠️ Zero-Maintenance:** Uses client-side scraping logic, eliminating the need for a dedicated backend server.
 
 ---
+
+## 📱 Requirements
+Currently not available for iOS devices (but would be added soon!)
+### MINIMUM
+- **Android OS** - Android 7.0 (API 24)
+- **RAM** - 2GB
+- **Processor** - Quad-core 1.5 GHz
+- **Internet**	3G / Stable Edge
+
+### RECOMMENDED
+- **Android OS** - Android 12.0 or higher
+- **RAM** - 4 GB
+- **Processor** - Octa-core 2.0 GHz+ (64-bit)
+- **Internet**	4G / 5G 
+
+---
+
 ## 📥 Download & Install
 
 The app is currently available as a direct APK download for Android devices.
@@ -48,37 +68,13 @@ The app is currently available as a direct APK download for Android devices.
 * **Framework:** [React Native](https://reactnative.dev/) (via [Expo SDK](https://expo.dev/))
 * **Language:** JavaScript (ES6+)
 * **Navigation:** [Expo Router](https://docs.expo.dev/router/introduction/) (File-based routing)
-* **Storage:** `AsyncStorage` (Local data persistence)
+* **Storage:** `AsyncStorage` (Local storage for data)
 * **Networking:** Native `fetch` API with custom DOM parsing logic
 * **Build Tool:** EAS (Expo Application Services)
 * **Key Libraries:** `expo-linear-gradient`, `react-native-safe-area-context`, `expo-vector-icons`
 
 ---
-## 🔒 Privacy Policy
 
-**ArsdSaathi** is built with a "Privacy-by-Design" philosophy. We believe your academic data belongs to you and should remain under your control.
-
-### 1. Data Collection & Usage
-* **No Server-Side Storage:** ArsdSaathi does **not** have a central database or backend server. We do not collect, store, or monitor your personal information.
-* **Direct Integration:** The app connects directly to the official ARSD College Student Portal. It acts as a specialized browser that fetches your information and displays it in a mobile-friendly format.
-
-### 2. Local Storage
-* **Credentials:** Your College Roll Number, Name, and Date of Birth are stored **locally** on your device using `AsyncStorage`. This is done solely to keep you logged in and allow for offline access to your synced data.
-* **Encryption:** Data stored on your device is sandboxed by the Android operating system, meaning other apps cannot access ArsdSaathi's local storage.
-
-### 3. Third-Party Services
-* **Analytics:** We do **not** use any third-party analytics to track your usage patterns.
-* **External Links:** The app provide links to the developers' profile links.
-
-### 4. Data Deletion
-* You can delete all your data instantly by clicking **"Logout"** inside the app or by clearing the app's cache/storage in your phone's Android settings.
-
-### 5. Contact
-For any privacy-related concerns, please reach out to: **arsdsaathi.help@gmail.com**
-
----
-
----
 ## ⚠️ Disclaimer
 
 * **Unofficial App:** ArsdSaathi is a student-developed project and is **not** currently affiliated with, endorsed by, or connected to the official administration of Atma Ram Sanatan Dharma College.
@@ -93,7 +89,7 @@ For any privacy-related concerns, please reach out to: **arsdsaathi.help@gmail.c
 **Have questions or found a bug?**
 
 * **Email:** [arsdsaathi.help@gmail.com](mailto:arsdsaathi.help@gmail.com)
-* **Issues:** Please report any bugs or feature requests on the [GitHub Issues](https://github.com/KshavCode/ArsdSaathi/issues) page.
+* **Issues:** Please report any bugs or feature requests on the [GitHub Issues](https://github.com/KshavCode/arsd-saathi-app/issues) page.
 
 ---
 
@@ -103,4 +99,4 @@ For any privacy-related concerns, please reach out to: **arsdsaathi.help@gmail.c
 
 This project is proprietary software. Unauthorized copying, modification, distribution, or use of this source code or assets, via any medium, is strictly prohibited without the express written permission of the copyright holder.
 
-"ArsdSaathi"™ and its associated logo are trademarks of the developer.
+ArsdSaathi™ and its associated logo are trademarks of the developer.
