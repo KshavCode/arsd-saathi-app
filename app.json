@@ -2,7 +2,7 @@
   "expo": {
     "name": "ArsdSaathi",
     "slug": "arsdsaathi",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "orientation": "portrait",
     "jsEngine": "hermes",
     "icon": "./assets/images/icon.png",
@@ -20,7 +20,7 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.keshav.arsdsaathi",
-      "versionCode": 2
+      "versionCode": 3
     },
     "web": {
       "output": "static",

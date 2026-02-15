@@ -15,37 +15,6 @@ const handleFeedback = () => {
   Linking.openURL(`mailto:${email}?subject=${subject}&body=${body}`);
 };
 
-const handleUpdate = async () => {
-  try {
-    const currentVersion = Constants.expoConfig.version;
-    const response = await fetch(
-      'https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest'
-    );
-    const data = await response.json();
-    
-    const latestVersion = data.tag_name.replace('v', '');
-
-    if (latestVersion !== currentVersion) {
-      Alert.alert(
-        "Update Available 🚀",
-        `A new version (${latestVersion}) is available. Would you like to download it now?`,
-        [
-          { text: "Later", style: "cancel" },
-          { 
-            text: "Download", 
-            onPress: () => Linking.openURL(data.assets[0].browser_download_url)
-          }
-        ]
-      );
-    } else {
-      Alert.alert("Up to Date", "You are already using the latest version of ArsdSaathi!");
-    }
-  } catch (error) {
-    console.error(error);
-    Alert.alert("Error", "Could not check for updates. Please check your internet connection.");
-  }
-};
-
 // --- Sub-Components ---
 
 const DashboardCard = ({ title, value, icon, color, subValue, highlight, theme }) => (
@@ -107,6 +76,45 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
   const [userData, setUserData] = useState({ name: "Loading...", rollNo: "...", enrollmentNumber: "..." });
   const [savedCredentials, setSavedCredentials] = useState(null);
   const [isSyncing, setIsSyncing] = useState(false);
+
+  // --- AUTOMATIC UPDATE CHECK (Starts on Mount) ---
+  useEffect(() => {
+    const checkForUpdates = async () => {
+      try {
+        const currentVersion = Constants.expoConfig.version;
+        // Silent Fetch - No loading spinners, just background logic
+        const response = await fetch(
+          'https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest'
+        );
+        
+        if (!response.ok) return; // Silent fail if GitHub is down
+
+        const data = await response.json();
+        const latestVersion = data.tag_name.replace('v', '');
+        
+        if (latestVersion !== currentVersion) {
+            // Get the APK download link
+            const downloadUrl = data.assets?.[0]?.browser_download_url || data.html_url;
+
+            Alert.alert(
+                "Update Available 🚀",
+                `A new version (${latestVersion}) is available with fixes and improvements.`,
+                [
+                    { text: "Not Now", style: "cancel" },
+                    { 
+                        text: "Update", 
+                        onPress: () => Linking.openURL(downloadUrl)
+                    }
+                ]
+            );
+        }
+      } catch (error) {
+        console.log("Auto-update check failed:", error); 
+      }
+    };
+
+    checkForUpdates();
+  }, []); 
 
   const loadData = async () => {
       try {
@@ -170,10 +178,8 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
   const handleTheme = async () => {
     const nextMode = !isDarkMode;
     setIsDarkMode(nextMode); 
-    
-    // 3. Save the new value as a string
     await AsyncStorage.setItem('DARK_THEME', JSON.stringify(nextMode));
-};
+  };
 
   const isAttendanceLow = Number(userData.percent_attendance) < 67;
 
@@ -281,16 +287,9 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
           />
         </View>
 
-        {/* Utility Actions */}
-        <View style={{ marginTop: 20, borderWidth:1, borderRadius:12, borderColor: theme.primary}}>
-          <ActionButton 
-            title="Check for Updates" 
-            icon="build" 
-            onPress={handleUpdate}
-            theme={theme}
-          />
-        </View>
-        <View style={{ marginTop: 10 }}>
+        {/* Removed 'Check for Updates' Button here - Automatic check handles it now */}
+
+        <View style={{ marginTop: 25 }}>
           <ActionButton 
             title="Logout" 
             icon="log-out" 
