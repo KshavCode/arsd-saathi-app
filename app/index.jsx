@@ -1,8 +1,8 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LinearGradient } from 'expo-linear-gradient';
-import * as Linking from 'expo-linking';
-import React, { useState } from 'react';
+import Ionicons from "@expo/vector-icons/Ionicons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LinearGradient } from "expo-linear-gradient";
+import * as Linking from "expo-linking";
+import React, { useState } from "react";
 import {
     ActivityIndicator,
     Alert,
@@ -17,14 +17,15 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors } from '../constants/themeStyle';
+    View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Colors } from "../constants/themeStyle";
 import ArsdScraper from '../services/ArsdScraper';
 
-// Get screen dimensions
-const { height } = Dimensions.get('window');
+const { height } = Dimensions.get("window");
+const TERMS_URL = "https://github.com/KshavCode/arsd-saathi-app/TERMS.md";
+const PRIVACY_URL = "https://github.com/KshavCode/arsd-saathi-app/PRIVACY.md";
 
 const handleFeedback = () => {
     const email = "arsdsaathi.help@gmail.com";
@@ -34,54 +35,47 @@ const handleFeedback = () => {
 };
 
 export default function Login({ navigation }) {
-
-    const [roll, setRoll] = useState('');
-    const [fullName, setFullName] = useState('');
-    const [dob, setDob] = useState('');
-
+    const [roll, setRoll] = useState("23/38046");
+    const [fullName, setFullName] = useState("Keshav Pal");
+    const [dob, setDob] = useState("02-08-2005");
+    const [consentGiven, setConsentGiven] = useState(false);
     const [isScraping, setIsScraping] = useState(false);
-    const [progressMsg, setProgressMsg] = useState('');
+    const [progressMsg, setProgressMsg] = useState("");
 
-    const isInputValid = roll.length > 0 && fullName.length > 0 && dob.length > 0;
+    // --- LOGIC FIX: Button remains disabled unless inputs are filled AND checkbox is ticked ---
+    const isReadyToSync = roll.length > 0 && fullName.length > 0 && dob.length > 0 && consentGiven;
 
     const handleLogin = () => {
         Keyboard.dismiss();
-
         if (!roll || !fullName || !dob) {
             Alert.alert("Missing Fields", "Please fill in all details exactly as they appear on your ID card.");
             return;
         }
-
         const dobRegex = /^\d{1,2}-\d{1,2}-\d{4}$/;
         if (!dobRegex.test(dob)) {
             Alert.alert("Invalid Date", "Please use the format DD-MM-YYYY (e.g., 15-08-2004)");
             return;
         }
-
         setProgressMsg("Connecting to ARSD Portal...");
         setIsScraping(true);
     };
 
     const handleCompletion = async (status) => {
-    if (status === 'DONE') {
-        setProgressMsg("Sync Complete!");
-        
-        // --- ADD THESE TIMESTAMP SAVES ---
-        const now = Date.now().toString();
-        await AsyncStorage.setItem('LOGIN_TIMESTAMP', now);
-        await AsyncStorage.setItem('DATA_TIMESTAMP', now); 
+        if (status === "DONE") {
+            setProgressMsg("Sync Complete!");
+            const now = Date.now().toString();
+            await AsyncStorage.setItem("LOGIN_TIMESTAMP", now);
+            await AsyncStorage.setItem("DATA_TIMESTAMP", now);
 
-        // ---------------------------------
-
-        setTimeout(() => {
-            setIsScraping(false);
-            navigation.reset({
-                index: 0,
-                routes: [{ name: 'Home' }],
-            });
-        }, 800);
-    }
-};
+            setTimeout(() => {
+                setIsScraping(false);
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: "Home" }],
+                });
+            }, 800);
+        }
+    };
 
     const handleError = (errorMsg) => {
         setIsScraping(false);
@@ -91,98 +85,75 @@ export default function Login({ navigation }) {
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" />
-            
-            {/* 1. FLEX 1 IS CRITICAL HERE */}
-            <KeyboardAvoidingView 
-                style={{ flex: 1 }} 
-                behavior={Platform.OS === "ios" ? "padding" : "height"} 
+            <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
                 keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
             >
-                <ScrollView 
+                <ScrollView
                     style={{ flex: 1 }}
-                    contentContainerStyle={{ flexGrow: 1, paddingBottom: 150 }} // Extra padding for scrolling space
+                    contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                     bounces={false}
                 >
-                    
-                    {/* HEADER SECTION */}
                     <LinearGradient
                         colors={[Colors.light.text, Colors.light.primary]}
-                        style={[styles.headerBackground, { height: height * 0.45 }]}
+                        style={[styles.headerBackground, { height: height * 0.40 }]}
                     >
                         <SafeAreaView style={styles.headerContent}>
                             <View style={styles.logoCircle}>
-                                <Image source={require("../assets/images/icon.png")} style={{ width: '70%', height: '70%' }} />
+                                <Image source={require("../assets/images/icon.png")} style={{ width: "70%", height: "70%" }} />
                             </View>
                             <Text style={styles.appName}>ArsdSaathi</Text>
                             <Text style={styles.tagline}>Your College Companion</Text>
                         </SafeAreaView>
                     </LinearGradient>
 
-                    {/* FORM SECTION */}
                     <View style={styles.formContainer}>
                         <View style={styles.card}>
                             <Text style={styles.cardTitle}>Student Login</Text>
                             <Text style={styles.cardSub}>Sync your attendance & profile</Text>
 
-                            {/* INPUTS */}
                             <View style={styles.inputGroup}>
                                 <View style={styles.inputWrapper}>
                                     <Ionicons name="id-card-outline" size={20} color="#6B7280" style={styles.inputIcon} />
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="College Roll No. (e.g. 23/38046)"
-                                        placeholderTextColor="#9CA3AF"
-                                        value={roll}
-                                        onChangeText={setRoll}
-                                        autoCapitalize="none"
-                                    />
+                                    <TextInput style={styles.input} placeholder="Roll No. (23/380XX)" placeholderTextColor="#9CA3AF" value={roll} onChangeText={setRoll} autoCapitalize="none" />
                                 </View>
-
                                 <View style={styles.inputWrapper}>
                                     <Ionicons name="person-outline" size={20} color="#6B7280" style={styles.inputIcon} />
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="Full Name (as per ID)"
-                                        placeholderTextColor="#9CA3AF"
-                                        value={fullName}
-                                        onChangeText={setFullName}
-                                    />
+                                    <TextInput style={styles.input} placeholder="Full Name" placeholderTextColor="#9CA3AF" value={fullName} onChangeText={setFullName} />
                                 </View>
-
                                 <View style={styles.inputWrapper}>
                                     <Ionicons name="calendar-outline" size={20} color="#6B7280" style={styles.inputIcon} />
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="Date of Birth (DD-MM-YYYY)"
-                                        placeholderTextColor="#9CA3AF"
-                                        value={dob}
-                                        onChangeText={setDob}
-                                        keyboardType="numbers-and-punctuation"
-                                    />
+                                    <TextInput style={styles.input} placeholder="Date of Birth (DD-MM-YYYY)" placeholderTextColor="#9CA3AF" value={dob} onChangeText={setDob} keyboardType="numbers-and-punctuation" />
                                 </View>
-                                <Text style={styles.helperText}>Format: DD-MM-YYYY</Text>
                             </View>
 
-                            {/* ACTION BUTTON */}
+                            {/* CONSENT CHECKBOX - MOVED OUTSIDE INPUTGROUP */}
+                            {!isScraping && (
+                                <View style={styles.consentContainer}>
+                                    <TouchableOpacity onPress={() => setConsentGiven(!consentGiven)} style={styles.checkbox}>
+                                        <Ionicons name={consentGiven ? "checkbox" : "square-outline"} size={22} color={consentGiven ? Colors.light.primary : "#9CA3AF"} />
+                                    </TouchableOpacity>
+                                    <Text style={styles.consentText}>
+                                        I agree to the <Text style={styles.linkText} onPress={() => Linking.openURL(TERMS_URL)}>Terms</Text> and <Text style={styles.linkText} onPress={() => Linking.openURL(PRIVACY_URL)}>Privacy Policy</Text> regarding my data.
+                                    </Text>
+                                </View>
+                            )}
+
                             <View style={styles.actionArea}>
                                 {isScraping ? (
                                     <View style={styles.loadingState}>
-                                        <ActivityIndicator size="large" color="#4F46E5" />
+                                        <ActivityIndicator size="large" color={Colors.light.primary} />
                                         <Text style={styles.loadingText}>{progressMsg}</Text>
-                                        <ArsdScraper
-                                            credentials={{ name: fullName, rollNo: roll, dob: dob }}
-                                            onProgress={setProgressMsg}
-                                            onFinish={handleCompletion}
-                                            onError={handleError}
-                                        />
+                                        <ArsdScraper credentials={{ name: fullName, rollNo: roll, dob: dob }} onProgress={setProgressMsg} onFinish={handleCompletion} onError={handleError} />
                                     </View>
                                 ) : (
                                     <TouchableOpacity
-                                        style={[styles.loginButton, !isInputValid && styles.disabledButton]}
+                                        style={[styles.loginButton, !isReadyToSync && styles.disabledButton]}
                                         onPress={handleLogin}
-                                        disabled={!isInputValid}
+                                        disabled={!isReadyToSync}
                                         activeOpacity={0.8}
                                     >
                                         <Text style={styles.loginButtonText}>Connect & Sync</Text>
@@ -192,8 +163,8 @@ export default function Login({ navigation }) {
                             </View>
                         </View>
 
-                        <TouchableOpacity onPress={() => handleFeedback()} style={{ marginTop: 20 }}>
-                            <Text style={[styles.footerText, { color: '#4F46E5', fontWeight: 'bold' }]}>
+                        <TouchableOpacity onPress={() => handleFeedback()} style={{ marginTop: 25 }}>
+                            <Text style={[styles.footerText, { color: "#4F46E5", fontWeight: "bold" }]}>
                                 Having trouble? Report an Issue
                             </Text>
                         </TouchableOpacity>
@@ -205,75 +176,29 @@ export default function Login({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F3F4F6' },
-    
-    headerBackground: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderBottomLeftRadius: 30,
-        borderBottomRightRadius: 30,
-        width: '100%',
-    },
-    headerContent: { alignItems: 'center', marginTop: -40 },
-    logoCircle: {
-        width: 80,
-        height: 80,
-        backgroundColor: '#FFF',
-        borderRadius: 40,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 16,
-        shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 5
-    },
-    appName: { fontSize: 28, fontWeight: '800', color: '#FFF', letterSpacing: 0.5 },
-    tagline: { fontSize: 14, color: '#E0E7FF', marginTop: 4, fontWeight: '500' },
-
-    // Form Container
-    formContainer: { 
-        paddingHorizontal: 20, 
-        marginTop: -60, // Lifts the card up over the header
-    },
-    
-    card: {
-        backgroundColor: '#FFF',
-        borderRadius: 24,
-        padding: 24,
-        shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.08, shadowRadius: 20, elevation: 10,
-    },
-    cardTitle: { fontSize: 20, fontWeight: '700', color: '#1F2937', textAlign: 'center' },
-    cardSub: { fontSize: 13, color: '#6B7280', textAlign: 'center', marginTop: 4, marginBottom: 24 },
-
-    inputGroup: { gap: 16 },
-    inputWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#F9FAFB',
-        borderWidth: 1,
-        borderColor: '#E5E7EB',
-        borderRadius: 12,
-        paddingHorizontal: 14,
-        height: 50,
-    },
-    inputIcon: { marginRight: 10 },
-    input: { flex: 1, fontSize: 15, color: '#111827', height: '100%' },
-    helperText: { fontSize: 11, color: '#9CA3AF', marginLeft: 4, marginTop: -10 },
-
-    actionArea: { marginTop: 24, minHeight: 60, justifyContent: 'center' },
-    
-    loginButton: {
-        backgroundColor: Colors.light.primary,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: 52,
-        borderRadius: 12,
-        shadowColor: Colors.light.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4
-    },
-    disabledButton: { backgroundColor: '#A5B4FC', shadowOpacity: 0 },
-    loginButtonText: { color: '#FFF', fontSize: 16, fontWeight: '600', marginRight: 8 },
-
-    loadingState: { alignItems: 'center', gap: 10 },
-    loadingText: { fontSize: 13, color: '#4F46E5', fontWeight: '500' },
-
-    footerText: { textAlign: 'center', color: '#9CA3AF', fontSize: 12 },
+    container: { flex: 1, backgroundColor: "#F3F4F6" },
+    headerBackground: { justifyContent: "center", alignItems: "center", borderBottomLeftRadius: 30, borderBottomRightRadius: 30, width: "100%" },
+    headerContent: { alignItems: "center", marginTop: -20 },
+    logoCircle: { width: 75, height: 75, backgroundColor: "#FFF", borderRadius: 40, alignItems: "center", justifyContent: "center", marginBottom: 12, elevation: 5 },
+    appName: { fontSize: 26, fontWeight: "800", color: "#FFF" },
+    tagline: { fontSize: 13, color: "#E0E7FF", marginTop: 4 },
+    formContainer: { paddingHorizontal: 20, marginTop: -50 },
+    card: { backgroundColor: "#FFF", borderRadius: 24, padding: 22, elevation: 10, shadowColor: "#000", shadowOpacity: 0.1, shadowRadius: 10 },
+    cardTitle: { fontSize: 19, fontWeight: "700", color: "#1F2937", textAlign: "center" },
+    cardSub: { fontSize: 13, color: "#6B7280", textAlign: "center", marginTop: 4, marginBottom: 20 },
+    inputGroup: { gap: 14, marginBottom: 15 },
+    inputWrapper: { flexDirection: "row", alignItems: "center", backgroundColor: "#F9FAFB", borderWidth: 1, borderColor: "#E5E7EB", borderRadius: 12, paddingHorizontal: 12, height: 48 },
+    inputIcon: { marginRight: 8 },
+    input: { flex: 1, fontSize: 14, color: "#111827" },
+    consentContainer: { flexDirection: 'row', alignItems: 'flex-start', marginTop: 0, paddingHorizontal: 2 },
+    checkbox: { marginRight: 8 },
+    consentText: { flex: 1, fontSize: 12, color: '#4B5563', lineHeight: 18 },
+    linkText: { color: '#4F46E5', fontWeight: '700', textDecorationLine: 'underline' },
+    actionArea: { marginTop: 15, minHeight: 60, justifyContent: 'center' },
+    loginButton: { backgroundColor: Colors.light.primary, flexDirection: "row", alignItems: "center", justifyContent: "center", height: 50, borderRadius: 12, elevation: 4 },
+    disabledButton: { backgroundColor: "#A5B4FC", elevation: 0 },
+    loginButtonText: { color: "#FFF", fontSize: 16, fontWeight: "600", marginRight: 8 },
+    loadingState: { alignItems: "center", gap: 8 },
+    loadingText: { fontSize: 13, color: "#4F46E5", fontWeight: "600" },
+    footerText: { textAlign: "center", fontSize: 12 },
 });

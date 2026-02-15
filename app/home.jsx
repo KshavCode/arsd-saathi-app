@@ -282,7 +282,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
         </View>
 
         {/* Utility Actions */}
-        <View style={{ marginTop: 20, backgroundColor: theme.primary, borderRadius: 12 }}>
+        <View style={{ marginTop: 20, borderWidth:1, borderRadius:12, borderColor: theme.primary}}>
           <ActionButton 
             title="Check for Updates" 
             icon="build" 
@@ -308,7 +308,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
         
         <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, marginTop:10}}>
           <Text style={{ color: theme.secondary, fontSize:15}}>Developed by</Text>
-          <TouchableOpacity onPress={()=>Linking.openURL("kshavcode.me")}>
+          <TouchableOpacity onPress={()=>Linking.openURL("https://kshavcode.me")}>
               <Text style={{ color: theme.footer, fontWeight: 'bold', fontSize:15 }}>Keshav Pal</Text>
           </TouchableOpacity>
         </View>
