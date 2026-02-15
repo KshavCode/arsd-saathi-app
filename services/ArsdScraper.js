@@ -31,7 +31,6 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
             callback(el);
           } else if (Date.now() - start > timeout) {
             clearInterval(interval);
-            // If we can't find the element, it usually means the page didn't load correctly
             callback(null);
           }
         }, 500);
@@ -54,9 +53,6 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
 
       // --- 1. LOGIN ROUTE ---
       if (url.toLowerCase().includes("login")) {
-        
-        // CHECK 1: Loop Detection (Wrong Credentials)
-        // If we tried logging in, but the page reloaded and we are STILL here, it failed.
         if (sessionStorage.getItem("login_attempted") === "true") {
              sessionStorage.removeItem("login_attempted");
              sendError("Wrong credentials or Server Error");
@@ -65,7 +61,6 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
 
         waitForElement("txtrollno", (input) => {
           if (!input) {
-              // If the login input doesn't appear after 10s
               sendError("Connection timed out. Login page not loading.");
               return;
           }
@@ -85,18 +80,13 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
           setTimeout(() => {
             const btn = document.getElementById("btnsearch") || document.querySelector('input[type="submit"]');
             if (btn) {
-                // Set flag before clicking
                 sessionStorage.setItem("login_attempted", "true");
                 btn.click();
-
-                // CHECK 2: Stagnation Timer (Server Hang)
-                // If 15 seconds pass and this script is STILL active, the page didn't navigate.
                 setTimeout(() => {
-                     // Verify we haven't moved yet
-                     if (window.location.href.toLowerCase().includes("login")) {
-                         sessionStorage.removeItem("login_attempted");
-                         sendError("Server not responding. Please try again.");
-                     }
+                      if (window.location.href.toLowerCase().includes("login")) {
+                          sessionStorage.removeItem("login_attempted");
+                          sendError("Server not responding. Please try again.");
+                      }
                 }, 15000); 
             }
           }, 1000);
@@ -105,7 +95,6 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
 
       // --- 2. BASIC DETAILS ---
       else if (url.includes("STD_Basic_Details.aspx")) {
-        // Success! Clear the failure flag
         sessionStorage.removeItem("login_attempted");
 
         waitForElement("lbleno", (el) => {
@@ -145,53 +134,107 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
 
       // --- 4. ATTENDANCE ---
       else if (url.includes("Attendance_Report_Monthly.aspx")) {
-        const table = document.getElementById("gvshow");
-        
-        if (table) {
-            log("Extracting Attendance...");
-            let attendance = {};
-            
-            // Scrape Table
-            const rows = Array.from(table.querySelectorAll("tr"));
-            const headers = Array.from(rows[0].querySelectorAll("th")).map(th => th.innerText.trim());
-            
-            rows.slice(1).forEach(row => {
-                const cols = row.querySelectorAll("td");
-                if (cols.length === 0) return;
-                let rowData = {};
-                headers.forEach((h, i) => rowData[h] = cols[i]?.innerText.trim());
+        const typeSelect = document.getElementById("ddlpapertype");
+        const currentVal = typeSelect ? typeSelect.value.replace(/'/g, "") : null;
+
+        // 💡 HELPER: Scrapes whatever table is currently on the screen
+        const scrapeTableData = () => {
+            let extractedData = {};
+            const table = document.getElementById("gvshow");
+            if (table) {
+                const rows = Array.from(table.querySelectorAll("tr"));
+                const headers = Array.from(rows[0].querySelectorAll("th")).map(th => th.innerText.trim());
                 
-                let subject = rowData["Subject"] || rowData["Paper Name"] || "General";
-                if (!attendance[subject]) attendance[subject] = [];
-                attendance[subject].push(rowData);
-            });
-
-            // Scrape Percentage
-            const percentLabel = document.getElementById("lbl_percentage");
-            let finalPercent = "0"; 
-
-            if (percentLabel) {
-                const text = percentLabel.innerText; 
-                const parts = text.split(': '); 
-                if (parts.length > 1) {
-                    finalPercent = parts[1].trim(); 
-                }
+                rows.slice(1).forEach(row => {
+                    const cols = row.querySelectorAll("td");
+                    if (cols.length === 0) return;
+                    let rowData = {};
+                    headers.forEach((h, i) => rowData[h] = cols[i]?.innerText.trim());
+                    
+                    // 🛠️ FIX 1: Smart Subject Extraction with corrected syntax
+                    let subject = "General"; 
+                    const keys = Object.keys(rowData);
+                    
+                    for (let k of keys) {
+                        let upperK = k.toUpperCase();
+                        if (upperK.includes("PAPER_NAME")) {
+                            if (rowData[k] && rowData[k].trim() !== "") {
+                                subject = rowData[k];
+                            }
+                            break;
+                        }
+                    }
+                    
+                    if (!extractedData[subject]) extractedData[subject] = [];
+                    extractedData[subject].push(rowData);
+                });
             }
-            attendance['overall_percentage'] = finalPercent;
+            return extractedData;
+        };
 
-            sendData("data_attendance", attendance);
-            
-            setTimeout(() => {
-                window.location.href = "https://www.arsdcollege.in/Internet/Student/Check_Student_Faculty_Details.aspx";
-            }, 800);
-
-        } else {
-            // Filter Logic
-            const typeSelect = document.getElementById("ddlpapertype");
-            if (typeSelect && typeSelect.value !== "'TE'" && typeSelect.value !== "TE") {
+        if (typeSelect) {
+            if (currentVal !== "TE" && currentVal !== "PE") {
+                // STEP 1: Neither is selected. Select Theory ('TE') first.
                 setSelect(typeSelect, "'TE'");
                 setTimeout(() => { document.getElementById("btnsearch")?.click(); }, 500);
+            } 
+            else if (currentVal === "TE") {
+                // STEP 2: Scrape Theory, Save Data AND Percentage to Storage
+                const teData = scrapeTableData();
+                
+                const theoryPercentLabel = document.getElementById("lbl_percentage");
+                let theoryPercent = "0"; 
+                if (theoryPercentLabel) {
+                    const text = theoryPercentLabel.innerText; 
+                    const parts = text.split(': '); 
+                    if (parts.length > 1) theoryPercent = parts[1].trim(); 
+                }
+
+                // 🛠️ FIX 2: Save both data and percentage into the temporary backpack
+                const tempStoragePayload = {
+                    data: teData,
+                    percent: theoryPercent
+                };
+                sessionStorage.setItem('TEMP_TE_DATA', JSON.stringify(tempStoragePayload));
+
+                log("Extracting Practical attendance...");
+                setSelect(typeSelect, "'PE'");
+                setTimeout(() => { document.getElementById("btnsearch")?.click(); }, 500);
+            } 
+            else if (currentVal === "PE") {
+                // STEP 3: Scrape Practical, Combine, and Redirect
+                const prData = scrapeTableData();
+                
+                // 🛠️ FIX 2 (Continued): Retrieve both from storage
+                const savedTemp = JSON.parse(sessionStorage.getItem('TEMP_TE_DATA') || '{"data":{}, "percent":"0"}');
+                const teData = savedTemp.data;
+                const theoryPercent = savedTemp.percent;
+
+                const practicalPercentLabel = document.getElementById("lbl_percentage");
+                let practicalPercent = "0"; 
+                if (practicalPercentLabel) {
+                    const text = practicalPercentLabel.innerText; 
+                    const parts = text.split(': '); 
+                    if (parts.length > 1) practicalPercent = parts[1].trim(); 
+                }
+
+                // 📦 STORE SEPARATELY IN ONE OBJECT
+                const finalAttendancePayload = {
+                    practical_percentage: practicalPercent,
+                    theory_percentage: theoryPercent,
+                    theory: teData,
+                    practical: prData
+                };
+
+                sendData("data_attendance", finalAttendancePayload);
+                sessionStorage.removeItem('TEMP_TE_DATA'); // Clean up
+
+                setTimeout(() => {
+                    window.location.href = "https://www.arsdcollege.in/Internet/Student/Check_Student_Faculty_Details.aspx";
+                }, 800);
             }
+        } else {
+            sendError("Could not find the dropdown to select Theory/Tutorial.");
         }
       }
 
@@ -220,7 +263,7 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
 
       // REDIRECT
       else if (url.includes("Home.aspx") || document.body.innerText.includes("Welcome")) {
-        sessionStorage.removeItem("login_attempted"); // Just in case
+        sessionStorage.removeItem("login_attempted");
         log("🚀 Login Success! Redirecting...");
         window.location.href = "https://www.arsdcollege.in/Internet/Student/STD_Basic_Details.aspx";
       }

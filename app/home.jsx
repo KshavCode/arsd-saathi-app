@@ -135,7 +135,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
             name: basic?.name || creds?.name || "Student", 
             rollNo: basic?.rollNo || creds?.rollNo || "N/A",
             enrollmentNumber: basic?.enrollmentNumber || "N/A",
-            percent_attendance: att?.overall_percentage || 0,
+            percent_attendance: att?.theory_percentage || 0,
             mentor_name: mentor?.mentor || "N/A"
           });
         }

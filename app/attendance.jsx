@@ -1,10 +1,9 @@
-import { Colors } from '../constants/themeStyle';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import { Colors } from '../constants/themeStyle';
 
 export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode }) {
 
@@ -21,7 +20,6 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
     };
 
     const [fullData, setFullData] = useState(null); // The raw JSON
-    const [displayList, setDisplayList] = useState([]); // The array of rows (e.g. from "General")
     const [loading, setLoading] = useState(true);
     
     // Selection State
@@ -39,19 +37,11 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
                     const data = JSON.parse(rawData);
                     setFullData(data);
 
-                    // 1. Flatten the data (It might be under "General" or other keys)
-                    // We combine all arrays we find into one big list
-                    let allRows = [];
-                    Object.keys(data).forEach(key => {
-                        if (Array.isArray(data[key])) {
-                            allRows = [...allRows, ...data[key]];
-                        }
-                    });
+                    // 1. Extract Unique Subjects from BOTH theory and practical
+                    const theorySubjects = data.theory ? Object.keys(data.theory) : [];
+                    const tutorialSubjects = data.practical ? Object.keys(data.practical) : [];
                     
-                    setDisplayList(allRows);
-
-                    // 2. Extract Unique Subjects
-                    const uniqueSubjects = [...new Set(allRows.map(item => item.PAPER_NAME).filter(Boolean))];
+                    const uniqueSubjects = [...new Set([...theorySubjects, ...tutorialSubjects])];
                     setSubjects(uniqueSubjects);
                     
                     if (uniqueSubjects.length > 0) {
@@ -67,39 +57,62 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
         fetchLocal();
     }, []);
 
-    // Helper to find value safely
+    // Helper to find value safely (Defaults to '-' if missing so the table doesn't look empty)
     const getValue = (row, ...keys) => {
         for (const key of keys) {
             if (row[key] !== undefined && row[key] !== null && row[key] !== "") return row[key];
         }
-        return '0';
+        return '-';
     };
 
-    // Build the grid based on Selected Subject
+    // Build the 5-column grid based on Selected Subject
     const grid = useMemo(() => {
-        if (!selectedSubject || displayList.length === 0) return [];
+        if (!selectedSubject || !fullData) return [];
 
-        // 1. Filter rows for the selected subject
-        const filteredRows = displayList.filter(row => row.PAPER_NAME === selectedSubject);
-        
         let formattedGrid = [];
+        
+        // Add Header (5 Columns)
+        formattedGrid.push(['Month', 'Lec Att.', 'Lec Total', 'Prac Att.', 'Prac Total']);
 
-        // 2. Add Header
-        // Note: Your JSON only shows Lecture data. If Tutorial data exists in other rows, it will show up.
-        formattedGrid.push(['Month', 'Lec Att.', 'Lec Total']);
+        // Fetch the arrays for the selected subject
+        const theoryRows = fullData.theory?.[selectedSubject] || [];
+        const tutorialRows = fullData.practical?.[selectedSubject] || [];
 
-        // 3. Map the data
-        filteredRows.forEach(row => {
-            const rowValues = [
-                row.MONTH || row.Month || '-',
-                getValue(row, 'Final Lect. Attended', 'LECT_ATTD', 'Lecture Attended'),
-                getValue(row, 'Final Lect. Held', 'LECT_HELD', 'Lecture Delivered'),
-            ];
-            formattedGrid.push(rowValues);
+        // We use an object to merge Theory and Tutorial data by Month
+        const mergedByMonth = {};
+
+        const addRowsToMap = (rows, type) => {
+            if (!Array.isArray(rows)) return;
+            
+            rows.forEach(row => {
+                const month = row.MONTH || row.Month || 'Unknown';
+                
+                // Initialize the month if it doesn't exist
+                if (!mergedByMonth[month]) {
+                    mergedByMonth[month] = { month, lecAtt: '-', lecTotal: '-', pracAtt: '-', pracTotal: '-' };
+                }
+
+                // Populate the correct columns based on the type
+                if (type === 'theory') {
+                    mergedByMonth[month].lecAtt = getValue(row, 'Final Lect. Attended', 'LECT_ATTD', 'Lecture Attended');
+                    mergedByMonth[month].lecTotal = getValue(row, 'Final Lect. Held', 'LECT_HELD', 'Lecture Delivered');
+                } else if (type === 'practical') {
+                    mergedByMonth[month].pracAtt = getValue(row, 'Final Lect. Attended', 'LECT_ATTD', 'Lecture Attended');
+                    mergedByMonth[month].pracTotal = getValue(row, 'Final Lect. Held', 'LECT_HELD', 'Lecture Delivered');
+                }
+            });
+        };
+
+        addRowsToMap(theoryRows, 'theory');
+        addRowsToMap(tutorialRows, 'practical');
+
+        // Convert the merged map back into an array for the grid
+        Object.values(mergedByMonth).forEach(data => {
+            formattedGrid.push([data.month, data.lecAtt, data.lecTotal, data.pracAtt, data.pracTotal]);
         });
 
         return formattedGrid;
-    }, [selectedSubject, displayList]);
+    }, [selectedSubject, fullData]);
 
     const COLS = 5; 
 
@@ -207,7 +220,7 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
                                                 <Text style={[
                                                     styles.cellText, 
                                                     { color: theme.text },
-                                                    isHeaderRow && { color: theme.headerText, fontWeight: '700', fontSize: 11 },
+                                                    isHeaderRow && { color: theme.headerText, fontWeight: '700', fontSize: 10 }, // Slightly smaller font for headers to fit 5 cols
                                                     isRowHeader && { fontWeight: '600' }
                                                 ]} numberOfLines={1} adjustsFontSizeToFit>
                                                     {cell}
@@ -219,12 +232,21 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
                             ))}
                         </View>
                         
-                        {/* Overall Percentage Footer */}
-                        {fullData.overall_percentage && (
+                        {/* Theory Percentage Footer */}
+                        {fullData.theory_percentage && (
                              <View style={[styles.footerInfo, { backgroundColor: theme.iconBg }]}>
                                 <Ionicons name="pie-chart" size={20} color={theme.primary} />
                                 <Text style={[styles.footerText, { color: theme.primary }]}>
-                                    Overall Attendance: <Text style={{fontWeight: 'bold'}}>{fullData.overall_percentage}%</Text>
+                                    Theory Attendance: <Text style={{fontWeight: 'bold'}}>{fullData.theory_percentage}%</Text>
+                                </Text>
+                             </View>
+                        )}
+                        {/* Practical Percentage Footer */}
+                        {fullData.practical_percentage && (
+                             <View style={[styles.footerInfo, { backgroundColor: theme.iconBg, marginTop:5 }]}>
+                                <Ionicons name="pie-chart" size={20} color={theme.primary} />
+                                <Text style={[styles.footerText, { color: theme.primary }]}>
+                                    Practical Attendance: <Text style={{fontWeight: 'bold'}}>{fullData.practical_percentage}%</Text>
                                 </Text>
                              </View>
                         )}
@@ -263,9 +285,9 @@ const styles = StyleSheet.create({
     // Table
     tableContainer: { overflow: 'hidden', borderRadius: 12, borderWidth: 1, marginBottom: 20 },
     tableRow: { flexDirection: 'row' },
-    tableCell: { flex: 1, paddingVertical: 12, paddingHorizontal: 2, borderRightWidth: 0.5, alignItems: 'center', justifyContent: 'center' },
+    tableCell: { flex: 1, paddingVertical: 12, paddingHorizontal: 1, borderRightWidth: 0.5, alignItems: 'center', justifyContent: 'center' }, // Reduced horizontal padding to fit 5 cols
     tableCellLast: { borderRightWidth: 0 },
-    cellText: { fontSize: 12, textAlign: 'center' },
+    cellText: { fontSize: 11, textAlign: 'center' }, // Slightly smaller to ensure fit
 
     // Footer
     footerInfo: { padding: 12, borderRadius: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }
