@@ -185,7 +185,6 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
   };
 
   const isAttendanceLow = Number(userData.percent_attendance) < 67;
-  const [consentGiven, setConsentGiven] = useState(false);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
