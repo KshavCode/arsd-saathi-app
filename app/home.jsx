@@ -2,8 +2,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Modal, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Modal, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../constants/themeStyle';
 import ArsdScraper from '../services/ArsdScraper';
@@ -85,7 +85,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [updateInfo, setUpdateInfo] = useState({ version: '', url: '' });
 
-  // --- AUTOMATIC UPDATE CHECK (Starts on Mount) ---
+  // --- AUTOMATIC UPDATE CHECK ---
   useEffect(() => {
     const checkForUpdates = async () => {
       try {
@@ -100,7 +100,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
         if (latestVersion !== currentVersion) {
             const downloadUrl = data.assets?.[0]?.browser_download_url || data.html_url;
             setUpdateInfo({ version: latestVersion, url: downloadUrl });
-            setShowUpdateModal(true); // Trigger custom modal instead of Alert
+            setShowUpdateModal(true); 
         }
       } catch (error) {
         console.log("Auto-update check failed:", error); 
@@ -110,7 +110,8 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
     checkForUpdates();
   }, []); 
 
-  const loadData = async () => {
+  // --- DATA LOADING & MIGRATION ---
+  const loadData = useCallback(async () => {
       try {
         const basicRaw = await AsyncStorage.getItem('BASIC_DETAILS');
         const credsRaw = await AsyncStorage.getItem('USER_CREDENTIALS');
@@ -136,16 +137,60 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
       } catch (error) {
         console.error("Error loading Dashboard data:", error);
       }
-  };
+  }, []);
 
+  const validateDataStructure = useCallback(async () => {
+    try {
+        const attRaw = await AsyncStorage.getItem('ATTENDANCE_DATA');
+        if (attRaw) {
+            const data = JSON.parse(attRaw);
+            
+            // Check if the NEW structure exists
+            if (data && !data.theory) {
+                // 1. Wipe everything
+                await AsyncStorage.multiRemove([
+                    'USER_CREDENTIALS', 
+                    'BASIC_DETAILS', 
+                    'ATTENDANCE_DATA', 
+                    'FACULTY_DATA', 
+                    'MENTOR_DATA'
+                ]);
+
+                // 2. Alert the user politely
+                Alert.alert(
+                    "App Updated 🚀",
+                    "We've upgraded how attendance is tracked (Theory vs Practical). Please log in again to sync your new data.",
+                    [{ 
+                        text: "OK", 
+                        onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Login' }] }) 
+                    }]
+                );
+            }
+        }
+    } catch (e) {
+        console.error("Migration check failed", e);
+    }
+  }, [navigation]);
+
+  // --- INITIALIZATION (Runs Once) ---
   useEffect(() => {
-    loadData();
+    const initialize = async () => {
+        await validateDataStructure(); 
+        await loadData();             
+    };
+    
+    initialize();
+  }, [validateDataStructure, loadData]);
 
-    if (route.params?.requiresSync) {
+  // --- ROUTE PARAM HANDLING ---
+  const requiresSync = route.params?.requiresSync;
+  useEffect(() => {
+    if (requiresSync) {
         setIsSyncing(true);
     }
-  }, [route.params]);
+  }, [requiresSync]);
 
+  // --- ACTION HANDLERS ---
   const handleSyncCompletion = async (status) => {
       if (status === 'DONE') {
           await AsyncStorage.setItem('DATA_TIMESTAMP', Date.now().toString());
@@ -204,7 +249,8 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
         transparent={true}
         visible={showUpdateModal}
         onRequestClose={() => setShowUpdateModal(false)}
-        statusBarTranslucent={true}
+        statusBarTranslucent={true} // Extends behind top status bar
+        navigationBarTranslucent={true} // Extends behind bottom navigation bar
       >
         <View style={[styles.modalOverlay, { backgroundColor: theme.modalOverlay }]}>
           <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
@@ -289,7 +335,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
         <View style={styles.statsGrid}>
           <View style={styles.heroCardContainer}>
             <DashboardCard 
-              title="Attendance %" 
+              title="Theory Attendance %" 
               value={userData.percent_attendance}
               subValue={isAttendanceLow ? "Below required 67%" : ""}
               icon="pie-chart"
@@ -425,7 +471,8 @@ const styles = StyleSheet.create({
     actionText: { flex: 1, fontSize: 15, fontWeight: '600' },
     separator: { height: 1, marginLeft: 60 },
     footerText: { textAlign: 'center', color: '#9CA3AF', fontSize: 12 },
-
+    
+    // Custom Modal Styles
     modalOverlay: { ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', padding: 5 },
     modalContent: { width: '90%', borderRadius: 24, padding: 24, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 20, elevation: 15 },
     modalIconContainer: { width: 70, height: 70, borderRadius: 35, alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
