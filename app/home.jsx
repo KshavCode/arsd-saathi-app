@@ -15,6 +15,9 @@ const handleFeedback = () => {
   Linking.openURL(`mailto:${email}?subject=${subject}&body=${body}`);
 };
 
+const TERMS_URL = "https://github.com/KshavCode/arsd-saathi-app/TERMS.md";
+const PRIVACY_URL = "https://github.com/KshavCode/arsd-saathi-app/PRIVACY.md";
+
 // --- Sub-Components ---
 
 const DashboardCard = ({ title, value, icon, color, subValue, highlight, theme }) => (
@@ -182,6 +185,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
   };
 
   const isAttendanceLow = Number(userData.percent_attendance) < 67;
+  const [consentGiven, setConsentGiven] = useState(false);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
@@ -304,7 +308,17 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
           <Text style={[styles.footerText, { color: theme.footer, fontWeight: 'bold', marginTop: 10 }]}>Having trouble? Report an Issue
           </Text>
         </TouchableOpacity>
-        
+
+        {/* TERMS AND PRIVACY */}
+        <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:50, marginTop:10}}>
+          <TouchableOpacity onPress={()=>Linking.openURL(TERMS_URL)}>
+              <Text style={{ color: theme.footer }}>Terms & Conditions</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={()=>Linking.openURL(PRIVACY_URL)}>
+              <Text style={{ color: theme.footer }}>Privacy Policy</Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, marginTop:10}}>
           <Text style={{ color: theme.secondary, fontSize:15}}>Developed by</Text>
           <TouchableOpacity onPress={()=>Linking.openURL("https://kshavcode.me")}>
@@ -348,4 +362,7 @@ const styles = StyleSheet.create({
     actionText: { flex: 1, fontSize: 15, fontWeight: '600' },
     separator: { height: 1, marginLeft: 60 },
     footerText: { textAlign: 'center', color: '#9CA3AF', fontSize: 12 },
+    consentContainer: { flexDirection:   'row', alignItems: 'flex-start', marginTop: 0, paddingHorizontal: 2 },
+    consentText: { flex: 1, fontSize: 12, color: '#4B5563', lineHeight: 18 },
+    linkText: { color: '#4F46E5', fontWeight: '700', textDecorationLine: 'underline' },
 });
