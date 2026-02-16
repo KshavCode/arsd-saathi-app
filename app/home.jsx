@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Modal, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../constants/themeStyle';
 import ArsdScraper from '../services/ArsdScraper';
@@ -15,8 +15,8 @@ const handleFeedback = () => {
   Linking.openURL(`mailto:${email}?subject=${subject}&body=${body}`);
 };
 
-const TERMS_URL = "https://github.com/KshavCode/arsd-saathi-app/TERMS.md";
-const PRIVACY_URL = "https://github.com/KshavCode/arsd-saathi-app/PRIVACY.md";
+const TERMS_URL = "https://github.com/KshavCode/arsd-saathi-app/blob/master/TERMS.md";
+const PRIVACY_URL = "https://github.com/KshavCode/arsd-saathi-app/blob/master/PRIVACY.md";
 
 // --- Sub-Components ---
 
@@ -73,43 +73,34 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
     destructiveBg: isDarkMode ? Colors.light.destructiveBg : Colors.dark.destructiveBg,
     destructiveBorder: isDarkMode ? Colors.light.destructiveBorder : Colors.dark.destructiveBorder,
     separator: isDarkMode ? Colors.light.separator : Colors.dark.separator,
-    footer: isDarkMode ? Colors.dark.footer : Colors.light.footer
+    footer: isDarkMode ? Colors.dark.footer : Colors.light.footer,
+    modalOverlay: 'rgba(0, 0, 0, 0.6)'
   };
 
   const [userData, setUserData] = useState({ name: "Loading...", rollNo: "...", enrollmentNumber: "..." });
   const [savedCredentials, setSavedCredentials] = useState(null);
   const [isSyncing, setIsSyncing] = useState(false);
 
+  // Modal States
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [updateInfo, setUpdateInfo] = useState({ version: '', url: '' });
+
   // --- AUTOMATIC UPDATE CHECK (Starts on Mount) ---
   useEffect(() => {
     const checkForUpdates = async () => {
       try {
         const currentVersion = Constants.expoConfig.version;
-        // Silent Fetch - No loading spinners, just background logic
-        const response = await fetch(
-          'https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest'
-        );
+        const response = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest');
         
-        if (!response.ok) return; // Silent fail if GitHub is down
+        if (!response.ok) return; 
 
         const data = await response.json();
         const latestVersion = data.tag_name.replace('v', '');
         
         if (latestVersion !== currentVersion) {
-            // Get the APK download link
             const downloadUrl = data.assets?.[0]?.browser_download_url || data.html_url;
-
-            Alert.alert(
-                "Update Available 🚀",
-                `A new version (${latestVersion}) is available with fixes and improvements.`,
-                [
-                    { text: "Not Now", style: "cancel" },
-                    { 
-                        text: "Update", 
-                        onPress: () => Linking.openURL(downloadUrl)
-                    }
-                ]
-            );
+            setUpdateInfo({ version: latestVersion, url: downloadUrl });
+            setShowUpdateModal(true); // Trigger custom modal instead of Alert
         }
       } catch (error) {
         console.log("Auto-update check failed:", error); 
@@ -177,11 +168,28 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
       });
   }
 
-  // Saving Dark Theme
   const handleTheme = async () => {
     const nextMode = !isDarkMode;
     setIsDarkMode(nextMode); 
     await AsyncStorage.setItem('DARK_THEME', JSON.stringify(nextMode));
+  };
+
+  const handleShare = async () => {
+    const response = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest');
+        if (!response.ok) return; 
+
+        const data = await response.json();
+            const downloadUrl = data.assets?.[0]?.browser_download_url || data.html_url;
+    try {
+      await Share.share({
+        message: `Check out the ArsdSaathi App: ${downloadUrl}`,
+        url: downloadUrl,
+        title: 'ArsdSaathi App Link', 
+      });
+    } 
+    catch (error) {
+      alert(error.message);
+    }
   };
 
   const isAttendanceLow = Number(userData.percent_attendance) < 67;
@@ -190,6 +198,59 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
       
+      {/* --- CUSTOM UPDATE MODAL --- */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showUpdateModal}
+        onRequestClose={() => setShowUpdateModal(false)}
+        statusBarTranslucent={true}
+      >
+        <View style={[styles.modalOverlay, { backgroundColor: theme.modalOverlay }]}>
+          <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
+            
+            {/* Modal Header Icon */}
+            <View style={[styles.modalIconContainer, { backgroundColor: theme.iconBg }]}>
+              <Ionicons name="rocket" size={36} color={theme.primary} />
+            </View>
+
+            {/* Modal Text */}
+            <Text style={[styles.modalTitle, { color: theme.text }]}>Update Available!</Text>
+            <Text style={[styles.modalText, { color: theme.textSecondary }]}>
+              Version {updateInfo.version} is ready. We&apos;ve crushed some bugs and added improvements to keep your app running smoothly.
+            </Text>
+
+            {/* Modal Action Buttons */}
+            <View style={styles.modalActions}>
+              <TouchableOpacity 
+                style={[styles.modalButtonPrimary, { backgroundColor: theme.primary }]}
+                onPress={() => {
+                  Linking.openURL(updateInfo.url);
+                  setShowUpdateModal(false);
+                }}
+              >
+                <Ionicons name="download-outline" size={18} color="#FFF" style={{marginRight: 6}} />
+                <Text style={styles.modalButtonPrimaryText}>Update Now</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={[styles.modalButtonSecondary, { borderColor: theme.separator }]}
+                onPress={() => Linking.openURL("https://github.com/KshavCode/arsd-saathi-app/blob/master/CHANGELOG.md")}
+              >
+                <Text style={[styles.modalButtonSecondaryText, { color: theme.text }]}>What&apos;s New</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={{ marginTop: 15, paddingVertical: 5 }}
+                onPress={() => setShowUpdateModal(false)}
+              >
+                <Text style={{ color: theme.textSecondary, fontSize: 13, fontWeight: '500' }}>Not Now</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* Background Scraper Component */}
       {isSyncing && savedCredentials && (
           <ArsdScraper
@@ -212,12 +273,16 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
             </View>
           </View>
           
-          <TouchableOpacity 
-            style={[styles.themeButton, { backgroundColor: theme.card }]} 
-            onPress={handleTheme}
-          >
-             <Ionicons name={isDarkMode ? "sunny" : "moon"} size={22} color={isDarkMode ? "#FBBF24" : theme.primary} />
-          </TouchableOpacity>
+          <View style={styles.topIconContainer}>
+            <TouchableOpacity 
+              style={[styles.themeButton, { backgroundColor: theme.card }]} onPress={handleShare}>
+               <Ionicons name='share-social' size={22} color={theme.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.themeButton, { backgroundColor: theme.card }]} onPress={handleTheme}>
+               <Ionicons name={isDarkMode ? "sunny" : "moon"} size={22} color={isDarkMode ? "#FBBF24" : theme.primary} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Top Statistics Grid */}
@@ -290,8 +355,6 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
           />
         </View>
 
-        {/* Removed 'Check for Updates' Button here - Automatic check handles it now */}
-
         <View style={{ marginTop: 25 }}>
           <ActionButton 
             title="Logout" 
@@ -342,6 +405,7 @@ const styles = StyleSheet.create({
     container: { flex: 1 },
     scrollContent: { padding: 20, paddingBottom: 40 },
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 25 },
+    topIconContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap:10 },
     greeting: { fontSize: 16, fontWeight: '500' },
     username: { fontSize: 26, fontWeight: '800' },
     themeButton: { width: 45, height: 45, borderRadius: 25, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
@@ -361,7 +425,15 @@ const styles = StyleSheet.create({
     actionText: { flex: 1, fontSize: 15, fontWeight: '600' },
     separator: { height: 1, marginLeft: 60 },
     footerText: { textAlign: 'center', color: '#9CA3AF', fontSize: 12 },
-    consentContainer: { flexDirection:   'row', alignItems: 'flex-start', marginTop: 0, paddingHorizontal: 2 },
-    consentText: { flex: 1, fontSize: 12, color: '#4B5563', lineHeight: 18 },
-    linkText: { color: '#4F46E5', fontWeight: '700', textDecorationLine: 'underline' },
+
+    modalOverlay: { ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', padding: 5 },
+    modalContent: { width: '90%', borderRadius: 24, padding: 24, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 20, elevation: 15 },
+    modalIconContainer: { width: 70, height: 70, borderRadius: 35, alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
+    modalTitle: { fontSize: 22, fontWeight: '800', marginBottom: 10, textAlign: 'center' },
+    modalText: { fontSize: 14, textAlign: 'center', lineHeight: 22, marginBottom: 25 },
+    modalActions: { width: '100%', alignItems: 'center' },
+    modalButtonPrimary: { flexDirection: 'row', width: '100%', paddingVertical: 14, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+    modalButtonPrimaryText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
+    modalButtonSecondary: { width: '100%', paddingVertical: 14, borderRadius: 12, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+    modalButtonSecondaryText: { fontSize: 15, fontWeight: '600' }
 });
