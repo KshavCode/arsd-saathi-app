@@ -3,6 +3,8 @@
 
 Download the latest version from the [Releases Page](https://github.com/KshavCode/arsd-saathi-app/releases).
 
+READ [TERMS & CONDITIONS]("https://github.com/KshavCode/arsd-saathi-app/blob/master/TERMS.md") and [PRIVACY POLICY](https://github.com/KshavCode/arsd-saathi-app/blob/dev-1.2.0/PRIVACY.md) for usage of ArsdSaathi
+
 ---
 
 # ArsdSaathi 🎓
