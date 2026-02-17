@@ -197,7 +197,7 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
                 };
                 sessionStorage.setItem('TEMP_TE_DATA', JSON.stringify(tempStoragePayload));
 
-                log("Extracting Practical attendance...");
+                log("Extracting attendance...");
                 setSelect(typeSelect, "'PE'");
                 setTimeout(() => { document.getElementById("btnsearch")?.click(); }, 500);
             } 
