@@ -22,7 +22,9 @@ Built with **React Native** and **Expo**, it utilizes a secure, client-side scra
 * **🔒 Privacy First:** Your data (Roll No, DOB, Name) is stored **locally** on your device using `AsyncStorage`. No external database or server stores your credentials.
 * **📱 Offline Access:** Once synced, view your attendance history even without an internet connection.
 * **🎨 Modern UI:** A clean, responsive interface built with `React Native` and `Expo Router`.
-* **🛠️ Zero-Maintenance:** Uses client-side scraping logic, eliminating the need for a dedicated backend server.
+* **🛠️ Zero-Maintenance:** Uses client-side extraction logic, eliminating the need for a dedicated backend server.
+* **🌙 Dark Theme Support:** Lets you switch between light and dark theme according to your liking!
+* **🎁 Details At One:** No need to move through links and navbars in the portal, one login and boom, you get your details in an instant, under your fingertips.
 
 ---
 
@@ -46,7 +48,7 @@ Currently not available for iOS devices (but would be added soon!)
 
 The app is currently available as a direct APK download for Android devices.
 
-1.  **Download:** Get the latest version from the [Releases Page](#) (or the link provided).
+1.  **Download:** Get the latest version from the [Releases Page](https://github.com/KshavCode/arsd-saathi-app/releases) (or the link provided).
 2.  **Open:** Tap on the downloaded `ArsdSaathi.apk` file.
 3.  **Permission:** If prompted with *"For your security, your phone is not allowed to install unknown apps from this source,"* tap **Settings** and toggle on **Allow from this source**.
 4.  **Install:** Tap **Install** and wait for the process to finish.
