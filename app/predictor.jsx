@@ -255,9 +255,12 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
                 </View>
 
                 {/* Smart Insight */}
-                <View style={[styles.insightBox, { backgroundColor: theme.card }]}>
-                    <Ionicons name="bulb-outline" size={25} color={prediction.insightColor} />
-                    <Text style={[styles.insightText, { color: prediction.insightColor }]}>{prediction.insight}</Text>
+                <View style={[{backgroundColor: theme.card}]}>
+                  <View style={[styles.insightBox]}>
+                      <Ionicons name="bulb-outline" size={25} color={prediction.insightColor} />
+                      <Text style={[styles.insightText, { color: prediction.insightColor }]}>{prediction.insight}</Text>
+                  </View>
+                  <Text style={ { color: theme.primary, padding:16, paddingTop:0, fontSize:13 }}>Reminder: A 2-hour class gives you 2 points worth of attendance!</Text>
                 </View>
 
                 <Text style={[styles.sectionLabel, { color: theme.textSecondary, marginTop: 20 }]}>3. Plan Future Classes</Text>
@@ -302,6 +305,15 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
                 </View>
             </>
         )}
+
+        {/* INSTRUCTIONS */}
+        <View style={{padding:10}}>
+          <Text style={[styles.infoText, { color: theme.textSecondary, fontSize:18, marginTop:20 }]}>HOW IT WORKS?</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary, fontWeight:"normal", textAlign:'justify'}]}>1. The formula assumes that the next class would be of one hour and will be held with 100% surity.</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary, fontWeight:"normal", textAlign:'justify'}]}>2. It uses the student&apos;s current attendance status for each month and sums them up.</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary, fontWeight:"normal", textAlign:'justify'}]}>3. The minimum requirement of 67% of attendance for each subject is used to compare and print the final result.</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary, fontWeight:"normal", textAlign:'justify'}]}>4. Both practical and theory classes are calculated independently.</Text>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -317,6 +329,7 @@ const styles = StyleSheet.create({
     themeButton: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
     
     sectionLabel: { fontSize: 14, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 10 },
+    infoText: { fontSize: 14, fontWeight: '700', letterSpacing: 0.5, marginBottom: 5, textAlign: 'center' },
     
     // Modal Dropdown
     dropdown: { paddingVertical: 14, paddingHorizontal: 16, borderWidth: 1, borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
@@ -354,7 +367,7 @@ const styles = StyleSheet.create({
     counterVal: { fontSize: 22, fontWeight: 'bold', width: 30, textAlign: 'center' },
 
     // Result Card
-    resultCard: { borderRadius: 16, padding: 25, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.1, shadowRadius: 12, elevation: 5 },
+    resultCard: { marginBottom: 20, borderRadius: 16, padding: 25, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.1, shadowRadius: 12, elevation: 5 },
     resultLabel: { fontSize: 14, color: 'rgba(255,255,255,0.8)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 5 },
     resultVal: { fontSize: 48, color: '#FFF', fontWeight: '900', marginBottom: 5 },
     resultSub: { fontSize: 13, color: 'rgba(255,255,255,0.9)', fontWeight: '500' },
