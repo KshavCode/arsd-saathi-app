@@ -79,6 +79,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
   const [userData, setUserData] = useState({ name: "Loading...", rollNo: "...", enrollmentNumber: "..." });
   const [savedCredentials, setSavedCredentials] = useState(null);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSynced, setLastSynced] = useState("Never"); // <-- New State for Timestamp
 
   // Modal States
   const [showUpdateModal, setShowUpdateModal] = useState(false);
@@ -109,6 +110,19 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
     checkForUpdates();
   }, []); 
 
+  // --- SAFE DATE FORMATTER ---
+  // React Native environments sometimes lack full Intl support, so we format it manually
+  const formatTimestamp = (ts) => {
+      if (!ts) return "Never";
+      const d = new Date(parseInt(ts));
+      const hrs = d.getHours();
+      const mins = d.getMinutes().toString().padStart(2, '0');
+      const ampm = hrs >= 12 ? 'PM' : 'AM';
+      const hr12 = hrs % 12 || 12;
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      return `${months[d.getMonth()]} ${d.getDate()}, ${hr12}:${mins} ${ampm}`;
+  };
+
   // --- DATA LOADING & MIGRATION ---
   const loadData = useCallback(async () => {
       try {
@@ -116,11 +130,16 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
         const credsRaw = await AsyncStorage.getItem('USER_CREDENTIALS');
         const attRaw = await AsyncStorage.getItem('ATTENDANCE_DATA');
         const mentorRaw = await AsyncStorage.getItem('MENTOR_DATA');
+        const timestampRaw = await AsyncStorage.getItem('DATA_TIMESTAMP'); // <-- Fetch Timestamp
 
         const basic = basicRaw ? JSON.parse(basicRaw) : null;
         const creds = credsRaw ? JSON.parse(credsRaw) : null;
         const att = attRaw ? JSON.parse(attRaw) : null;
         const mentor = mentorRaw ? JSON.parse(mentorRaw) : null;
+
+        if (timestampRaw) {
+            setLastSynced(formatTimestamp(timestampRaw));
+        }
 
         if (creds) setSavedCredentials(creds); 
 
@@ -152,7 +171,8 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
                     'BASIC_DETAILS', 
                     'ATTENDANCE_DATA', 
                     'FACULTY_DATA', 
-                    'MENTOR_DATA'
+                    'MENTOR_DATA',
+                    'DATA_TIMESTAMP'
                 ]);
 
                 // 2. Alert the user politely
@@ -248,8 +268,8 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
         transparent={true}
         visible={showUpdateModal}
         onRequestClose={() => setShowUpdateModal(false)}
-        statusBarTranslucent={true} // Extends behind top status bar
-        navigationBarTranslucent={true} // Extends behind bottom navigation bar
+        statusBarTranslucent={true} 
+        navigationBarTranslucent={true} 
       >
         <View style={[styles.modalOverlay, { backgroundColor: theme.modalOverlay }]}>
           <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
@@ -316,6 +336,15 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
                 <Text style={[styles.username, { color: theme.text }]}>{userData.name}</Text>
                 {isSyncing && <ActivityIndicator size="small" color={theme.primary} />}
             </View>
+            
+            {/* --- NEW SYNC LABEL --- */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 4 }}>
+               <Ionicons name="time-outline" size={12} color={theme.secondary} />
+               <Text style={{ fontSize: 12, color: theme.secondary, fontWeight: '500' }}>
+                 Last synced: {lastSynced}
+               </Text>
+            </View>
+
           </View>
           
           <View style={styles.topIconContainer}>
