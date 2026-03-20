@@ -1,7 +1,10 @@
-# ArsdSaathi v1.2.1 is now available!
+# ArsdSaathi v1.3.0 is now available!
 
 ## 💫 What's New?
-- **TITLE**: description
+- **Attendance Predictor**: Students can now use and plan their classes ahead using the attendance calculator which takes in a few inputs and generates a plan to maintain the minimum requirement of 67% attendance for each subject!
+- **Official Portal**: A link for the student portal has been attached in the footer of the Home Tab for easy access.
+- **Last Synced**: Students are now informed about the timestamp when information was last synced through the portal as the app automatically syncs itself in every 2 days.
+
 
 ## 📦 How to Install
 1. Download the attached .apk file below.

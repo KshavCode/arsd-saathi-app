@@ -17,5 +17,11 @@ By using ArsdSaathi, you agree to the following terms. This document is designed
 - **Device Security**: Since your data is stored locally on your phone, you are responsible for keeping your device secure.
 - **Fair Use**: You agree not to use the app to attempt unauthorized access to portal or to interfere with the college's server operations.
 
-### 5. Limitation of Liability
+### 5. Accuracy of Predictions
+The 'Attendance Predictor' features are provided for informational and estimation purposes only. While the app strives for mathematical accuracy based on provided data, these projections do not account for teacher-specific adjustments, late portal entries, or manual overrides by the College administration.
+
+### 6. The "Bunk" Clause
+Users are solely responsible for their actual attendance. ArsdSaathi shall not be held liable for any academic consequences—including but not limited to being barred from examinations or loss of internal assessment marks—resulting from a user's decision to miss classes based on app projections.
+
+### 7. Limitation of Liability
 The developers of ArsdSaathi shall not be held liable for any data loss, account issues, or academic consequences resulting from the use of this application. This app is provided "as-is" without any warranties.
