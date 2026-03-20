@@ -121,7 +121,7 @@ export default function Stack1() {
                 {(props) => <Faculty {...props} {...themeProps} />}
             </Stack.Screen>
 
-            <Stack.Screen name="Attendance Predictor">
+            <Stack.Screen name="Predictor">
                 {(props) => <Predictor {...props} {...themeProps} />}
             </Stack.Screen>
         </Stack.Navigator>

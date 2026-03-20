@@ -398,6 +398,13 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
             onPress={() => navigation.navigate("Faculty")} 
             theme={theme}
           />
+          <View style={[styles.separator, { backgroundColor: theme.separator }]} />
+          <ActionButton 
+            title="Attendance Predictor" 
+            icon="color-wand" 
+            onPress={() => navigation.navigate("Predictor")} 
+            theme={theme}
+          />
         </View>
 
         <View style={{ marginTop: 25 }}>
