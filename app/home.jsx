@@ -1,4 +1,4 @@
-import { PRIVACY_URL, TERMS_URL } from '@/constants/links';
+import { PRIVACY_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
@@ -418,22 +418,33 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
         </View>
 
         {/* Footer Section */}
-        <TouchableOpacity onPress={() => handleFeedback()}>
-          <Text style={[styles.footerText, { color: theme.footer, fontWeight: 'bold', marginTop: 10 }]}>Having trouble? Report an Issue
-          </Text>
-        </TouchableOpacity>
-
         {/* TERMS AND PRIVACY */}
-        <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:50, marginTop:10}}>
-          <TouchableOpacity onPress={()=>Linking.openURL(TERMS_URL)}>
-              <Text style={{ color: theme.footer }}>Terms & Conditions</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={()=>Linking.openURL(PRIVACY_URL)}>
-              <Text style={{ color: theme.footer }}>Privacy Policy</Text>
-          </TouchableOpacity>
+        <View style={styles.footerGrid}>
+
+          {/* Row 1 */}
+          <View style={styles.footerRow}>
+            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(TERMS_URL)}>
+              <Text style={[styles.footerLink, { color: theme.footer }]}>Terms & Conditions</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(PRIVACY_URL)}>
+              <Text style={[styles.footerLink, { color: theme.footer }]}>Privacy Policy</Text>
+            </TouchableOpacity>
+          </View>
+            
+          {/* Row 2 */}
+          <View style={styles.footerRow}>
+            <TouchableOpacity style={styles.footerItem} onPress={() => handleFeedback()}>
+              <Text style={[styles.footerLink, { color: theme.footer }]}>Report Issue?</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(STUDENT_PORTAL_URL)}>
+              <Text style={[styles.footerLink, { color: theme.footer }]}>Official Portal</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, marginTop:10}}>
+        <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, marginTop:20}}>
           <Text style={{ color: theme.secondary, fontSize:15}}>Developed by</Text>
           <TouchableOpacity onPress={()=>Linking.openURL("https://kshavcode.me")}>
               <Text style={{ color: theme.footer, fontWeight: 'bold', fontSize:15 }}>Keshav Pal</Text>
@@ -452,7 +463,6 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
 }
 
 // --- Stylesheet ---
-
 const styles = StyleSheet.create({
     container: { flex: 1 },
     scrollContent: { padding: 20, paddingBottom: 40 },
@@ -477,6 +487,10 @@ const styles = StyleSheet.create({
     actionText: { flex: 1, fontSize: 15, fontWeight: '600' },
     separator: { height: 1, marginLeft: 60 },
     footerText: { textAlign: 'center', color: '#9CA3AF', fontSize: 12 },
+    footerGrid: { marginTop: 20, paddingHorizontal: 10},
+    footerRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
+    footerItem: {flex: 1, alignItems: 'center',},
+    footerLink: { fontSize: 13, textAlign: 'center',},
     
     // Custom Modal Styles
     modalOverlay: { ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', padding: 5 },
