@@ -10,6 +10,7 @@ import Details from './basic';
 import Faculty from './faculty';
 import Home from './home';
 import Login from './index';
+import Predictor from './predictor';
 
 const Stack = createStackNavigator();
 
@@ -118,6 +119,10 @@ export default function Stack1() {
 
             <Stack.Screen name="Faculty">
                 {(props) => <Faculty {...props} {...themeProps} />}
+            </Stack.Screen>
+
+            <Stack.Screen name="Attendance Predictor">
+                {(props) => <Predictor {...props} {...themeProps} />}
             </Stack.Screen>
         </Stack.Navigator>
     );

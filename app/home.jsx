@@ -1,3 +1,4 @@
+import { PRIVACY_URL, TERMS_URL } from '@/constants/links';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
@@ -15,8 +16,6 @@ const handleFeedback = () => {
   Linking.openURL(`mailto:${email}?subject=${subject}&body=${body}`);
 };
 
-const TERMS_URL = "https://github.com/KshavCode/arsd-saathi-app/blob/master/TERMS.md";
-const PRIVACY_URL = "https://github.com/KshavCode/arsd-saathi-app/blob/master/PRIVACY.md";
 
 // --- Sub-Components ---
 

@@ -1,3 +1,4 @@
+import { PRIVACY_URL, TERMS_URL } from '@/constants/links';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
@@ -24,8 +25,6 @@ import { Colors } from "../constants/themeStyle";
 import ArsdScraper from '../services/ArsdScraper';
 
 const { height } = Dimensions.get("window");
-const TERMS_URL = "https://github.com/KshavCode/arsd-saathi-app/TERMS.md";
-const PRIVACY_URL = "https://github.com/KshavCode/arsd-saathi-app/PRIVACY.md";
 
 const handleFeedback = () => {
     const email = "arsdsaathi.help@gmail.com";
