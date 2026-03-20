@@ -14,15 +14,14 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
     primary: isDarkMode ? Colors.dark.primary : Colors.light.primary,
     secondary: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
     error: isDarkMode ? Colors.dark.error : Colors.light.error,
-    success: isDarkMode ? (Colors.dark.success || '#34D399') : (Colors.light.success || '#059669'),
-    iconBg: isDarkMode ? Colors.dark.iconBg : Colors.light.iconBg,
+    success: isDarkMode ? (Colors.dark.success) : (Colors.light.success),
+    iconBg: isDarkMode ? Colors.light.iconBg : Colors.dark.iconBg,
     iconPlaceholder: isDarkMode ? Colors.dark.iconPlaceholder : Colors.light.iconPlaceholder,
     destructiveBg: isDarkMode ? Colors.dark.destructiveBg : Colors.light.destructiveBg,
     destructiveBorder: isDarkMode ? Colors.dark.destructiveBorder : Colors.light.destructiveBorder,
     separator: isDarkMode ? Colors.dark.separator : Colors.light.separator,
-    borderColor: isDarkMode ? Colors.dark.separator : Colors.light.separator,
+    borderColor: isDarkMode ? Colors.light.separator : Colors.dark.separator,
     footer: isDarkMode ? Colors.dark.footer : Colors.light.footer,
-    modalOverlay: 'rgba(0, 0, 0, 0.6)'
   };
 
   const [fullData, setFullData] = useState(null);
@@ -113,7 +112,7 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
       
       const newPercentage = newHeld === 0 ? 0 : (newAttended / newHeld) * 100;
       
-      // Smart Insights Logic (Target 67%)
+      // (Target 67%)
       let insight = "";
       let insightColor = theme.secondary;
 
@@ -134,7 +133,7 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
           } else {
               // Calculate Required Classes: R = (0.67H - A) / 0.33
               const reqClasses = Math.ceil(((target * held) - attended) / 0.33);
-              insight = `You need to attend ${reqClasses} consecutive class(s) to reach 67%.`;
+              insight = `You need to attend ${reqClasses} more class(es) to reach 67%.`;
               insightColor = theme.error;
           }
       }
@@ -188,13 +187,9 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
             </TouchableOpacity>
 
             <Modal visible={showDropdown} transparent={true} animationType="fade" onRequestClose={() => setShowDropdown(false)}>
-                <TouchableOpacity 
-                    style={styles.modalBackdrop} 
-                    activeOpacity={1} 
-                    onPressOut={() => setShowDropdown(false)} 
-                >
+                <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPressOut={() => setShowDropdown(false)}>
                     <View style={[styles.modalListContainer, { backgroundColor: theme.card, borderColor: theme.borderColor }]}>
-                        <Text style={[styles.modalListHeader, { color: theme.textSecondary, backgroundColor: isDarkMode ? '#1E293B' : '#F8FAFC' }]}>Select a Subject</Text>
+                        <Text style={[styles.modalListHeader, { color: theme.text, backgroundColor: theme.iconBg, borderBottomWidth: .5, borderColor:theme.primary}]}>Select a Subject</Text>
                         <ScrollView style={{maxHeight: 350}} showsVerticalScrollIndicator={true}>
                             {subjects.map((sub) => (
                                 <TouchableOpacity 
@@ -203,8 +198,7 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
                                     onPress={() => {
                                         setSelectedSubject(sub);
                                         setShowDropdown(false);
-                                    }}
-                                >
+                                    }}>
                                     <Text style={[styles.dropdownItemText, { color: theme.textSecondary }, selectedSubject === sub && { color: theme.primary, fontWeight: '700' }]}>
                                         {sub}
                                     </Text>
@@ -241,7 +235,11 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
             </View>
         ) : (
             <>
+
                 {/* Step 2: Current Status */}
+                <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>2. CURRENT STATS</Text>
+
+                {/* Step 3: Calculation */}
                 <View style={[styles.statusCard, { backgroundColor: theme.card }]}>
                     <View style={styles.statusCol}>
                         <Text style={[styles.statusVal, { color: theme.text }]}>{currentStats.attended}/{currentStats.held}</Text>
@@ -262,8 +260,7 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
                     <Text style={[styles.insightText, { color: prediction.insightColor }]}>{prediction.insight}</Text>
                 </View>
 
-                {/* Step 3: Planner Controls */}
-                <Text style={[styles.sectionLabel, { color: theme.textSecondary, marginTop: 20 }]}>2. Plan Future Classes</Text>
+                <Text style={[styles.sectionLabel, { color: theme.textSecondary, marginTop: 20 }]}>3. Plan Future Classes</Text>
                 
                 <View style={styles.controlsGrid}>
                     {/* Attend Control */}
@@ -326,7 +323,7 @@ const styles = StyleSheet.create({
     dropdownText: { fontSize: 15, fontWeight: '600', flex: 1 },
     modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center', padding: 20 },
     modalListContainer: { width: '100%', borderRadius: 16, borderWidth: 1, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 10, elevation: 10 },
-    modalListHeader: { fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase', padding: 16, borderBottomWidth: 1 },
+    modalListHeader: { fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase', padding: 16 },
     dropdownItem: { paddingVertical: 16, paddingHorizontal: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 0.5 },
     dropdownItemText: { fontSize: 15 },
 

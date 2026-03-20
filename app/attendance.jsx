@@ -163,7 +163,6 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
                     
                     /* DATA VIEW */
                     <>
-                        {/* THE NEW MODAL DROPDOWN CONTROL */}
                         <View style={styles.controlsRow}>
                             <Text style={[styles.selectLabel, { color: theme.textSecondary }]}>Select Subject:</Text>
                             <TouchableOpacity 
