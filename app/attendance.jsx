@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Modal, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../constants/themeStyle';
 
@@ -9,14 +9,16 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
 
     const theme = {
         background: isDarkMode ? Colors.dark.background : Colors.light.background,
-        card: isDarkMode ? '#1A2235' : '#FFFFFF',
+        card: isDarkMode ? Colors.dark.card : Colors.light.card, 
         text: isDarkMode ? Colors.dark.text : Colors.light.text,
         textSecondary: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
         primary: isDarkMode ? Colors.dark.primary : Colors.light.primary,
-        borderColor: isDarkMode ? '#2E3A52' : '#E2E8F0',
+        secondary: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
+        error: isDarkMode ? Colors.dark.error : Colors.light.error,
+        iconBg: isDarkMode ? Colors.light.iconBg : Colors.dark.iconBg,
+        borderColor: isDarkMode ? Colors.light.separator : Colors.dark.separator,
         headerBg: isDarkMode ? '#252F45' : '#F8FAFC',
         headerText: isDarkMode ? '#F8FAFC' : '#64748B',
-        iconBg: isDarkMode ? '#252F45' : '#F0F4FF',
     };
 
     const [fullData, setFullData] = useState(null); // The raw JSON
@@ -116,11 +118,6 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
 
     const COLS = 5; 
 
-    function onSelectSubject(subject) {
-        setSelectedSubject(subject);
-        setShowDropdown(false);
-    }
-
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
             <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
@@ -143,7 +140,7 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
                 </TouchableOpacity>
             </View>
 
-            <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}>
+            <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }} showsVerticalScrollIndicator={false}>
                 
                 {loading ? (
                     <View style={styles.centerContainer}>
@@ -166,38 +163,48 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
                     
                     /* DATA VIEW */
                     <>
-                        {/* Dropdown Control */}
+                        {/* THE NEW MODAL DROPDOWN CONTROL */}
                         <View style={styles.controlsRow}>
                             <Text style={[styles.selectLabel, { color: theme.textSecondary }]}>Select Subject:</Text>
-                            <View style={styles.dropdownRow}>
-                                <View style={styles.dropdownWrapper}>
-                                    <TouchableOpacity 
-                                        style={[styles.dropdown, { backgroundColor: theme.card, borderColor: theme.borderColor }]} 
-                                        onPress={() => setShowDropdown((s) => !s)}
-                                        activeOpacity={0.8}
-                                    >
-                                        <Text style={[styles.dropdownText, { color: theme.text }]} numberOfLines={1}>
-                                            {selectedSubject}
-                                        </Text>
-                                        <Ionicons name={showDropdown ? 'chevron-up' : 'chevron-down'} size={18} color={theme.textSecondary} />
-                                    </TouchableOpacity>
+                            <TouchableOpacity 
+                                style={[styles.dropdown, { backgroundColor: theme.card, borderColor: theme.borderColor }]} 
+                                onPress={() => setShowDropdown(true)}
+                                activeOpacity={0.8}
+                            >
+                                <Text style={[styles.dropdownText, { color: theme.text }]} numberOfLines={1}>
+                                    {selectedSubject}
+                                </Text>
+                                <Ionicons name={'chevron-down'} size={18} color={theme.textSecondary} />
+                            </TouchableOpacity>
 
-                                    {showDropdown && (
-                                        <View style={[styles.dropdownList, { backgroundColor: theme.card, borderColor: theme.borderColor }]}>
-                                            <ScrollView style={{maxHeight: 250}} nestedScrollEnabled={true}>
-                                                {subjects.map((sub) => (
-                                                    <TouchableOpacity key={sub} style={styles.dropdownItem} onPress={() => onSelectSubject(sub)}>
-                                                        <Text style={[styles.dropdownItemText, { color: theme.textSecondary }, selectedSubject === sub && { color: theme.primary, fontWeight: '700' }]}>
-                                                            {sub}
-                                                        </Text>
-                                                        {selectedSubject === sub && <Ionicons name="checkmark" size={16} color={theme.primary} />}
-                                                    </TouchableOpacity>
-                                                ))}
-                                            </ScrollView>
-                                        </View>
-                                    )}
-                                </View>
-                            </View>
+                            <Modal visible={showDropdown} transparent={true} animationType="fade" onRequestClose={() => setShowDropdown(false)}>
+                                <TouchableOpacity 
+                                    style={styles.modalBackdrop} 
+                                    activeOpacity={1} 
+                                    onPressOut={() => setShowDropdown(false)} 
+                                >
+                                    <View style={[styles.modalListContainer, { backgroundColor: theme.card, borderColor: theme.borderColor }]}>
+                                        <Text style={[styles.modalListHeader, { color: theme.text, backgroundColor: theme.iconBg, borderBottomWidth: .5, borderColor:theme.primary}]}>Select a Subject</Text>
+                                        <ScrollView style={{maxHeight: 350}} showsVerticalScrollIndicator={true}>
+                                            {subjects.map((sub) => (
+                                                <TouchableOpacity 
+                                                    key={sub} 
+                                                    style={[styles.dropdownItem, { borderBottomColor: theme.borderColor }]} 
+                                                    onPress={() => {
+                                                        setSelectedSubject(sub);
+                                                        setShowDropdown(false);
+                                                    }}
+                                                >
+                                                    <Text style={[styles.dropdownItemText, { color: theme.textSecondary }, selectedSubject === sub && { color: theme.primary, fontWeight: '700' }]}>
+                                                        {sub}
+                                                    </Text>
+                                                    {selectedSubject === sub && <Ionicons name="checkmark" size={16} color={theme.primary} />}
+                                                </TouchableOpacity>
+                                            ))}
+                                        </ScrollView>
+                                    </View>
+                                </TouchableOpacity>
+                            </Modal>
                         </View>
 
                         {/* Table */}
@@ -220,7 +227,7 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
                                                 <Text style={[
                                                     styles.cellText, 
                                                     { color: theme.text },
-                                                    isHeaderRow && { color: theme.headerText, fontWeight: '700', fontSize: 10 }, // Slightly smaller font for headers to fit 5 cols
+                                                    isHeaderRow && { color: theme.headerText, fontWeight: '700', fontSize: 10 }, 
                                                     isRowHeader && { fontWeight: '600' }
                                                 ]} numberOfLines={1} adjustsFontSizeToFit>
                                                     {cell}
@@ -243,7 +250,7 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
                         )}
                         {/* Practical Percentage Footer */}
                         {fullData.practical_percentage && (
-                             <View style={[styles.footerInfo, { backgroundColor: theme.iconBg, marginTop:5 }]}>
+                             <View style={[styles.footerInfo, { backgroundColor: theme.iconBg, marginTop:10 }]}>
                                 <Ionicons name="pie-chart" size={20} color={theme.primary} />
                                 <Text style={[styles.footerText, { color: theme.primary }]}>
                                     Practical Attendance: <Text style={{fontWeight: 'bold'}}>{fullData.practical_percentage}%</Text>
@@ -271,24 +278,25 @@ const styles = StyleSheet.create({
     emptySub: { fontSize: 14, textAlign: 'center', lineHeight: 20 },
 
     // Controls
-    controlsRow: { marginBottom: 16, zIndex: 10 }, 
+    controlsRow: { marginBottom: 20, zIndex: 10 }, 
     selectLabel: { fontSize: 13, marginBottom: 8, fontWeight: '600' },
-    dropdownRow: { flexDirection: 'row', alignItems: 'center' },
-    dropdownWrapper: { position: 'relative', flex: 1 },
-    dropdown: { paddingVertical: 12, paddingHorizontal: 12, borderWidth: 1, borderRadius: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'white' },
-    dropdownText: { fontSize: 13, fontWeight: '500', flex: 1 },
+    dropdown: { paddingVertical: 14, paddingHorizontal: 16, borderWidth: 1, borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    dropdownText: { fontSize: 15, fontWeight: '600', flex: 1 },
     
-    dropdownList: { position: 'absolute', top: 50, left: 0, right: 0, borderWidth: 1, borderRadius: 10, overflow: 'hidden', zIndex: 999, elevation: 8, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 4, shadowOffset: {width:0, height:2} },
-    dropdownItem: { paddingVertical: 12, paddingHorizontal: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    dropdownItemText: { fontSize: 13 },
+    // Modal Dropdown Styles
+    modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+    modalListContainer: { width: '100%', borderRadius: 16, borderWidth: 1, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 10, elevation: 10 },
+    modalListHeader: { fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase', padding: 16 },
+    dropdownItem: { paddingVertical: 16, paddingHorizontal: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 0.5 },
+    dropdownItemText: { fontSize: 15 },
     
     // Table
     tableContainer: { overflow: 'hidden', borderRadius: 12, borderWidth: 1, marginBottom: 20 },
     tableRow: { flexDirection: 'row' },
-    tableCell: { flex: 1, paddingVertical: 12, paddingHorizontal: 1, borderRightWidth: 0.5, alignItems: 'center', justifyContent: 'center' }, // Reduced horizontal padding to fit 5 cols
+    tableCell: { flex: 1, paddingVertical: 12, paddingHorizontal: 1, borderRightWidth: 0.5, alignItems: 'center', justifyContent: 'center' }, 
     tableCellLast: { borderRightWidth: 0 },
-    cellText: { fontSize: 11, textAlign: 'center' }, // Slightly smaller to ensure fit
+    cellText: { fontSize: 11, textAlign: 'center' }, 
 
     // Footer
-    footerInfo: { padding: 12, borderRadius: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }
+    footerInfo: { padding: 14, borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }
 });
