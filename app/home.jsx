@@ -378,10 +378,17 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
         {/* Navigation Actions */}
         <Text style={[styles.sectionHeader, { color: theme.text }]}>Quick Actions</Text>
         <View style={[styles.actionContainer, { backgroundColor: theme.card }]}>
-           <ActionButton 
+          <ActionButton 
             title="Detailed Attendance" 
             icon="bar-chart" 
             onPress={() => navigation.navigate("Attendance")} 
+            theme={theme}
+          />
+          <View style={[styles.separator, { backgroundColor: theme.separator }]} />
+          <ActionButton 
+            title="Attendance Predictor" 
+            icon="color-wand" 
+            onPress={() => navigation.navigate("Predictor")} 
             theme={theme}
           />
           <View style={[styles.separator, { backgroundColor: theme.separator }]} />
@@ -398,14 +405,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
             onPress={() => navigation.navigate("Faculty")} 
             theme={theme}
           />
-          <View style={[styles.separator, { backgroundColor: theme.separator }]} />
-          <ActionButton 
-            title="Attendance Predictor" 
-            icon="color-wand" 
-            onPress={() => navigation.navigate("Predictor")} 
-            theme={theme}
-          />
-        </View>
+          </View>
 
         <View style={{ marginTop: 25 }}>
           <ActionButton 
