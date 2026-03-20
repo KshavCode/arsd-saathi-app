@@ -7,6 +7,12 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
   const webViewRef = useRef(null);
 
   const runScraping = `
+    // For stopping HTML to load extra resources (boost speed)
+    if (document.readyState === 'interactive' || document.readyState === 'complete') {window.stop();}
+    const style = document.createElement('style');
+    style.innerHTML = 'img, i, .header-banner { display: none !important; }';
+    document.head.appendChild(style);
+    
     (function() {
       const post = (type, payload) => {
         if (window.ReactNativeWebView) {
@@ -316,8 +322,11 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
         mixedContentMode="always"
         javaScriptEnabled={true}
         domStorageEnabled={true}
+        builtInZoomControls={false}
+        displayZoomControls={false}
         onMessage={handleMessage}
         onError={(e) => onError("Network Error: " + e.nativeEvent.description)}
+        userAgent="Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Mobile Safari/537.36"
       />
     </View>
   );
