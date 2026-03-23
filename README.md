@@ -3,7 +3,7 @@
 
 Download the latest version from the [Releases Page](https://github.com/KshavCode/arsd-saathi-app/releases).
 
-READ [TERMS & CONDITIONS]("https://github.com/KshavCode/arsd-saathi-app/blob/master/TERMS.md") and [PRIVACY POLICY](https://github.com/KshavCode/arsd-saathi-app/blob/master/PRIVACY.md) for usage of ArsdSaathi
+READ [TERMS & CONDITIONS](https://github.com/KshavCode/arsd-saathi-app/blob/master/TERMS.md) and [PRIVACY POLICY](https://github.com/KshavCode/arsd-saathi-app/blob/master/PRIVACY.md) for usage of ArsdSaathi
 
 ---
 
@@ -11,7 +11,7 @@ READ [TERMS & CONDITIONS]("https://github.com/KshavCode/arsd-saathi-app/blob/mas
 
 **Your College Companion**
 
-ArsdSaathi is a mobile application designed specifically for students of **Atma Ram Sanatan Dharma (ARSD) College**. It provides a seamless, mobile-friendly interface to access the college portal, allowing students to sync their attendance, view their profile, and stay updated without navigating the legacy website every time.
+ArsdSaathi is an unofficial mobile application designed specifically for students of **Atma Ram Sanatan Dharma (ARSD) College**. It provides a seamless, mobile-friendly interface to access the college portal, allowing students to sync their attendance, view their profile, and stay updated without navigating the legacy website every time.
 Built with **React Native** and **Expo**, it utilizes a secure, client-side scraping architecture to fetch data directly from the college portal, ensuring user privacy and zero server costs.
 
 ---
@@ -25,6 +25,7 @@ Built with **React Native** and **Expo**, it utilizes a secure, client-side scra
 * **🛠️ Zero-Maintenance:** Uses client-side extraction logic, eliminating the need for a dedicated backend server.
 * **🌙 Dark Theme Support:** Lets you switch between light and dark theme according to your liking!
 * **🎁 Details At One:** No need to move through links and navbars in the portal, one login and boom, you get your details in an instant, under your fingertips.
+* **❤️ Built by Students:** Minimal and additional features are added according to the student needs!
 
 ---
 
