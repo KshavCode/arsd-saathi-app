@@ -9,6 +9,7 @@
 
 ## 🔍 Fixes
 - **Attendance Predictor**: Now the number of classes are limited. Earlier, a student could exploit the 'plus' button to estimate for 200 classes. Now, limit has been set to 50.
+- **Home Layout**: Enhanced the User Experience with grid based buttons and display of information is now more organized.
 
 
 ## 📦 How to Install

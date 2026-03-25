@@ -1,10 +1,9 @@
 import { FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, PRIVACY_URL, SHIVAM_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Modal, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../constants/themeStyle';
 import ArsdScraper from '../services/ArsdScraper';
@@ -19,40 +18,21 @@ const handleFeedback = () => {
 
 // --- Sub-Components ---
 
-const DashboardCard = ({ title, value, icon, color, subValue, highlight, theme }) => (
-  <View style={[styles.card, { backgroundColor: theme.card }]}>
-    <View style={styles.cardHeader}>
-      <View style={[styles.iconContainer, { backgroundColor: color || theme.primary }]}>
-        <Ionicons name={icon} size={20} color="#fff" />
-      </View>
-      {highlight && <Ionicons name="alert-circle" size={18} color={theme.error} />}
-    </View>
-    <View>
-      <Text style={[styles.cardValue, { color: theme.text }]} numberOfLines={1} adjustsFontSizeToFit>{value}</Text>
-      <Text style={[styles.cardTitle, { color: theme.textSecondary }]}>{title}</Text>
-      {subValue && <Text style={[styles.cardSub, { color: theme.error }]}>{subValue}</Text>}
-    </View>
-  </View>
-);
-
-const ActionButton = ({ title, icon, onPress, isDestructive, theme }) => (
+// New Square Grid Button
+const GridActionButton = ({ title, icon, onPress, theme, isDestructive }) => (
   <TouchableOpacity 
     style={[
-      styles.actionButton, 
-      { backgroundColor: theme.card }, 
-      isDestructive && { backgroundColor: theme.destructiveBg, borderColor: theme.destructiveBorder, borderWidth: 1 }
+      styles.gridActionCard, 
+      { backgroundColor: theme.card },
+      isDestructive && { backgroundColor: theme.destructiveBg, borderWidth: 1, borderColor: theme.destructiveBorder }
     ]} 
     onPress={onPress}
     activeOpacity={0.8}
   >
-    <View style={[
-      styles.actionIconCtx, 
-      { backgroundColor: isDestructive ? 'transparent' : theme.iconBg }
-    ]}>
-      <Ionicons name={icon} color={isDestructive ? theme.error : theme.primary} size={20} />
+    <View style={[styles.gridActionIconCtx, { backgroundColor: isDestructive ? 'transparent' : theme.iconBg }]}>
+      <Ionicons name={icon} color={isDestructive ? theme.error : theme.primary} size={24} />
     </View>
-    <Text style={[styles.actionText, { color: theme.text }, isDestructive && { color: theme.error }]}>{title}</Text>
-    <Ionicons name="chevron-forward" color={theme.iconPlaceholder} size={20} />
+    <Text style={[styles.gridActionText, { color: isDestructive ? theme.error : theme.text }]}>{title}</Text>
   </TouchableOpacity>
 );
 
@@ -89,29 +69,15 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
   useEffect(() => {
     const checkForUpdates = async () => {
       try {
-        const currentVersion = Constants.expoConfig.version;
-        const response = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest');
-        
-        if (!response.ok) return; 
-
-        const data = await response.json();
-        const latestVersion = data.tag_name.replace('v', '');
-        
-        if (latestVersion !== currentVersion) {
-            const downloadUrl = data.assets?.[0]?.browser_download_url || data.html_url;
-            setUpdateInfo({ version: latestVersion, url: downloadUrl });
-            setShowUpdateModal(true); 
-        }
+        console.log("Update Check")
       } catch (error) {
         console.log("Auto-update check failed:", error); 
       }
     };
-
     checkForUpdates();
   }, []); 
 
   // --- SAFE DATE FORMATTER ---
-  // React Native environments sometimes lack full Intl support, so we format it manually
   const formatTimestamp = (ts) => {
       if (!ts) return "Never";
       const d = new Date(parseInt(ts));
@@ -130,7 +96,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
         const credsRaw = await AsyncStorage.getItem('USER_CREDENTIALS');
         const attRaw = await AsyncStorage.getItem('ATTENDANCE_DATA');
         const mentorRaw = await AsyncStorage.getItem('MENTOR_DATA');
-        const timestampRaw = await AsyncStorage.getItem('DATA_TIMESTAMP'); // <-- Fetch Timestamp
+        const timestampRaw = await AsyncStorage.getItem('DATA_TIMESTAMP');
 
         const basic = basicRaw ? JSON.parse(basicRaw) : null;
         const creds = credsRaw ? JSON.parse(credsRaw) : null;
@@ -162,27 +128,16 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
         const attRaw = await AsyncStorage.getItem('ATTENDANCE_DATA');
         if (attRaw) {
             const data = JSON.parse(attRaw);
-            
-            // Check if the NEW structure exists
             if (data && !data.theory) {
-                // 1. Wipe everything
                 await AsyncStorage.multiRemove([
-                    'USER_CREDENTIALS', 
-                    'BASIC_DETAILS', 
-                    'ATTENDANCE_DATA', 
-                    'FACULTY_DATA', 
-                    'MENTOR_DATA',
-                    'DATA_TIMESTAMP'
+                    'USER_CREDENTIALS', 'BASIC_DETAILS', 'ATTENDANCE_DATA', 
+                    'FACULTY_DATA', 'MENTOR_DATA', 'DATA_TIMESTAMP'
                 ]);
 
-                // 2. Alert the user politely
                 Alert.alert(
                     "App Updated 🚀",
                     "We've upgraded how attendance is tracked (Theory vs Practical). Please log in again to sync your new data.",
-                    [{ 
-                        text: "OK", 
-                        onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Login' }] }) 
-                    }]
+                    [{ text: "OK", onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Login' }] }) }]
                 );
             }
         }
@@ -191,25 +146,19 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
     }
   }, [navigation]);
 
-  // --- INITIALIZATION (Runs Once) ---
   useEffect(() => {
     const initialize = async () => {
         await validateDataStructure(); 
         await loadData();             
     };
-    
     initialize();
   }, [validateDataStructure, loadData]);
 
-  // --- ROUTE PARAM HANDLING ---
   const requiresSync = route.params?.requiresSync;
   useEffect(() => {
-    if (requiresSync) {
-        setIsSyncing(true);
-    }
+    if (requiresSync) setIsSyncing(true);
   }, [requiresSync]);
 
-  // --- ACTION HANDLERS ---
   const handleSyncCompletion = async (status) => {
       if (status === 'DONE') {
           await AsyncStorage.setItem('DATA_TIMESTAMP', Date.now().toString());
@@ -226,10 +175,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
 
   const handleLogout = async () => {
       await AsyncStorage.multiRemove(['USER_CREDENTIALS', 'BASIC_DETAILS', 'ATTENDANCE_DATA', 'FACULTY_DATA', 'MENTOR_DATA', 'LOGIN_TIMESTAMP', 'DATA_TIMESTAMP']);
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Login' }],
-      });
+      navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
   }
 
   const handleTheme = async () => {
@@ -239,19 +185,13 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
   };
 
   const handleShare = async () => {
-    const response = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest');
-        if (!response.ok) return; 
-
-        const data = await response.json();
-            const downloadUrl = data.assets?.[0]?.browser_download_url || data.html_url;
     try {
-      await Share.share({
-        message: `Check out the ArsdSaathi App: ${downloadUrl}`,
-        url: downloadUrl,
-        title: 'ArsdSaathi App Link', 
-      });
-    } 
-    catch (error) {
+      const response = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest');
+      if (!response.ok) return; 
+      const data = await response.json();
+      const downloadUrl = data.assets?.[0]?.browser_download_url || data.html_url;
+      await Share.share({ message: `Check out the ArsdSaathi App: ${downloadUrl}`, url: downloadUrl, title: 'ArsdSaathi App Link' });
+    } catch (error) {
       alert(error.message);
     }
   };
@@ -262,251 +202,119 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
       
-      {/* --- CUSTOM UPDATE MODAL --- */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={showUpdateModal}
-        onRequestClose={() => setShowUpdateModal(false)}
-        statusBarTranslucent={true} 
-        navigationBarTranslucent={true} 
-      >
-        <View style={[styles.modalOverlay, { backgroundColor: theme.modalOverlay }]}>
-          <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
-            
-            {/* Modal Header Icon */}
-            <View style={[styles.modalIconContainer, { backgroundColor: theme.iconBg }]}>
-              <Ionicons name="rocket" size={36} color={theme.primary} />
-            </View>
-
-            {/* Modal Text */}
-            <Text style={[styles.modalTitle, { color: theme.text }]}>Update Available!</Text>
-            <Text style={[styles.modalText, { color: theme.textSecondary }]}>
-              Version {updateInfo.version} is ready. We&apos;ve crushed some bugs and added improvements to keep your app running smoothly.
-            </Text>
-
-            {/* Modal Action Buttons */}
-            <View style={styles.modalActions}>
-              <TouchableOpacity 
-                style={[styles.modalButtonPrimary, { backgroundColor: theme.primary }]}
-                onPress={() => {
-                  Linking.openURL(updateInfo.url);
-                  setShowUpdateModal(false);
-                }}
-              >
-                <Ionicons name="download-outline" size={18} color="#FFF" style={{marginRight: 6}} />
-                <Text style={styles.modalButtonPrimaryText}>Update Now</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity 
-                style={[styles.modalButtonSecondary, { borderColor: theme.separator }]}
-                onPress={() => Linking.openURL("https://github.com/KshavCode/arsd-saathi-app/blob/master/CHANGELOG.md")}
-              >
-                <Text style={[styles.modalButtonSecondaryText, { color: theme.text }]}>What&apos;s New</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity 
-                style={{ marginTop: 15, paddingVertical: 5 }}
-                onPress={() => setShowUpdateModal(false)}
-              >
-                <Text style={{ color: theme.textSecondary, fontSize: 13, fontWeight: '500' }}>Not Now</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
       {/* Background Scraper Component */}
       {isSyncing && savedCredentials && (
-          <ArsdScraper
-              credentials={savedCredentials}
-              onProgress={(msg) => console.log("Background Sync:", msg)}
-              onFinish={handleSyncCompletion}
-              onError={handleSyncError}
-          />
+          <ArsdScraper credentials={savedCredentials} onProgress={(msg) => console.log("Background Sync:", msg)} onFinish={handleSyncCompletion} onError={handleSyncError} />
       )}
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         
         {/* Header Section */}
         <View style={styles.header}>
-          <View>
+          <View style={{flex: 1}}>
             <Text style={[styles.greeting, { color: theme.textSecondary }]}>Welcome back,</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Text style={[styles.username, { color: theme.text }]}>{userData.name}</Text>
+              <TouchableOpacity onPress={()=>navigation.navigate("Details")} style={{flexDirection: 'row', gap:5, justifyContent:'center', alignItems:'center'}}>
+                <Text style={[styles.username, { color: theme.primary }]} numberOfLines={1}>{userData.name}</Text>
+                <Ionicons name="information-circle" size={15} color={theme.secondary} />
+              </TouchableOpacity>
                 {isSyncing && <ActivityIndicator size="small" color={theme.primary} />}
             </View>
-            
-            {/* --- NEW SYNC LABEL --- */}
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 4 }}>
                <Ionicons name="time-outline" size={12} color={theme.secondary} />
-               <Text style={{ fontSize: 12, color: theme.secondary, fontWeight: '500' }}>
-                 Last synced: {lastSynced}
-               </Text>
+               <Text style={{ fontSize: 12, color: theme.secondary, fontWeight: '500' }}>Last synced: {lastSynced}</Text>
             </View>
-
           </View>
           
           <View style={styles.topIconContainer}>
-            <TouchableOpacity 
-              style={[styles.themeButton, { backgroundColor: theme.card }]} onPress={handleShare}>
-               <Ionicons name='share-social' size={22} color={theme.primary} />
+            <TouchableOpacity style={[styles.themeButton, { backgroundColor: theme.card }]} onPress={handleShare}>
+               <Ionicons name='share-social' size={20} color={theme.primary} />
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.themeButton, { backgroundColor: theme.card }]} onPress={handleTheme}>
-               <Ionicons name={isDarkMode ? "sunny" : "moon"} size={22} color={isDarkMode ? "#FBBF24" : theme.primary} />
+            <TouchableOpacity style={[styles.themeButton, { backgroundColor: theme.card }]} onPress={handleTheme}>
+               <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} />
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Top Statistics Grid */}
-        <View style={styles.statsGrid}>
-          <View style={styles.heroCardContainer}>
-            <DashboardCard 
-              title="Theory Attendance %" 
-              value={userData.percent_attendance}
-              subValue={isAttendanceLow ? "Below required 67%" : ""}
-              icon="pie-chart"
-              color={isAttendanceLow ? theme.error : "#10B981"}
-              highlight={isAttendanceLow}
-              theme={theme}
-            />
-          </View>
+        {/* Hero Dashboard Container (Stacked Layout) */}
+        <View style={[styles.heroContainer, { backgroundColor: theme.card, borderColor: theme.borderColor }]}>
+            
+            {/* Top Row: Attendance */}
+            <View style={styles.heroMainRow}>
+                <View style={[styles.heroIconBox, { backgroundColor: isAttendanceLow ? theme.error : "#10B981" }]}>
+                    <Ionicons name="pie-chart" size={24} color="#FFF" />
+                </View>
+                <View style={styles.heroTextContent}>
+                    <Text style={[styles.heroValue, { color: theme.text }]}>{userData.percent_attendance}%</Text>
+                    <Text style={[styles.heroLabel, { color: theme.textSecondary }]}>Theory Attendance</Text>
+                </View>
+                {isAttendanceLow && <Ionicons name="alert-circle" size={28} color={theme.error} />}
+            </View>
 
-          <View style={styles.secondaryStatsRow}>
-            <View style={{flex: 1}}>
-                <DashboardCard 
-                  title="Enrollment" 
-                  value={userData.enrollmentNumber} 
-                  icon="document-text" 
-                  color={theme.secondary} 
-                  theme={theme}
-                />
+            {isAttendanceLow && (
+                <Text style={[styles.warningText, { color: theme.error }]}>* Attendance is below the 67% university requirement.</Text>
+            )}
+
+            <View style={[styles.heroDivider, { backgroundColor: theme.separator }]} />
+
+            {/* Bottom Row: Mentor (Full Width) */}
+            <View style={styles.mentorRow}>
+                 <Ionicons name="person-outline" size={18} color={theme.primary} />
+                 <View style={{marginLeft: 12, flex: 1}}>
+                     <Text style={[styles.mentorLabel, { color: theme.textSecondary }]}>Assigned Mentor</Text>
+                     <Text style={[styles.mentorName, { color: theme.text }]} numberOfLines={2}>{userData.mentor_name}</Text>
+                 </View>
             </View>
-            <View style={{width: 12}} /> 
-            <View style={{flex: 1}}>
-                <DashboardCard 
-                  title="Roll No." 
-                  value={userData.rollNo} 
-                  icon="id-card"
-                  color={theme.primary} 
-                  theme={theme}
-                />
-            </View>
-          </View>
-          <View style={styles.heroCardContainer}>
-            <DashboardCard 
-              title="Mentor" 
-              value={userData.mentor_name}
-              icon="book"
-              theme={theme}
-            />
-          </View>
         </View>
 
-        {/* Navigation Actions */}
-        <Text style={[styles.sectionHeader, { color: theme.text }]}>Quick Actions</Text>
-        <View style={[styles.actionContainer, { backgroundColor: theme.card }]}>
-          <ActionButton 
-            title="Detailed Attendance" 
-            icon="bar-chart" 
-            onPress={() => navigation.navigate("Attendance")} 
-            theme={theme}
-          />
-          <View style={[styles.separator, { backgroundColor: theme.separator }]} />
-          <ActionButton 
-            title="Attendance Predictor" 
-            icon="color-wand" 
-            onPress={() => navigation.navigate("Predictor")} 
-            theme={theme}
-          />
-          <View style={[styles.separator, { backgroundColor: theme.separator }]} />
-          <ActionButton 
-            title="Time-Table" 
-            icon="calendar" 
-            onPress={() => navigation.navigate("TimeTable")} 
-            theme={theme}
-          />
-          <View style={[styles.separator, { backgroundColor: theme.separator }]} />
-          <ActionButton 
-            title="Know Your Campus" 
-            icon="compass" 
-            onPress={() => navigation.navigate("Campus")} 
-            theme={theme}
-          />
-          <View style={[styles.separator, { backgroundColor: theme.separator }]} />
-          <ActionButton 
-            title="Personal Details" 
-            icon="person" 
-            onPress={() => navigation.navigate("Details")} 
-            theme={theme}
-          />
-          <View style={[styles.separator, { backgroundColor: theme.separator }]} />
-          <ActionButton 
-            title="Faculty Details" 
-            icon="people" 
-            onPress={() => navigation.navigate("Faculty")} 
-            theme={theme}
-          />
-          </View>
-
-        <View style={{ marginTop: 25 }}>
-          <ActionButton 
-            title="Logout" 
-            icon="log-out" 
-            onPress={handleLogout}
-            isDestructive={true}
-            theme={theme}
-          />
+        {/* Grid Navigation */}
+        <Text style={[styles.sectionHeader, { color: theme.text, marginTop: 10 }]}>Quick Actions</Text>
+        
+        <View style={styles.actionsGrid}>
+            <GridActionButton title="Attendance" icon="bar-chart" onPress={() => navigation.navigate("Attendance")} theme={theme} />
+            <GridActionButton title="Predictor" icon="color-wand" onPress={() => navigation.navigate("Predictor")} theme={theme} />
+            <GridActionButton title="Timetable" icon="calendar" onPress={() => navigation.navigate("TimeTable")} theme={theme} />
+            <GridActionButton title="Campus Map" icon="compass" onPress={() => navigation.navigate("Campus")} theme={theme} />
+            <GridActionButton title="Faculty" icon="people" onPress={() => navigation.navigate("Faculty")} theme={theme} />
+            <GridActionButton title="Logout" icon="log-out" onPress={handleLogout} isDestructive={true} theme={theme} />
         </View>
+
+  
 
         {/* Footer Section */}
-        {/* TERMS AND PRIVACY */}
-        <View style={styles.footerGrid}>
+        <View style={[styles.footerContainer, { backgroundColor: theme.card }]}>
+            <View style={styles.footerGrid}>
+              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(STUDENT_PORTAL_URL)}>
+                <Text style={[styles.footerLink, { color: theme.footer }]}>Official Portal</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(FEES_PORTAL_URL)}>
+                <Text style={[styles.footerLink, { color: theme.footer }]}>Fee Payment</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(FEE_STRUCTURE_URL)}>
+                <Text style={[styles.footerLink, { color: theme.footer }]}>Fee Structure</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(SOCIETIES_URL)}>
+                <Text style={[styles.footerLink, { color: theme.footer }]}>Societies</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(HANDBOOK_URL)}>
+                <Text style={[styles.footerLink, { color: theme.footer }]}>Handbook</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.footerItem} onPress={() => handleFeedback()}>
+                <Text style={[styles.footerLink, { color: theme.footer }]}>Report Issue</Text>
+              </TouchableOpacity>
+            </View>
 
-          {/* Row 1 */}
-          <View style={styles.footerRow}>
-            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(TERMS_URL)}>
-              <Text style={[styles.footerLink, { color: theme.footer }]}>Terms & Conditions</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(PRIVACY_URL)}>
-              <Text style={[styles.footerLink, { color: theme.footer }]}>Privacy Policy</Text>
-            </TouchableOpacity>
-          </View>
-            
-          {/* Row 2 */}
-          <View style={styles.footerRow}>
-            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(FEES_PORTAL_URL)}>
-              <Text style={[styles.footerLink, { color: theme.footer }]}>Fee Payment</Text>
-            </TouchableOpacity>
+            <View style={[styles.footerDivider, { backgroundColor: theme.separator }]} />
 
-            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(STUDENT_PORTAL_URL)}>
-              <Text style={[styles.footerLink, { color: theme.footer }]}>Official Portal</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Row 3 */}
-          <View style={styles.footerRow}>
-            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(FEE_STRUCTURE_URL)}>
-              <Text style={[styles.footerLink, { color: theme.footer }]}>Fees Structure</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(SOCIETIES_URL)}>
-              <Text style={[styles.footerLink, { color: theme.footer }]}>Socities</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Row 4 */}
-          <View style={styles.footerRow}>
-            <TouchableOpacity style={styles.footerItem} onPress={() => handleFeedback()}>
-              <Text style={[styles.footerLink, { color: theme.footer }]}>Report Issue?</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(HANDBOOK_URL)}>
-              <Text style={[styles.footerLink, { color: theme.footer }]}>Handbook</Text>
-            </TouchableOpacity>
-          </View>
+            <View style={styles.footerLegal}>
+              <TouchableOpacity onPress={() => Linking.openURL(TERMS_URL)}>
+                <Text style={[styles.footerLegalText, { color: theme.footer }]}>Terms & Conditions</Text>
+              </TouchableOpacity>
+              <Text style={{color: theme.separator}}>•</Text>
+              <TouchableOpacity onPress={() => Linking.openURL(PRIVACY_URL)}>
+                <Text style={[styles.footerLegalText, { color: theme.footer }]}>Privacy Policy</Text>
+              </TouchableOpacity>
+            </View>
         </View>
 
         <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, marginTop:20}}>
@@ -531,41 +339,40 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
 const styles = StyleSheet.create({
     container: { flex: 1 },
     scrollContent: { padding: 20, paddingBottom: 40 },
-    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 25 },
-    topIconContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap:10 },
-    greeting: { fontSize: 16, fontWeight: '500' },
-    username: { fontSize: 26, fontWeight: '800' },
-    themeButton: { width: 45, height: 45, borderRadius: 25, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
-    statsGrid: { marginBottom: 25, gap: 12 },
-    heroCardContainer: { width: '100%' },
-    secondaryStatsRow: { flexDirection: 'row', justifyContent: 'space-between' },
-    card: { borderRadius: 16, padding: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, elevation: 4, minHeight: 110, justifyContent: 'space-between' },
-    cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 },
-    iconContainer: { padding: 8, borderRadius: 10 },
-    cardValue: { fontSize: 22, fontWeight: 'bold' },
-    cardTitle: { fontSize: 14, marginTop: 2 },
-    cardSub: { fontSize: 12, marginTop: 4, fontWeight: '600' },
-    sectionHeader: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
-    actionContainer: { borderRadius: 16, padding: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
-    actionButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: 16, paddingHorizontal: 12, borderRadius: 12 },
-    actionIconCtx: { width: 36, height: 36, borderRadius: 8, alignItems: 'center', justifyContent: 'center', marginRight: 15 },
-    actionText: { flex: 1, fontSize: 15, fontWeight: '600' },
-    separator: { height: 1, marginLeft: 60 },
-    footerText: { textAlign: 'center', color: '#9CA3AF', fontSize: 12 },
-    footerGrid: { marginTop: 20, paddingHorizontal: 10},
-    footerRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-    footerItem: {flex: 1, alignItems: 'center',},
-    footerLink: { fontSize: 13, textAlign: 'center',},
     
-    // Custom Modal Styles
-    modalOverlay: { ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', padding: 5 },
-    modalContent: { width: '90%', borderRadius: 24, padding: 24, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 20, elevation: 15 },
-    modalIconContainer: { width: 70, height: 70, borderRadius: 35, alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
-    modalTitle: { fontSize: 22, fontWeight: '800', marginBottom: 10, textAlign: 'center' },
-    modalText: { fontSize: 14, textAlign: 'center', lineHeight: 22, marginBottom: 25 },
-    modalActions: { width: '100%', alignItems: 'center' },
-    modalButtonPrimary: { flexDirection: 'row', width: '100%', paddingVertical: 14, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
-    modalButtonPrimaryText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
-    modalButtonSecondary: { width: '100%', paddingVertical: 14, borderRadius: 12, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
-    modalButtonSecondaryText: { fontSize: 15, fontWeight: '600' }
+    // Header
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 25 },
+    topIconContainer: { flexDirection: 'row', gap: 12 },
+    greeting: { fontSize: 14, fontWeight: '600', letterSpacing: 0.5, textTransform: 'uppercase' },
+    username: { fontSize: 28, fontWeight: '900', letterSpacing: -0.5 },
+    themeButton: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 3 },
+    
+    // Hero Container (Stacked Layout)
+    heroContainer: { borderRadius: 24, padding: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 12, elevation: 4, marginBottom: 25, borderWidth: 1 },
+    heroMainRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    heroIconBox: { width: 56, height: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginRight: 16 },
+    heroTextContent: { flex: 1, justifyContent: 'center' },
+    heroValue: { fontSize: 36, fontWeight: '900', letterSpacing: -1 },
+    heroLabel: { fontSize: 13, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 2 },
+    warningText: { fontSize: 12, fontWeight: '600', marginTop: 16, fontStyle: 'italic' },
+    heroDivider: { height: 1, width: '100%', marginVertical: 20 },
+    mentorRow: { flexDirection: 'row', alignItems: 'center' },
+    mentorLabel: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 },
+    mentorName: { fontSize: 16, fontWeight: '800' },
+
+    // Grid Actions
+    sectionHeader: { fontSize: 18, fontWeight: '800', marginBottom: 16, letterSpacing: -0.5 },
+    actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' },
+    gridActionCard: { width: '48%', padding: 10, borderRadius: 20, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
+    gridActionIconCtx: { width: 48, height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+    gridActionText: { fontSize: 14, fontWeight: '700', textAlign: 'center' },
+
+    // Footer Block
+    footerContainer: { borderRadius: 24, padding: 20, marginTop: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
+    footerGrid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: 16 },
+    footerItem: { width: '33%', alignItems: 'center' },
+    footerLink: { fontSize: 12, fontWeight: '600', textAlign: 'center' },
+    footerDivider: { height: 1, width: '100%', marginVertical: 16 },
+    footerLegal: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 12 },
+    footerLegalText: { fontSize: 11, fontWeight: '500' },
 });
