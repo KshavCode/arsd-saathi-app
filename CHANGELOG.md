@@ -1,4 +1,4 @@
-# ArsdSaathi v1.3.0 is now available!
+# ArsdSaathi v1.4.0 is now available!
 
 ## 💫 What's New?
 - **Know Your Campus**: Having hard time in finding and exploring the campus? Here's the one stop solution!

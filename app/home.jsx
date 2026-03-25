@@ -1,4 +1,4 @@
-import { PRIVACY_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
+import { FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, PRIVACY_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
@@ -463,12 +463,34 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
             
           {/* Row 2 */}
           <View style={styles.footerRow}>
+            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(FEES_PORTAL_URL)}>
+              <Text style={[styles.footerLink, { color: theme.footer }]}>Fee Payment</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(STUDENT_PORTAL_URL)}>
+              <Text style={[styles.footerLink, { color: theme.footer }]}>Official Portal</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Row 3 */}
+          <View style={styles.footerRow}>
+            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(FEE_STRUCTURE_URL)}>
+              <Text style={[styles.footerLink, { color: theme.footer }]}>Fees Structure</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(SOCIETIES_URL)}>
+              <Text style={[styles.footerLink, { color: theme.footer }]}>Socities</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Row 4 */}
+          <View style={styles.footerRow}>
             <TouchableOpacity style={styles.footerItem} onPress={() => handleFeedback()}>
               <Text style={[styles.footerLink, { color: theme.footer }]}>Report Issue?</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(STUDENT_PORTAL_URL)}>
-              <Text style={[styles.footerLink, { color: theme.footer }]}>Official Portal</Text>
+            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(HANDBOOK_URL)}>
+              <Text style={[styles.footerLink, { color: theme.footer }]}>Handbook</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -34,10 +34,10 @@ const handleFeedback = () => {
 };
 
 export default function Login({ navigation }) {
-    const [roll, setRoll] = useState("");
-    const [fullName, setFullName] = useState("");
-    const [dob, setDob] = useState("");
-    const [consentGiven, setConsentGiven] = useState(false);
+    const [roll, setRoll] = useState("23/38046");
+    const [fullName, setFullName] = useState("Keshav Pal");
+    const [dob, setDob] = useState("02-08-2005");
+    const [consentGiven, setConsentGiven] = useState(true);
     const [isScraping, setIsScraping] = useState(false);
     const [progressMsg, setProgressMsg] = useState("");
 
