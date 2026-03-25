@@ -1,7 +1,7 @@
 import { FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, PRIVACY_URL, SHIVAM_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CheckBox } from 'expo-checkbox';
+import CheckBox from 'expo-checkbox';
 import * as Linking from 'expo-linking';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -71,7 +71,6 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
   const [updateInfo, setUpdateInfo] = useState({ version: '', url: '' });
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [deleteTimetable, setDeleteTimetable] = useState(false);
-  const [confirmLogout, setConfirmLogout] = useState(false);
 
   // --- AUTOMATIC UPDATE CHECK ---
   useEffect(() => {
@@ -250,13 +249,34 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
   };
 
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
       setShowLogoutModal(true)
-      if (confirmLogout) {
-        await AsyncStorage.multiRemove(['USER_CREDENTIALS', 'BASIC_DETAILS', 'ATTENDANCE_DATA', 'FACULTY_DATA', 'MENTOR_DATA', 'LOGIN_TIMESTAMP', 'DATA_TIMESTAMP']);
-        navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
-      }
   }
+
+  // --- THE NEW LOGOUT EXECUTION LOGIC ---
+  const executeLogout = async () => {
+      try {
+          const keysToRemove = [
+              'USER_CREDENTIALS', 
+              'BASIC_DETAILS', 
+              'ATTENDANCE_DATA', 
+              'FACULTY_DATA', 
+              'MENTOR_DATA', 
+              'LOGIN_TIMESTAMP', 
+              'DATA_TIMESTAMP'
+          ];
+          
+          if (deleteTimetable) {
+              keysToRemove.push('TIMETABLE_DATA');
+          }
+
+          await AsyncStorage.multiRemove(keysToRemove);
+          setShowLogoutModal(false);
+          navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+      } catch (error) {
+          console.error("Logout failed:", error);
+      }
+  };
 
   const handleTheme = async () => {
     const nextMode = !isDarkMode;
@@ -332,7 +352,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
         animationType="fade"
         transparent={true}
         visible={showLogoutModal}
-        onRequestClose={() => setShowUpdateModal(false)}
+        onRequestClose={() => setShowLogoutModal(false)}
         statusBarTranslucent={true}
         navigationBarTranslucent={true}
       >
@@ -346,8 +366,8 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
 
             {/* Modal Text */}
             <Text style={[styles.modalTitle, { color: theme.text }]}>Are you sure?</Text>
-            <View style={{flexDirection:'row', gap:10}}>
-              <CheckBox value={confirmLogout} onValueChange={setConfirmLogout}></CheckBox>
+            <View style={{flexDirection:'row', gap:7}}>
+              <CheckBox value={deleteTimetable} onValueChange={setDeleteTimetable} color={deleteTimetable ? theme.primary : undefined}></CheckBox>
               <Text style={[styles.modalText, { color: theme.textSecondary }]}>Delete my Timetable</Text>
             </View>
 
@@ -355,10 +375,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
             <View style={styles.modalActions}>
               <TouchableOpacity
                 style={[styles.modalButtonPrimary, { backgroundColor: theme.error }]}
-                onPress={() => {
-                  setShowLogoutModal(false);
-                  setConfirmLogout(true)
-            }}>
+                onPress={executeLogout}>
                 <Ionicons name="log-out-outline" size={18} color="#FFF" style={{marginRight: 6}} />
                 <Text style={styles.modalButtonPrimaryText}>Logout</Text>
               </TouchableOpacity>
