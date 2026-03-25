@@ -1,3 +1,6 @@
+export const KESHAV_URL = "https://kshavcode.me"
+export const SHIVAM_URL = "https://github.com/SHIVAMY007"
+
 // Terms & Conditions
 export const TERMS_URL = "https://github.com/KshavCode/arsd-saathi-app/blob/master/TERMS.md";
 

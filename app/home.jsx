@@ -1,4 +1,4 @@
-import { FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, PRIVACY_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
+import { FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, PRIVACY_URL, SHIVAM_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
@@ -511,13 +511,13 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
 
         <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, marginTop:20}}>
           <Text style={{ color: theme.secondary, fontSize:15}}>Developed by</Text>
-          <TouchableOpacity onPress={()=>Linking.openURL("https://kshavcode.me")}>
+          <TouchableOpacity onPress={()=>Linking.openURL(KESHAV_URL)}>
               <Text style={{ color: theme.footer, fontWeight: 'bold', fontSize:15 }}>Keshav Pal</Text>
           </TouchableOpacity>
         </View>
         <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4}}>
           <Text style={{ color: theme.secondary, fontSize:13}}>with</Text>
-          <TouchableOpacity onPress={()=>Linking.openURL("https://github.com/SHIVAMY007")}>
+          <TouchableOpacity onPress={()=>Linking.openURL(SHIVAM_URL)}>
               <Text style={{ color: theme.footer, fontWeight: 'bold', fontSize:13 }}>Shivam Yadav</Text>
           </TouchableOpacity>
         </View>
