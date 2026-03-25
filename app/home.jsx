@@ -1,9 +1,10 @@
 import { FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, PRIVACY_URL, SHIVAM_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { CheckBox } from 'expo-checkbox';
 import * as Linking from 'expo-linking';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../constants/themeStyle';
 import ArsdScraper from '../services/ArsdScraper';
@@ -19,7 +20,7 @@ const handleFeedback = () => {
 // --- Sub-Components ---
 
 // New Square Grid Button
-const GridActionButton = ({ title, icon, onPress, theme, isDestructive }) => (
+const GridActionButton = ({ title, icon, onPress, theme, isDestructive, accessibilityHint='' }) => (
   <TouchableOpacity 
     style={[
       styles.gridActionCard, 
@@ -28,6 +29,8 @@ const GridActionButton = ({ title, icon, onPress, theme, isDestructive }) => (
     ]} 
     onPress={onPress}
     activeOpacity={0.8}
+    accessibilityRole="button"
+    accessibilityHint="a button to move to feature's screen"
   >
     <View style={[styles.gridActionIconCtx, { backgroundColor: isDestructive ? 'transparent' : theme.iconBg }]}>
       <Ionicons name={icon} color={isDestructive ? theme.error : theme.primary} size={24} />
@@ -47,6 +50,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
     primary: isDarkMode ? Colors.dark.primary : Colors.light.primary,
     secondary: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
     error: isDarkMode ? Colors.dark.error : Colors.light.error,
+    success: isDarkMode ? Colors.dark.success : Colors.light.success,
     iconBg: isDarkMode ? Colors.light.iconBg : Colors.dark.iconBg,
     iconPlaceholder: isDarkMode ? Colors.light.iconPlaceholder : Colors.dark.iconPlaceholder,
     destructiveBg: isDarkMode ? Colors.light.destructiveBg : Colors.dark.destructiveBg,
@@ -60,15 +64,30 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
   const [savedCredentials, setSavedCredentials] = useState(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSynced, setLastSynced] = useState("Never");
+  const [nextClassInfo, setNextClassInfo] = useState(null);
 
   // Modal States
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [updateInfo, setUpdateInfo] = useState({ version: '', url: '' });
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [deleteTimetable, setDeleteTimetable] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
 
   // --- AUTOMATIC UPDATE CHECK ---
   useEffect(() => {
     const checkForUpdates = async () => {
       try {
+        // const currentVersion = Constants.expoConfig.version;
+        // const response = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest');
+        // if (!response.ok) return;
+        // const data = await response.json();
+        // const latestVersion = data.tag_name.replace('v', '');
+
+        // if (latestVersion !== currentVersion) {
+        //     const downloadUrl = data.assets?.[0]?.browser_download_url || data.html_url;
+        //     setUpdateInfo({ version: latestVersion, url: downloadUrl });
+        //     setShowUpdateModal(true);
+        // }
         console.log("Update Check")
       } catch (error) {
         console.log("Auto-update check failed:", error); 
@@ -76,6 +95,55 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
     };
     checkForUpdates();
   }, []); 
+
+  // --- HELPER: Parse Time String to Minutes for Comparison ---
+  // Converts "10:30 AM" to 630 (minutes since midnight)
+  const parseTimeToMinutes = (timeStr) => {
+      if (!timeStr) return 0;
+      const [time, modifier] = timeStr.split(' ');
+      let [hours, minutes] = time.split(':').map(Number);
+      if (hours === 12) hours = 0;
+      if (modifier === 'PM') hours += 12;
+      return hours * 60 + minutes;
+  };
+
+  // --- HELPER: Get Next Class from Timetable ---
+  const getNextClass = (timetableData) => {
+      if (!timetableData) return null;
+
+      const now = new Date();
+      const currentDay = now.getDay();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+      // 1. Check classes for TODAY
+      let todayClasses = timetableData[currentDay] || [];
+      
+      // Sort by time just in case
+      todayClasses.sort((a, b) => parseTimeToMinutes(a.slot) - parseTimeToMinutes(b.slot));
+
+      for (let i = 0; i < todayClasses.length; i++) {
+          const cls = todayClasses[i];
+          const classTimeMins = parseTimeToMinutes(cls.slot);
+          
+          // If the class hasn't started yet, or just started (within last 15 mins), it's the "next" class
+          if (classTimeMins > currentMinutes - 15) {
+              return { ...cls, dayName: 'Today' };
+          }
+      }
+
+      // 2. If no more classes today, find the first class TOMORROW
+      const tomorrowDay = (currentDay + 1) % 7;
+      let tomorrowClasses = timetableData[tomorrowDay] || [];
+      
+      if (tomorrowClasses.length > 0) {
+          tomorrowClasses.sort((a, b) => parseTimeToMinutes(a.slot) - parseTimeToMinutes(b.slot));
+          return { ...tomorrowClasses[0], dayName: 'Tomorrow' };
+      }
+
+      // 3. If no classes tomorrow, fallback
+      return null;
+  };
+
 
   // --- SAFE DATE FORMATTER ---
   const formatTimestamp = (ts) => {
@@ -97,6 +165,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
         const attRaw = await AsyncStorage.getItem('ATTENDANCE_DATA');
         const mentorRaw = await AsyncStorage.getItem('MENTOR_DATA');
         const timestampRaw = await AsyncStorage.getItem('DATA_TIMESTAMP');
+        const timetableRaw = await AsyncStorage.getItem('TIMETABLE_DATA');
 
         const basic = basicRaw ? JSON.parse(basicRaw) : null;
         const creds = credsRaw ? JSON.parse(credsRaw) : null;
@@ -118,6 +187,13 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
             mentor_name: mentor?.mentor || "N/A"
           });
         }
+
+        if (timetableRaw) {
+            const parsedTimetable = JSON.parse(timetableRaw);
+            const upNext = getNextClass(parsedTimetable);
+            setNextClassInfo(upNext);
+        }
+
       } catch (error) {
         console.error("Error loading Dashboard data:", error);
       }
@@ -173,9 +249,13 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
       console.warn("Background sync failed:", errorMsg); 
   };
 
+
   const handleLogout = async () => {
-      await AsyncStorage.multiRemove(['USER_CREDENTIALS', 'BASIC_DETAILS', 'ATTENDANCE_DATA', 'FACULTY_DATA', 'MENTOR_DATA', 'LOGIN_TIMESTAMP', 'DATA_TIMESTAMP']);
-      navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+      setShowLogoutModal(true)
+      if (confirmLogout) {
+        await AsyncStorage.multiRemove(['USER_CREDENTIALS', 'BASIC_DETAILS', 'ATTENDANCE_DATA', 'FACULTY_DATA', 'MENTOR_DATA', 'LOGIN_TIMESTAMP', 'DATA_TIMESTAMP']);
+        navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+      }
   }
 
   const handleTheme = async () => {
@@ -202,13 +282,99 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
       
+      {/* --- CUSTOM UPDATE MODAL --- */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showUpdateModal}
+        onRequestClose={() => setShowUpdateModal(false)}
+        statusBarTranslucent={true}
+        navigationBarTranslucent={true}
+      >
+        <View style={[styles.modalOverlay, { backgroundColor: theme.modalOverlay }]}>
+          <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
+
+            {/* Modal Header Icon */}
+            <View style={[styles.modalIconContainer, { backgroundColor: theme.iconBg }]}>
+              <Ionicons name="rocket" size={36} color={theme.primary} />
+            </View>
+
+            {/* Modal Text */}
+            <Text style={[styles.modalTitle, { color: theme.text }]}>Update Available!</Text>
+            <Text style={[styles.modalText, { color: theme.textSecondary }]}>
+              Version {updateInfo.version} is ready. We&apos;ve crushed some bugs and added improvements to keep your app running smoothly.
+            </Text>
+
+            {/* Modal Action Buttons */}
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={[styles.modalButtonPrimary, { backgroundColor: theme.primary }]}
+                onPress={() => {
+                  Linking.openURL(updateInfo.url);
+                  setShowUpdateModal(false);
+            }}>
+                <Ionicons name="download-outline" size={18} color="#FFF" style={{marginRight: 6}} />
+                <Text style={styles.modalButtonPrimaryText}>Update Now</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.modalButtonSecondary, { borderColor: theme.separator }]} onPress={() => Linking.openURL("https://github.com/KshavCode/arsd-saathi-app/blob/master/CHANGELOG.md")}>
+                <Text style={[styles.modalButtonSecondaryText, { color: theme.text }]}>What&apos;s New</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={{ marginTop: 15, paddingVertical: 5 }} onPress={() => setShowUpdateModal(false)}>
+                <Text style={{ color: theme.textSecondary, fontSize: 13, fontWeight: '500' }}>Not Now</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* --- CUSTOM LOGOUT MODAL --- */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showLogoutModal}
+        onRequestClose={() => setShowUpdateModal(false)}
+        statusBarTranslucent={true}
+        navigationBarTranslucent={true}
+      >
+        <View style={[styles.modalOverlay, { backgroundColor: theme.modalOverlay }]}>
+          <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
+
+            {/* Modal Header Icon */}
+            <View style={[styles.modalIconContainer, { backgroundColor: theme.error + '20' }]}>
+              <Ionicons name="alert" size={36} color={theme.error} />
+            </View>
+
+            {/* Modal Text */}
+            <Text style={[styles.modalTitle, { color: theme.text }]}>Are you sure?</Text>
+            <View style={{flexDirection:'row', gap:10}}>
+              <CheckBox value={confirmLogout} onValueChange={setConfirmLogout}></CheckBox>
+              <Text style={[styles.modalText, { color: theme.textSecondary }]}>Delete my Timetable</Text>
+            </View>
+
+            {/* Modal Action Buttons */}
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={[styles.modalButtonPrimary, { backgroundColor: theme.error }]}
+                onPress={() => {
+                  setShowLogoutModal(false);
+                  setConfirmLogout(true)
+            }}>
+                <Ionicons name="log-out-outline" size={18} color="#FFF" style={{marginRight: 6}} />
+                <Text style={styles.modalButtonPrimaryText}>Logout</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.modalButtonSecondary, { borderColor: theme.separator }]} onPress={() => setShowLogoutModal(false)}>
+                <Text style={[styles.modalButtonSecondaryText, { color: theme.text }]}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* Background Scraper Component */}
       {isSyncing && savedCredentials && (
           <ArsdScraper credentials={savedCredentials} onProgress={(msg) => console.log("Background Sync:", msg)} onFinish={handleSyncCompletion} onError={handleSyncError} />
       )}
-
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        
         {/* Header Section */}
         <View style={styles.header}>
           <View style={{flex: 1}}>
@@ -252,12 +418,12 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
             </View>
 
             {isAttendanceLow && (
-                <Text style={[styles.warningText, { color: theme.error }]}>* Attendance is below the 67% university requirement.</Text>
+                <Text style={[styles.warningText, { color: theme.error }]}>* Below 67%.</Text>
             )}
 
             <View style={[styles.heroDivider, { backgroundColor: theme.separator }]} />
 
-            {/* Bottom Row: Mentor (Full Width) */}
+            {/* Middle Row: Mentor */}
             <View style={styles.mentorRow}>
                  <Ionicons name="person-outline" size={18} color={theme.primary} />
                  <View style={{marginLeft: 12, flex: 1}}>
@@ -265,6 +431,38 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
                      <Text style={[styles.mentorName, { color: theme.text }]} numberOfLines={2}>{userData.mentor_name}</Text>
                  </View>
             </View>
+
+            {/* --- NEW: Upcoming Class Row --- */}
+            {nextClassInfo && (
+                <>
+                    <View style={[styles.heroDivider, { backgroundColor: theme.separator }]} />
+                    <View style={styles.nextClassRow}>
+                        <View style={styles.nextClassHeader}>
+                            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                <Ionicons name="alarm-outline" size={16} color={theme.success} />
+                                <Text style={[styles.nextClassTitle, { color: theme.success }]}>Up Next ({nextClassInfo.dayName})</Text>
+                            </View>
+                            <Text style={[styles.nextClassTime, { color: theme.primary }]}>{nextClassInfo.slot}</Text>
+                        </View>
+                        
+                        <Text style={[styles.nextClassSubject, { color: theme.text }]} numberOfLines={1}>
+                            {nextClassInfo.subject}
+                        </Text>
+                        
+                        <View style={styles.nextClassMetaRow}>
+                            <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}>
+                                <Ionicons name="location" size={12} color={theme.textSecondary} />
+                                <Text style={[styles.metaText, { color: theme.textSecondary }]}>Room {nextClassInfo.room || 'N/A'}</Text>
+                            </View>
+                            <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}>
+                                <Ionicons name="time" size={12} color={theme.textSecondary} />
+                                <Text style={[styles.metaText, { color: theme.textSecondary }]}>{nextClassInfo.duration} Hr {nextClassInfo.type}</Text>
+                            </View>
+                        </View>
+                    </View>
+                </>
+            )}
+
         </View>
 
         {/* Grid Navigation */}
@@ -276,7 +474,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
             <GridActionButton title="Timetable" icon="calendar" onPress={() => navigation.navigate("TimeTable")} theme={theme} />
             <GridActionButton title="Campus Map" icon="compass" onPress={() => navigation.navigate("Campus")} theme={theme} />
             <GridActionButton title="Faculty" icon="people" onPress={() => navigation.navigate("Faculty")} theme={theme} />
-            <GridActionButton title="Logout" icon="log-out" onPress={handleLogout} isDestructive={true} theme={theme} />
+            <GridActionButton title="Logout" icon="log-out" onPress={handleLogout} isDestructive={true} theme={theme}/>
         </View>
 
   
@@ -339,6 +537,18 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
 const styles = StyleSheet.create({
     container: { flex: 1 },
     scrollContent: { padding: 20, paddingBottom: 40 },
+
+    // Modal 
+    modalOverlay: { ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', padding: 5 },
+    modalContent: { width: '90%', borderRadius: 24, padding: 24, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 20, elevation: 15 },
+    modalIconContainer: { width: 70, height: 70, borderRadius: 35, alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
+    modalTitle: { fontSize: 22, fontWeight: '800', marginBottom: 10, textAlign: 'center' },
+    modalText: { fontSize: 14, textAlign: 'center', lineHeight: 22, marginBottom: 25 },
+    modalActions: { width: '100%', alignItems: 'center' },
+    modalButtonPrimary: { flexDirection: 'row', width: '100%', paddingVertical: 14, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+    modalButtonPrimaryText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
+    modalButtonSecondary: { width: '100%', paddingVertical: 14, borderRadius: 12, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+    modalButtonSecondaryText: { fontSize: 15, fontWeight: '600' },
     
     // Header
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 25 },
@@ -356,9 +566,20 @@ const styles = StyleSheet.create({
     heroLabel: { fontSize: 13, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 2 },
     warningText: { fontSize: 12, fontWeight: '600', marginTop: 16, fontStyle: 'italic' },
     heroDivider: { height: 1, width: '100%', marginVertical: 20 },
+    
     mentorRow: { flexDirection: 'row', alignItems: 'center' },
     mentorLabel: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 },
     mentorName: { fontSize: 16, fontWeight: '800' },
+
+    // Next Class Section
+    nextClassRow: { marginTop: 4 },
+    nextClassHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+    nextClassTitle: { fontSize: 13, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5, marginLeft: 6 },
+    nextClassTime: { fontSize: 13, fontWeight: '800' },
+    nextClassSubject: { fontSize: 18, fontWeight: '800', marginBottom: 12 },
+    nextClassMetaRow: { flexDirection: 'row', gap: 10 },
+    metaBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, gap: 5 },
+    metaText: { fontSize: 12, fontWeight: '700' },
 
     // Grid Actions
     sectionHeader: { fontSize: 18, fontWeight: '800', marginBottom: 16, letterSpacing: -0.5 },
