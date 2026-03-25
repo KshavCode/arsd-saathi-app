@@ -1,18 +1,17 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'; // <--- Import this
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createStackNavigator } from '@react-navigation/stack';
 import * as NavigationBar from 'expo-navigation-bar';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Platform, View } from 'react-native'; // <--- Added View and ActivityIndicator
+import { ActivityIndicator, Platform, View } from 'react-native';
 import { Colors } from '../constants/themeStyle';
 
 import Attendance from './attendance';
 import Details from './basic';
+import Campus from './campus';
 import Faculty from './faculty';
 import Home from './home';
 import Login from './index';
 import Predictor from './predictor';
-
-import Campus from './campus';
 import Timetable from './timetable';
 
 const Stack = createStackNavigator();
@@ -129,11 +128,11 @@ export default function Stack1() {
             </Stack.Screen>
 
             <Stack.Screen name="TimeTable">
-                {(props) => <Campus {...props} {...themeProps} />}
+                {(props) => <Timetable {...props} {...themeProps} />}
             </Stack.Screen>
 
             <Stack.Screen name="Campus">
-                {(props) => <Timetable {...props} {...themeProps} />}
+                {(props) => <Campus {...props} {...themeProps} />}
             </Stack.Screen>
         </Stack.Navigator>
     );
