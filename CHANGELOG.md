@@ -4,7 +4,11 @@
 - **Know Your Campus**: Having hard time in finding and exploring the campus? Here's the one stop solution!
 - **Additional Links**: More helpful links are added in order to help students
 - **Timetable**: Now students can set the timetable for all other students with the same subject! Using this, the app notifies you 10 minutes before your class starts.
+- **Attendance Predictor**: Shows the marks which can be obtained with predicted attendance percentage.
+- **Accessibility**: Every functional element of the app is supporting accessibility, essential for the differently abled students.
 
+## 🔍 Fixes
+- **Attendance Predictor**: Now the number of classes are limited. Earlier, a student could exploit the 'plus' button to estimate for 200 classes. Now, limit has been set to 50.
 
 
 ## 📦 How to Install
