@@ -12,6 +12,9 @@ import Home from './home';
 import Login from './index';
 import Predictor from './predictor';
 
+import Campus from './campus';
+import Timetable from './timetable';
+
 const Stack = createStackNavigator();
 
 // Time Constants (in milliseconds)
@@ -123,6 +126,14 @@ export default function Stack1() {
 
             <Stack.Screen name="Predictor">
                 {(props) => <Predictor {...props} {...themeProps} />}
+            </Stack.Screen>
+
+            <Stack.Screen name="TimeTable">
+                {(props) => <Campus {...props} {...themeProps} />}
+            </Stack.Screen>
+
+            <Stack.Screen name="Campus">
+                {(props) => <Timetable {...props} {...themeProps} />}
             </Stack.Screen>
         </Stack.Navigator>
     );

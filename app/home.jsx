@@ -79,7 +79,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
   const [userData, setUserData] = useState({ name: "Loading...", rollNo: "...", enrollmentNumber: "..." });
   const [savedCredentials, setSavedCredentials] = useState(null);
   const [isSyncing, setIsSyncing] = useState(false);
-  const [lastSynced, setLastSynced] = useState("Never"); // <-- New State for Timestamp
+  const [lastSynced, setLastSynced] = useState("Never");
 
   // Modal States
   const [showUpdateModal, setShowUpdateModal] = useState(false);
@@ -418,6 +418,20 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
             title="Attendance Predictor" 
             icon="color-wand" 
             onPress={() => navigation.navigate("Predictor")} 
+            theme={theme}
+          />
+          <View style={[styles.separator, { backgroundColor: theme.separator }]} />
+          <ActionButton 
+            title="Time-Table" 
+            icon="calendar" 
+            onPress={() => navigation.navigate("TimeTable")} 
+            theme={theme}
+          />
+          <View style={[styles.separator, { backgroundColor: theme.separator }]} />
+          <ActionButton 
+            title="Know Your Campus" 
+            icon="compass" 
+            onPress={() => navigation.navigate("Campus")} 
             theme={theme}
           />
           <View style={[styles.separator, { backgroundColor: theme.separator }]} />
