@@ -268,7 +268,7 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
                 <View style={styles.controlsGrid}>
                     {/* Attend Control */}
                     <View style={[styles.controlBox, { backgroundColor: theme.card }]}>
-                        <Text style={[styles.controlLabel, { color: theme.success }]}>Classes to Attend</Text>
+                        <Text style={[styles.controlLabel, { color: theme.success }]}>To Attend</Text>
                         <View style={styles.counterRow}>
                             <TouchableOpacity style={[styles.counterBtn, { backgroundColor: theme.background }]} onPress={() => setAttendCount(Math.max(0, attendCount - 1))}>
                                 <Ionicons name="remove" size={25} color={theme.primary} />
@@ -282,13 +282,14 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
 
                     {/* Miss Control */}
                     <View style={[styles.controlBox, { backgroundColor: theme.card }]}>
-                        <Text style={[styles.controlLabel, { color: theme.error }]}>Classes to Miss</Text>
+                        <Text style={[styles.controlLabel, { color: theme.error }]}>To Miss</Text>
                         <View style={styles.counterRow}>
                             <TouchableOpacity style={[styles.counterBtn, { backgroundColor: theme.background }]} onPress={() => setBunkCount(Math.max(0, bunkCount - 1))}>
                                 <Ionicons name="remove" size={25} color={theme.primary} />
                             </TouchableOpacity>
                             <Text style={[styles.counterVal, { color: theme.text }]}>{bunkCount}</Text>
-                            <TouchableOpacity style={[styles.counterBtn, { backgroundColor: theme.background }]} onPress={() => setBunkCount(bunkCount + 1)}>
+                            <TouchableOpacity style={[styles.counterBtn, { backgroundColor: theme.background }]} onPress={
+                                () => {if (bunkCount < 15) setBunkCount(Math.max(0, bunkCount + 1))}}>
                                 <Ionicons name="add" size={25} color={theme.primary} />
                             </TouchableOpacity>
                         </View>
@@ -297,7 +298,7 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
 
                 {/* Result Card */}
                 <View style={[styles.resultCard, { backgroundColor: prediction.isLow ? theme.error : theme.primary }]}>
-                    <Text style={styles.resultLabel}>Predicted Attendance</Text>
+                    <Text style={styles.resultLabel}>Predicted Attendance (x)</Text>
                     <Text style={styles.resultVal}>{prediction.newPercentage}%</Text>
                     <Text style={styles.resultSub}>
                         ({currentStats.attended + attendCount} / {currentStats.held + attendCount + bunkCount} classes)
@@ -306,9 +307,20 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
             </>
         )}
 
+        {/* MARKS INFO */}
+        <View style={{padding:10}}>
+          <Text style={[styles.infoText, { color: theme.textSecondary, fontSize:18, marginTop:10, textAlign:'justify' }]}>MARKS REWARD SYSTEM</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]}>x &lt; 85% = 6 marks</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]}>85% &lt; x &lt; 80%  = 4.8 marks</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]}>75% &lt; x &lt; 80%  = 3.6 marks</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]}>70% &lt; x &lt; 75%  = 2.4 marks</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]}>67% &lt; x &lt; 70%  = 1.2 marks</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]}>x &lt; 67% = 0 marks</Text>
+        </View>
+
         {/* INSTRUCTIONS */}
         <View style={{padding:10}}>
-          <Text style={[styles.infoText, { color: theme.textSecondary, fontSize:18, marginTop:20 }]}>HOW IT WORKS?</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary, fontSize:18, marginTop:10 }]}>HOW IT WORKS?</Text>
           <Text style={[styles.infoText, { color: theme.textSecondary, fontWeight:"normal", textAlign:'justify'}]}>1. The formula assumes that the next class would be of one hour and will be held with 100% surity.</Text>
           <Text style={[styles.infoText, { color: theme.textSecondary, fontWeight:"normal", textAlign:'justify'}]}>2. It uses the student&apos;s current attendance status for each month and sums them up.</Text>
           <Text style={[styles.infoText, { color: theme.textSecondary, fontWeight:"normal", textAlign:'justify'}]}>3. The minimum requirement of 67% of attendance for each subject is used to compare and print the final result.</Text>
@@ -361,7 +373,7 @@ const styles = StyleSheet.create({
     // Controls
     controlsGrid: { flexDirection: 'row', justifyContent: 'space-between', gap: 15, marginBottom: 25 },
     controlBox: { flex: 1, borderRadius: 16, padding: 15, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 3 },
-    controlLabel: { fontSize: 13, fontWeight: '700', marginBottom: 15 },
+    controlLabel: { fontSize: 15, fontWeight: '700', marginBottom: 15 },
     counterRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 15 },
     counterBtn: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
     counterVal: { fontSize: 22, fontWeight: 'bold', width: 30, textAlign: 'center' },
