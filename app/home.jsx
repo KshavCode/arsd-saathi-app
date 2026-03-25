@@ -332,14 +332,16 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
                 onPress={() => {
                   Linking.openURL(updateInfo.url);
                   setShowUpdateModal(false);
-            }}>
+                }}
+                accessibilityHint="Downloads the updated application by redirecting to thet download link" accessibilityRole='button'
+              >
                 <Ionicons name="download-outline" size={18} color="#FFF" style={{marginRight: 6}} />
                 <Text style={styles.modalButtonPrimaryText}>Update Now</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.modalButtonSecondary, { borderColor: theme.separator }]} onPress={() => Linking.openURL("https://github.com/KshavCode/arsd-saathi-app/blob/master/CHANGELOG.md")}>
+              <TouchableOpacity style={[styles.modalButtonSecondary, { borderColor: theme.separator }]} onPress={() => Linking.openURL("https://github.com/KshavCode/arsd-saathi-app/blob/master/CHANGELOG.md")} accessibilityHint="Redirects to the new updates information of the application" accessibilityRole='button'>
                 <Text style={[styles.modalButtonSecondaryText, { color: theme.text }]}>What&apos;s New</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={{ marginTop: 15, paddingVertical: 5 }} onPress={() => setShowUpdateModal(false)}>
+              <TouchableOpacity style={{ marginTop: 15, paddingVertical: 5 }} onPress={() => setShowUpdateModal(false)} accessibilityHint="Remind again when you open the app" accessibilityRole='button'>
                 <Text style={{ color: theme.textSecondary, fontSize: 13, fontWeight: '500' }}>Not Now</Text>
               </TouchableOpacity>
             </View>
@@ -366,8 +368,8 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
 
             {/* Modal Text */}
             <Text style={[styles.modalTitle, { color: theme.text }]}>Are you sure?</Text>
-            <View style={{flexDirection:'row', gap:7}}>
-              <CheckBox value={deleteTimetable} onValueChange={setDeleteTimetable} color={deleteTimetable ? theme.primary : undefined}></CheckBox>
+            <View style={{flexDirection:'row', gap:7}} accessible={true}>
+              <CheckBox value={deleteTimetable} onValueChange={setDeleteTimetable} color={deleteTimetable ? theme.primary : undefined} accessibilityHint="To remove your saved timetable details permanently from storage" accessibilityRole='checkbox' accessibilityState={{checked:deleteTimetable}}/>
               <Text style={[styles.modalText, { color: theme.textSecondary }]}>Delete my Timetable</Text>
             </View>
 
@@ -375,11 +377,11 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
             <View style={styles.modalActions}>
               <TouchableOpacity
                 style={[styles.modalButtonPrimary, { backgroundColor: theme.error }]}
-                onPress={executeLogout}>
+                onPress={executeLogout} accessibilityHint="Confirmation on logout" accessibilityRole='button'>
                 <Ionicons name="log-out-outline" size={18} color="#FFF" style={{marginRight: 6}} />
                 <Text style={styles.modalButtonPrimaryText}>Logout</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.modalButtonSecondary, { borderColor: theme.separator }]} onPress={() => setShowLogoutModal(false)}>
+              <TouchableOpacity style={[styles.modalButtonSecondary, { borderColor: theme.separator }]} onPress={() => setShowLogoutModal(false)} accessibilityHint="Cancel the action and return to homepage" accessibilityRole='button'>
                 <Text style={[styles.modalButtonSecondaryText, { color: theme.text }]}>Cancel</Text>
               </TouchableOpacity>
             </View>
@@ -393,11 +395,11 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
       )}
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Header Section */}
-        <View style={styles.header}>
+        <View style={styles.header} accessible={true}>
           <View style={{flex: 1}}>
             <Text style={[styles.greeting, { color: theme.textSecondary }]}>Welcome back,</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <TouchableOpacity onPress={()=>navigation.navigate("Details")} style={{flexDirection: 'row', gap:5, justifyContent:'center', alignItems:'center'}}>
+              <TouchableOpacity onPress={()=>navigation.navigate("Details")} style={{flexDirection: 'row', gap:5, justifyContent:'center', alignItems:'center'}} accessibilityRole='button' accessibilityHint='Displays your personal details stored in the college database'>
                 <Text style={[styles.username, { color: theme.primary }]} numberOfLines={1}>{userData.name}</Text>
                 <Ionicons name="information-circle" size={15} color={theme.secondary} />
               </TouchableOpacity>
@@ -420,7 +422,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
         </View>
 
         {/* Hero Dashboard Container (Stacked Layout) */}
-        <View style={[styles.heroContainer, { backgroundColor: theme.card, borderColor: theme.borderColor }]}>
+        <View style={[styles.heroContainer, { backgroundColor: theme.card, borderColor: theme.borderColor }]} accessible={true}>
             
             {/* Top Row: Attendance */}
             <View style={styles.heroMainRow}>
@@ -479,12 +481,10 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
                     </View>
                 </>
             )}
-
         </View>
 
         {/* Grid Navigation */}
         <Text style={[styles.sectionHeader, { color: theme.text, marginTop: 10 }]}>Quick Actions</Text>
-        
         <View style={styles.actionsGrid}>
             <GridActionButton title="Attendance" icon="bar-chart" onPress={() => navigation.navigate("Attendance")} theme={theme} />
             <GridActionButton title="Predictor" icon="color-wand" onPress={() => navigation.navigate("Predictor")} theme={theme} />
@@ -494,27 +494,25 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
             <GridActionButton title="Logout" icon="log-out" onPress={handleLogout} isDestructive={true} theme={theme}/>
         </View>
 
-  
-
         {/* Footer Section */}
         <View style={[styles.footerContainer, { backgroundColor: theme.card }]}>
             <View style={styles.footerGrid}>
-              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(STUDENT_PORTAL_URL)}>
+              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(STUDENT_PORTAL_URL)} accessibilityRole="link" accessibilityHint="Redirects to the college's official student portal">
                 <Text style={[styles.footerLink, { color: theme.footer }]}>Official Portal</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(FEES_PORTAL_URL)}>
+              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(FEES_PORTAL_URL)} accessibilityRole="link" accessibilityHint="Link for fee payment portal">
                 <Text style={[styles.footerLink, { color: theme.footer }]}>Fee Payment</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(FEE_STRUCTURE_URL)}>
+              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(FEE_STRUCTURE_URL)} accessibilityRole="link" accessibilityHint="Redirects to the fee structure on the college website">
                 <Text style={[styles.footerLink, { color: theme.footer }]}>Fee Structure</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(SOCIETIES_URL)}>
+              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(SOCIETIES_URL)} accessibilityRole="link" accessibilityHint="a link to check the available socities or clubs found in the college">
                 <Text style={[styles.footerLink, { color: theme.footer }]}>Societies</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(HANDBOOK_URL)}>
+              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(HANDBOOK_URL)} accessibilityRole="link" accessibilityHint="Download the student helper handbook provided by the college.">
                 <Text style={[styles.footerLink, { color: theme.footer }]}>Handbook</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.footerItem} onPress={() => handleFeedback()}>
+              <TouchableOpacity style={styles.footerItem} onPress={() => handleFeedback()} accessibilityRole="link" accessibilityHint="Email the developer's through this link.">
                 <Text style={[styles.footerLink, { color: theme.footer }]}>Report Issue</Text>
               </TouchableOpacity>
             </View>
@@ -522,11 +520,11 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
             <View style={[styles.footerDivider, { backgroundColor: theme.separator }]} />
 
             <View style={styles.footerLegal}>
-              <TouchableOpacity onPress={() => Linking.openURL(TERMS_URL)}>
+              <TouchableOpacity onPress={() => Linking.openURL(TERMS_URL)} accessibilityRole="link" accessibilityHint="Opens the link to Terms and Conditions">
                 <Text style={[styles.footerLegalText, { color: theme.footer }]}>Terms & Conditions</Text>
               </TouchableOpacity>
               <Text style={{color: theme.separator}}>•</Text>
-              <TouchableOpacity onPress={() => Linking.openURL(PRIVACY_URL)}>
+              <TouchableOpacity onPress={() => Linking.openURL(PRIVACY_URL)} accessibilityRole="link" accessibilityHint="Opens the link to the privacy policy of this application">
                 <Text style={[styles.footerLegalText, { color: theme.footer }]}>Privacy Policy</Text>
               </TouchableOpacity>
             </View>
@@ -534,13 +532,13 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
 
         <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, marginTop:20}}>
           <Text style={{ color: theme.secondary, fontSize:15}}>Developed by</Text>
-          <TouchableOpacity onPress={()=>Linking.openURL(KESHAV_URL)}>
+          <TouchableOpacity onPress={()=>Linking.openURL(KESHAV_URL)} accessibilityRole="link" accessibilityHint="Redirects to the main developer's website">
               <Text style={{ color: theme.footer, fontWeight: 'bold', fontSize:15 }}>Keshav Pal</Text>
           </TouchableOpacity>
         </View>
         <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4}}>
           <Text style={{ color: theme.secondary, fontSize:13}}>with</Text>
-          <TouchableOpacity onPress={()=>Linking.openURL(SHIVAM_URL)}>
+          <TouchableOpacity onPress={()=>Linking.openURL(SHIVAM_URL)} accessibilityRole="link" accessibilityHint="Redirects to the developer's github profile">
               <Text style={{ color: theme.footer, fontWeight: 'bold', fontSize:13 }}>Shivam Yadav</Text>
           </TouchableOpacity>
         </View>
