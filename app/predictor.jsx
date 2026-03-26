@@ -150,7 +150,7 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
   if (loading) {
       return (
           <SafeAreaView style={[styles.container, { backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center' }]}>
-              <ActivityIndicator size="large" color={theme.primary} />
+              <ActivityIndicator size="large" color={theme.primary} accessibilityLabel="Loading predictor data" />
           </SafeAreaView>
       );
   }
@@ -160,13 +160,29 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
       <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
 
       {/* Header */}
-      <View style={styles.headerRow}>
-        <TouchableOpacity style={styles.backButton} onPress={() => (navigation?.goBack ? navigation.goBack() : console.log('Back'))}>
-            <Ionicons name="caret-back" size={27} color={theme.primary} />
+      <View style={styles.headerRow} accessible={false}>
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => (navigation?.goBack ? navigation.goBack() : console.log('Back'))}
+          accessibilityRole="button"
+          accessibilityLabel="Go Back"
+          accessibilityHint="Returns to the previous screen"
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+            <Ionicons name="caret-back" size={27} color={theme.primary} importantForAccessibility="no" />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: theme.text }]}>PREDICTOR</Text>
-        <TouchableOpacity style={[styles.themeButton, { backgroundColor: theme.card }]} onPress={() => setIsDarkMode(!isDarkMode)}>
-             <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} />
+        
+        <Text style={[styles.headerTitle, { color: theme.text }]} accessibilityRole="header">PREDICTOR</Text>
+        
+        <TouchableOpacity 
+          style={[styles.themeButton, { backgroundColor: theme.card }]} 
+          onPress={() => setIsDarkMode(!isDarkMode)}
+          accessibilityRole="button"
+          accessibilityLabel="Toggle Theme"
+          accessibilityHint={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+             <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} importantForAccessibility="no" />
         </TouchableOpacity>
       </View>
 
@@ -179,17 +195,26 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
                 style={[styles.dropdown, { backgroundColor: theme.card, borderColor: theme.borderColor }]} 
                 onPress={() => setShowDropdown(true)}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel={`Selected subject: ${selectedSubject || "None"}. Open subject list.`}
+                accessibilityHint="Opens a modal to select a different subject"
             >
-                <Text style={[styles.dropdownText, { color: theme.text }]} numberOfLines={1}>
+                <Text style={[styles.dropdownText, { color: theme.text }]} numberOfLines={1} importantForAccessibility="no">
                     {selectedSubject || "No Subjects Found"}
                 </Text>
-                <Ionicons name={'chevron-down'} size={18} color={theme.textSecondary} />
+                <Ionicons name={'chevron-down'} size={18} color={theme.textSecondary} importantForAccessibility="no" />
             </TouchableOpacity>
 
-            <Modal visible={showDropdown} transparent={true} animationType="fade" onRequestClose={() => setShowDropdown(false)}>
-                <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPressOut={() => setShowDropdown(false)}>
+            <Modal 
+              visible={showDropdown} 
+              transparent={true} 
+              animationType="fade" 
+              onRequestClose={() => setShowDropdown(false)}
+              accessibilityViewIsModal={true}
+            >
+                <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPressOut={() => setShowDropdown(false)} accessibilityLabel="Close subject list" accessibilityRole="button">
                     <View style={[styles.modalListContainer, { backgroundColor: theme.card, borderColor: theme.borderColor }]}>
-                        <Text style={[styles.modalListHeader, { color: theme.text, backgroundColor: theme.iconBg, borderBottomWidth: .5, borderColor:theme.primary}]}>Select a Subject</Text>
+                        <Text style={[styles.modalListHeader, { color: theme.text, backgroundColor: theme.iconBg, borderBottomWidth: .5, borderColor:theme.primary}]} accessibilityRole="header">Select a Subject</Text>
                         <ScrollView style={{maxHeight: 350}} showsVerticalScrollIndicator={true}>
                             {subjects.map((sub) => (
                                 <TouchableOpacity 
@@ -198,11 +223,15 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
                                     onPress={() => {
                                         setSelectedSubject(sub);
                                         setShowDropdown(false);
-                                    }}>
-                                    <Text style={[styles.dropdownItemText, { color: theme.textSecondary }, selectedSubject === sub && { color: theme.primary, fontWeight: '700' }]}>
+                                    }}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={sub}
+                                    accessibilityState={{ selected: selectedSubject === sub }}
+                                >
+                                    <Text style={[styles.dropdownItemText, { color: theme.textSecondary }, selectedSubject === sub && { color: theme.primary, fontWeight: '700' }]} importantForAccessibility="no">
                                         {sub}
                                     </Text>
-                                    {selectedSubject === sub && <Ionicons name="checkmark" size={16} color={theme.primary} />}
+                                    {selectedSubject === sub && <Ionicons name="checkmark" size={16} color={theme.primary} importantForAccessibility="no" />}
                                 </TouchableOpacity>
                             ))}
                         </ScrollView>
@@ -212,26 +241,32 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
         </View>
 
         {/* Toggle Theory/Practical */}
-        <View style={[styles.toggleContainer, { backgroundColor: theme.primary }]}>
+        <View style={[styles.toggleContainer, { backgroundColor: theme.primary }]} accessible={true} accessibilityRole="radiogroup">
             <TouchableOpacity 
                 style={[styles.toggleButton, selectedType === 'theory' && [styles.toggleActive, { backgroundColor: theme.background }]]}
                 onPress={() => setSelectedType('theory')}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: selectedType === 'theory' }}
+                accessibilityLabel="Theory Classes"
             >
-                <Text style={[styles.toggleText, { color: selectedType === 'theory' ? theme.text : theme.background }]}>Theory</Text>
+                <Text style={[styles.toggleText, { color: selectedType === 'theory' ? theme.text : theme.background }]} importantForAccessibility="no">Theory</Text>
             </TouchableOpacity>
             <TouchableOpacity 
                 style={[styles.toggleButton, selectedType === 'practical' && [styles.toggleActive, { backgroundColor: theme.background }]]}
                 onPress={() => setSelectedType('practical')}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: selectedType === 'practical' }}
+                accessibilityLabel="Practical Classes"
             >
-                <Text style={[styles.toggleText, { color: selectedType === 'practical' ? theme.text : theme.background }]}>Practical</Text>
+                <Text style={[styles.toggleText, { color: selectedType === 'practical' ? theme.text : theme.background }]} importantForAccessibility="no">Practical</Text>
             </TouchableOpacity>
         </View>
 
         {currentStats.held === 0 ? (
-            <View style={[styles.emptyCard, { backgroundColor: theme.card }]}>
-                <Ionicons name="information-circle-outline" size={32} color={theme.textSecondary} style={{marginBottom: 10}}/>
-                <Text style={{color: theme.text, textAlign: 'center', fontWeight: '500'}}>No data found for this selection.</Text>
-                <Text style={{color: theme.textSecondary, textAlign: 'center', fontSize: 13, marginTop: 5}}>Try switching between Theory and Practical.</Text>
+            <View style={[styles.emptyCard, { backgroundColor: theme.card }]} accessible={true} accessibilityLabel="No data found for this selection. Try switching between Theory and Practical.">
+                <Ionicons name="information-circle-outline" size={32} color={theme.textSecondary} style={{marginBottom: 10}} importantForAccessibility="no" />
+                <Text style={{color: theme.text, textAlign: 'center', fontWeight: '500'}} importantForAccessibility="no">No data found for this selection.</Text>
+                <Text style={{color: theme.textSecondary, textAlign: 'center', fontSize: 13, marginTop: 5}} importantForAccessibility="no">Try switching between Theory and Practical.</Text>
             </View>
         ) : (
             <>
@@ -240,13 +275,17 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
                 <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>2. CURRENT STATS</Text>
 
                 {/* Step 3: Calculation */}
-                <View style={[styles.statusCard, { backgroundColor: theme.card }]}>
-                    <View style={styles.statusCol}>
+                <View 
+                  style={[styles.statusCard, { backgroundColor: theme.card }]} 
+                  accessible={true} 
+                  accessibilityLabel={`Current Stats: You have attended ${currentStats.attended} out of ${currentStats.held} classes. Current total is ${currentStats.percentage} percent.`}
+                >
+                    <View style={styles.statusCol} importantForAccessibility="no-hide-descendants">
                         <Text style={[styles.statusVal, { color: theme.text }]}>{currentStats.attended}/{currentStats.held}</Text>
                         <Text style={[styles.statusLabel, { color: theme.textSecondary }]}>Classes Attended</Text>
                     </View>
                     <View style={[styles.statusDivider, { backgroundColor: theme.borderColor }]} />
-                    <View style={styles.statusCol}>
+                    <View style={styles.statusCol} importantForAccessibility="no-hide-descendants">
                         <Text style={[styles.statusVal, { color: Number(currentStats.percentage) < 67 ? theme.error : theme.success }]}>
                             {currentStats.percentage}%
                         </Text>
@@ -255,12 +294,12 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
                 </View>
 
                 {/* Smart Insight */}
-                <View style={[{backgroundColor: theme.card}]}>
-                  <View style={[styles.insightBox]}>
+                <View style={[{backgroundColor: theme.card}]} accessible={true} accessibilityLabel={`Insight: ${prediction.insight}. Reminder: A 2-hour class gives you 2 points worth of attendance!`}>
+                  <View style={[styles.insightBox]} importantForAccessibility="no-hide-descendants">
                       <Ionicons name="bulb-outline" size={25} color={prediction.insightColor} />
                       <Text style={[styles.insightText, { color: prediction.insightColor }]}>{prediction.insight}</Text>
                   </View>
-                  <Text style={ { color: theme.primary, padding:16, paddingTop:0, fontSize:13 }}>Reminder: A 2-hour class gives you 2 points worth of attendance!</Text>
+                  <Text style={ { color: theme.primary, padding:16, paddingTop:0, fontSize:13 }} importantForAccessibility="no">Reminder: A 2-hour class gives you 2 points worth of attendance!</Text>
                 </View>
 
                 <Text style={[styles.sectionLabel, { color: theme.textSecondary, marginTop: 20 }]}>3. Plan Future Classes</Text>
@@ -268,39 +307,66 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
                 <View style={styles.controlsGrid}>
                     {/* Attend Control */}
                     <View style={[styles.controlBox, { backgroundColor: theme.card }]}>
-                        <Text style={[styles.controlLabel, { color: theme.success }]}>To Attend</Text>
+                        <Text style={[styles.controlLabel, { color: theme.success }]} accessibilityRole="header">To Attend</Text>
                         <View style={styles.counterRow}>
-                            <TouchableOpacity style={[styles.counterBtn, { backgroundColor: theme.background }]} onPress={() => setAttendCount(Math.max(0, attendCount - 1))}>
-                                <Ionicons name="remove" size={25} color={theme.primary} />
+                            <TouchableOpacity 
+                              style={[styles.counterBtn, { backgroundColor: theme.background }]} 
+                              onPress={() => setAttendCount(Math.max(0, attendCount - 1))}
+                              accessibilityRole="button"
+                              accessibilityLabel="Decrease classes to attend"
+                              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                            >
+                                <Ionicons name="remove" size={25} color={theme.primary} importantForAccessibility="no" />
                             </TouchableOpacity>
-                            <Text style={[styles.counterVal, { color: theme.text }]}>{attendCount}</Text>
-                            <TouchableOpacity style={[styles.counterBtn, { backgroundColor: theme.background }]} onPress={() => setAttendCount(attendCount + 1)}>
-                                <Ionicons name="add" size={25} color={theme.primary} />
+                            <Text style={[styles.counterVal, { color: theme.text }]} accessibilityLabel={`${attendCount} classes planned to attend`}>{attendCount}</Text>
+                            <TouchableOpacity 
+                              style={[styles.counterBtn, { backgroundColor: theme.background }]} 
+                              onPress={() => setAttendCount(attendCount + 1)}
+                              accessibilityRole="button"
+                              accessibilityLabel="Increase classes to attend"
+                              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                            >
+                                <Ionicons name="add" size={25} color={theme.primary} importantForAccessibility="no" />
                             </TouchableOpacity>
                         </View>
                     </View>
 
                     {/* Miss Control */}
                     <View style={[styles.controlBox, { backgroundColor: theme.card }]}>
-                        <Text style={[styles.controlLabel, { color: theme.error }]}>To Miss</Text>
+                        <Text style={[styles.controlLabel, { color: theme.error }]} accessibilityRole="header">To Miss</Text>
                         <View style={styles.counterRow}>
-                            <TouchableOpacity style={[styles.counterBtn, { backgroundColor: theme.background }]} onPress={() => setBunkCount(Math.max(0, bunkCount - 1))}>
-                                <Ionicons name="remove" size={25} color={theme.primary} />
+                            <TouchableOpacity 
+                              style={[styles.counterBtn, { backgroundColor: theme.background }]} 
+                              onPress={() => setBunkCount(Math.max(0, bunkCount - 1))}
+                              accessibilityRole="button"
+                              accessibilityLabel="Decrease classes to miss"
+                              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                            >
+                                <Ionicons name="remove" size={25} color={theme.primary} importantForAccessibility="no" />
                             </TouchableOpacity>
-                            <Text style={[styles.counterVal, { color: theme.text }]}>{bunkCount}</Text>
-                            <TouchableOpacity style={[styles.counterBtn, { backgroundColor: theme.background }]} onPress={
-                                () => {if (bunkCount < 15) setBunkCount(Math.max(0, bunkCount + 1))}}>
-                                <Ionicons name="add" size={25} color={theme.primary} />
+                            <Text style={[styles.counterVal, { color: theme.text }]} accessibilityLabel={`${bunkCount} classes planned to miss`}>{bunkCount}</Text>
+                            <TouchableOpacity 
+                              style={[styles.counterBtn, { backgroundColor: theme.background }]} 
+                              onPress={() => {if (bunkCount < 15) setBunkCount(Math.max(0, bunkCount + 1))}}
+                              accessibilityRole="button"
+                              accessibilityLabel="Increase classes to miss"
+                              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                            >
+                                <Ionicons name="add" size={25} color={theme.primary} importantForAccessibility="no" />
                             </TouchableOpacity>
                         </View>
                     </View>
                 </View>
 
                 {/* Result Card */}
-                <View style={[styles.resultCard, { backgroundColor: prediction.isLow ? theme.error : theme.primary }]}>
-                    <Text style={styles.resultLabel}>Predicted Attendance (x)</Text>
-                    <Text style={styles.resultVal}>{prediction.newPercentage}%</Text>
-                    <Text style={styles.resultSub}>
+                <View 
+                  style={[styles.resultCard, { backgroundColor: prediction.isLow ? theme.error : theme.primary }]}
+                  accessible={true}
+                  accessibilityLabel={`Predicted Attendance: ${prediction.newPercentage} percent. Based on ${currentStats.attended + attendCount} out of ${currentStats.held + attendCount + bunkCount} total classes.`}
+                >
+                    <Text style={styles.resultLabel} importantForAccessibility="no">Predicted Attendance (x)</Text>
+                    <Text style={styles.resultVal} importantForAccessibility="no">{prediction.newPercentage}%</Text>
+                    <Text style={styles.resultSub} importantForAccessibility="no">
                         ({currentStats.attended + attendCount} / {currentStats.held + attendCount + bunkCount} classes)
                     </Text>
                 </View>
@@ -309,17 +375,20 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
 
         {/* MARKS INFO */}
         <View style={{padding:10}}>
-          <Text style={[styles.infoText, { color: theme.textSecondary, fontSize:18, marginTop:10, textAlign:'justify' }]}>MARKS REWARD SYSTEM</Text>
-          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]}>x &lt; 85% = 6 marks</Text>
-          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]}>85% &lt; x &lt; 80%  = 4.8 marks</Text>
-          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]}>75% &lt; x &lt; 80%  = 3.6 marks</Text>
-          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]}>70% &lt; x &lt; 75%  = 2.4 marks</Text>
-          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]}>67% &lt; x &lt; 70%  = 1.2 marks</Text>
-          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]}>x &lt; 67% = 0 marks</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary, fontSize:18, marginTop:10, textAlign:'justify' }]} accessibilityRole="header" accessibilityLabel="Marks Reward System">MARKS REWARD SYSTEM</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]} accessibilityLabel="85 and above % of attendance gives you 6 marks">x &lt; 85% = 6 marks</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]} accessibilityLabel="Between 80 and 85% of attendance gives you 4.8 marks">85% &lt; x &lt; 80%  = 4.8 marks</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]} accessibilityLabel="Between 75 and 80% of attendance gives you 3.6 marks">75% &lt; x &lt; 80%  = 3.6 marks</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]} accessibilityLabel="Between 70 and 75% of attendance gives you 2.4 marks">70% &lt; x &lt; 75%  = 2.4 marks</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]} accessibilityLabel="Between 67 and 70% of attendance gives you 1.2 marks">67% &lt; x &lt; 70%  = 1.2 marks</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify', fontStyle:'italic'}]} accessibilityLabel="No marks are awarded to attendance below 67%">No marks are awarded to attendance below 67%</Text>
         </View>
 
         {/* INSTRUCTIONS */}
-        <View style={{padding:10}}>
+        <View 
+            style={{padding:10}} 
+            accessible={true}
+        >
           <Text style={[styles.infoText, { color: theme.textSecondary, fontSize:18, marginTop:10 }]}>HOW IT WORKS?</Text>
           <Text style={[styles.infoText, { color: theme.textSecondary, fontWeight:"normal", textAlign:'justify'}]}>1. The formula assumes that the next class would be of one hour and will be held with 100% surity.</Text>
           <Text style={[styles.infoText, { color: theme.textSecondary, fontWeight:"normal", textAlign:'justify'}]}>2. It uses the student&apos;s current attendance status for each month and sums them up.</Text>

@@ -4,7 +4,9 @@ import { decode, encode } from 'base-64';
 import * as Clipboard from 'expo-clipboard';
 import React, { useEffect, useState } from 'react';
 import {
-    Alert, KeyboardAvoidingView, Modal, Platform,
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView, Modal, Platform,
     ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -208,15 +210,24 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
 
       if (existingClass) {
         const facultyName = getFacultyName(existingClass.subject);
+        
+        // Construct comprehensive accessibility string
+        const endTimeStr = getEndTime(time, existingClass.duration);
+        const classTypeFull = existingClass.type === 'TH' ? 'Theory' : 'Practical';
+        const a11yLabel = `${time} to ${endTimeStr}. ${existingClass.subject}. Room ${existingClass.room || 'Not assigned'}. ${classTypeFull} class. ${facultyName ? `Taught by ${facultyName}` : ''}. ${isEditMode ? 'Double tap to edit this slot.' : ''}`;
+
         return (
           <TouchableOpacity 
             key={time} 
             style={[styles.classCard, { backgroundColor: theme.card, borderLeftColor: theme.primary, borderLeftWidth: 4 }]}
             onPress={() => isEditMode && handleOpenSlot(time, existingClass)}
             disabled={!isEditMode}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={a11yLabel}
           >
-            <View style={styles.classContent}>
-              <Text style={[styles.classTime, { color: theme.primary }]}>{time} - {getEndTime(time, existingClass.duration)}</Text>
+            <View style={styles.classContent} importantForAccessibility="no-hide-descendants">
+              <Text style={[styles.classTime, { color: theme.primary }]}>{time} - {endTimeStr}</Text>
               <Text style={[styles.classSubject, { color: theme.text }]}>{existingClass.subject}</Text>
               <View style={styles.classMetaRow}>
                 <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}><Ionicons name="location" size={12} color={theme.textSecondary} /><Text style={[styles.metaText, { color: theme.textSecondary }]}>Room {existingClass.room || 'N/A'}</Text></View>
@@ -230,7 +241,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                 )}
               </View>
             </View>
-            {isEditMode && <Ionicons name="pencil" size={20} color={theme.textSecondary} />}
+            {isEditMode && <Ionicons name="pencil" size={20} color={theme.textSecondary} importantForAccessibility="no" />}
           </TouchableOpacity>
         );
       } else {
@@ -241,9 +252,12 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
             key={time} 
             style={[styles.emptySlot, { borderColor: theme.borderColor, backgroundColor: 'transparent' }]}
             onPress={() => handleOpenSlot(time)}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={`Empty slot at ${time}. Double tap to add a class.`}
           >
-            <Text style={{ color: theme.textSecondary, fontWeight: '600' }}>{time}</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+            <Text style={{ color: theme.textSecondary, fontWeight: '600' }} importantForAccessibility="no">{time}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }} importantForAccessibility="no-hide-descendants">
                 <Ionicons name="add-circle-outline" size={20} color={theme.primary} />
                 <Text style={{ color: theme.primary, fontWeight: '600' }}>Add Class</Text>
             </View>
@@ -253,27 +267,54 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
     });
   };
 
-  if (loading) return <View />;
+  if (loading) {
+    return (
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center' }]}>
+            <ActivityIndicator size="large" color={theme.primary} accessibilityLabel="Loading timetable" />
+        </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
         <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
         
         {/* Header */}
-        <View style={styles.headerRow}>
-            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                <Ionicons name="caret-back" size={27} color={theme.primary} />
+        <View style={styles.headerRow} accessible={false}>
+            <TouchableOpacity 
+              style={styles.backButton} 
+              onPress={() => navigation.goBack()}
+              accessibilityRole="button"
+              accessibilityLabel="Go Back"
+              accessibilityHint="Returns to the previous screen"
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+                <Ionicons name="caret-back" size={27} color={theme.primary} importantForAccessibility="no" />
             </TouchableOpacity>
-            <Text style={[styles.headerTitle, { color: theme.text }]}>TIMETABLE</Text>
-            <TouchableOpacity style={[styles.themeButton, { backgroundColor: theme.card }]} onPress={() => setIsDarkMode(!isDarkMode)}>
-                <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} />
+            <Text style={[styles.headerTitle, { color: theme.text }]} accessibilityRole="header" accessibilityLabel='Timetable'>TIMETABLE</Text>
+            <TouchableOpacity 
+              style={[styles.themeButton, { backgroundColor: theme.card }]} 
+              onPress={() => setIsDarkMode(!isDarkMode)}
+              accessibilityRole="button"
+              accessibilityLabel="Toggle Theme"
+              accessibilityHint={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+                <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} importantForAccessibility="no" />
             </TouchableOpacity>
         </View>
         
-        <View style={[styles.tabContainer, { backgroundColor: theme.card, marginTop: 10 }]}>
+        <View style={[styles.tabContainer, { backgroundColor: theme.card, marginTop: 10 }]} accessible={true} accessibilityRole="tablist">
             {['view', 'edit', 'share'].map((tab) => (
-                <TouchableOpacity key={tab} style={[styles.tabButton, activeTab === tab && [styles.tabActive, { backgroundColor: theme.primary }]]} onPress={() => setActiveTab(tab)}>
-                    <Text style={[styles.tabText, { color: activeTab === tab ? '#FFF' : theme.textSecondary }]}>{tab.charAt(0).toUpperCase() + tab.slice(1)}</Text>
+                <TouchableOpacity 
+                  key={tab} 
+                  style={[styles.tabButton, activeTab === tab && [styles.tabActive, { backgroundColor: theme.primary }]]} 
+                  onPress={() => setActiveTab(tab)}
+                  accessibilityRole="tab"
+                  accessibilityState={{ selected: activeTab === tab }}
+                  accessibilityLabel={`${tab} tab`}
+                >
+                    <Text style={[styles.tabText, { color: activeTab === tab ? '#FFF' : theme.textSecondary }]} importantForAccessibility="no">{tab.charAt(0).toUpperCase() + tab.slice(1)}</Text>
                 </TouchableOpacity>
             ))}
         </View>
@@ -282,8 +323,15 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
             <View style={styles.daySelector}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 10 }}>
                 {DAYS.map((day, index) => (
-                <TouchableOpacity key={day} style={[styles.dayPill, { backgroundColor: theme.card }, selectedDay === index && { backgroundColor: theme.primary }]} onPress={() => setSelectedDay(index)}>
-                    <Text style={[styles.dayText, { color: selectedDay === index ? '#FFF' : theme.textSecondary }]}>{day}</Text>
+                <TouchableOpacity 
+                  key={day} 
+                  style={[styles.dayPill, { backgroundColor: theme.card }, selectedDay === index && { backgroundColor: theme.primary }]} 
+                  onPress={() => setSelectedDay(index)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: selectedDay === index }}
+                  accessibilityLabel={`${day}day`}
+                >
+                    <Text style={[styles.dayText, { color: selectedDay === index ? '#FFF' : theme.textSecondary }]} importantForAccessibility="no">{day}</Text>
                 </TouchableOpacity>
                 ))}
             </ScrollView>
@@ -294,7 +342,9 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
             {activeTab === 'view' && (
                 <View>
                     {timetable[selectedDay]?.length === 0 ? (
-                         <View style={[styles.emptyCard, { backgroundColor: theme.card }]}><Text style={{ color: theme.text, fontSize: 16, fontWeight: '700' }}>No Classes Today!</Text></View>
+                         <View style={[styles.emptyCard, { backgroundColor: theme.card }]} accessible={true} accessibilityLabel="No Classes Today!">
+                           <Text style={{ color: theme.text, fontSize: 16, fontWeight: '700' }} importantForAccessibility="no">No Classes Today!</Text>
+                         </View>
                     ) : (
                         renderSlots(false)
                     )}
@@ -303,7 +353,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
 
             {activeTab === 'edit' && (
                 <View>
-                    <Text style={[styles.sectionLabel, { color: theme.textSecondary, marginBottom: 16 }]}>Tap a slot to assign a subject</Text>
+                    <Text style={[styles.sectionLabel, { color: theme.textSecondary, marginBottom: 16 }]} accessibilityRole="header" accessibilityLabel="Tap the slot to assign subject">Tap a slot to assign a subject</Text>
                     {renderSlots(true)}
                 </View>
             )}
@@ -311,25 +361,31 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
             {/* === RESTORED SHARE TAB === */}
             {activeTab === 'share' && (
                 <View style={{ gap: 20, height:700 }}>
-                    <View style={[styles.formCard, { backgroundColor: theme.card }]}>
-                        <View style={[styles.iconCircle, { backgroundColor: theme.iconBg }]}>
+                    <View style={[styles.formCard, { backgroundColor: theme.card }]} accessible={true} accessibilityRole="header">
+                        <View style={[styles.iconCircle, { backgroundColor: theme.iconBg }]} importantForAccessibility="no-hide-descendants">
                             <Ionicons name="share-social-outline" size={32} color={theme.primary} />
                         </View>
-                        <Text style={[styles.shareTitle, { color: theme.text }]}>Export Timetable</Text>
-                        <Text style={[styles.shareDesc, { color: theme.textSecondary }]}>Copy your timetable as a code to share with other ArsdSaathi Users.</Text>
+                        <Text style={[styles.shareTitle, { color: theme.text }]} importantForAccessibility="no">Export Timetable</Text>
+                        <Text style={[styles.shareDesc, { color: theme.textSecondary }]} importantForAccessibility="no">Copy your timetable as a code to share with other ArsdSaathi Users.</Text>
                         
-                        <TouchableOpacity style={[styles.primaryButton, { backgroundColor: theme.primary, width: '100%' }]} onPress={handleExport}>
-                            <Ionicons name="copy-outline" size={18} color="#FFF" style={{ marginRight: 8 }} />
-                            <Text style={styles.primaryButtonText}>Copy Code</Text>
+                        <TouchableOpacity 
+                          style={[styles.primaryButton, { backgroundColor: theme.primary, width: '100%' }]} 
+                          onPress={handleExport}
+                          accessibilityRole="button"
+                          accessibilityLabel="Copy Export Code"
+                          accessibilityHint="Copies your current timetable data to the clipboard"
+                        >
+                            <Ionicons name="copy-outline" size={18} color="#FFF" style={{ marginRight: 8 }} importantForAccessibility="no" />
+                            <Text style={styles.primaryButtonText} importantForAccessibility="no">Copy Code</Text>
                         </TouchableOpacity>
                     </View>
 
-                    <View style={[styles.formCard, { backgroundColor: theme.card }]}>
-                        <View style={[styles.iconCircle, { backgroundColor: theme.iconBg }]}>
+                    <View style={[styles.formCard, { backgroundColor: theme.card }]} accessible={true} accessibilityRole="header">
+                        <View style={[styles.iconCircle, { backgroundColor: theme.iconBg }]} importantForAccessibility="no-hide-descendants">
                             <Ionicons name="download-outline" size={32} color={theme.primary} />
                         </View>
-                        <Text style={[styles.shareTitle, { color: theme.text }]}>Import Timetable</Text>
-                        <Text style={[styles.shareDesc, { color: theme.textSecondary }]}>Paste a valid timetable code to save it.</Text>
+                        <Text style={[styles.shareTitle, { color: theme.text }]} importantForAccessibility="no">Import Timetable</Text>
+                        <Text style={[styles.shareDesc, { color: theme.textSecondary }]} importantForAccessibility="no">Paste a valid timetable code to save it.</Text>
                         
                         <TextInput
                             style={[styles.inputField, { borderColor: theme.primary, color: theme.text, width: '100%', marginBottom: 16 }]}
@@ -337,29 +393,40 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                             placeholderTextColor={theme.textSecondary}
                             value={importCode}
                             onChangeText={setImportCode}
+                            accessibilityLabel="Import Code Input"
+                            accessibilityHint="Paste the timetable code here"
                         />
                         
                         <TouchableOpacity 
                             style={[styles.primaryButton, { backgroundColor: importCode ? theme.primary : theme.borderColor, width: '100%' }]} 
                             onPress={handleImport}
                             disabled={!importCode}
+                            accessibilityRole="button"
+                            accessibilityState={{ disabled: !importCode }}
+                            accessibilityLabel="Import Data"
+                            accessibilityHint="Overwrites your current timetable with the pasted code data"
                         >
-                            <Text style={[styles.primaryButtonText, !importCode && { color: theme.textSecondary }]}>Import Data</Text>
+                            <Text style={[styles.primaryButtonText, !importCode && { color: theme.textSecondary }]} importantForAccessibility="no">Import Data</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
             )}
         </ScrollView>
 
-        <Modal visible={showSubjectModal} transparent animationType="slide">
+        <Modal visible={showSubjectModal} transparent animationType="slide" accessibilityViewIsModal={true}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-                <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1}>
-                <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
+                <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} accessibilityLabel="Close modal" accessibilityRole="button" onPress={() => setShowSubjectModal(false)}>
+                <View style={[styles.modalContent, { backgroundColor: theme.card }]} accessible={false}>
                     
-                    <View style={styles.modalHeaderRow}>
-                        <Text style={[styles.modalHeader, { color: theme.text }]}>Slot: {editingSlot}</Text>
-                        <TouchableOpacity onPress={() => setShowSubjectModal(false)}>
-                            <Ionicons name="close-circle" size={28} color={theme.textSecondary} />
+                    <View style={styles.modalHeaderRow} accessible={true}>
+                        <Text style={[styles.modalHeader, { color: theme.text }]} accessibilityRole="header" accessibilityLabel={`Editing slot of ${editingSlot}`}>Slot: {editingSlot}</Text>
+                        <TouchableOpacity 
+                          onPress={() => setShowSubjectModal(false)}
+                          accessibilityRole="button"
+                          accessibilityLabel="Close editor"
+                          hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+                        >
+                            <Ionicons name="close-circle" size={28} color={theme.textSecondary} importantForAccessibility="no" />
                         </TouchableOpacity>
                     </View>
 
@@ -367,18 +434,31 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                         
                         {/* 1. Subject Picker */}
                         <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>Select Subject</Text>
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }} accessible={false}>
                             {availableSubjects.map((sub) => (
                                 <TouchableOpacity 
                                     key={sub} 
                                     style={[styles.chip, { backgroundColor: formSubject === sub ? theme.primary : theme.iconBg }]}
                                     onPress={() => setFormSubject(sub)}
+                                    accessibilityRole="button"
+                                    accessibilityState={{ selected: formSubject === sub }}
+                                    accessibilityLabel={sub}
                                 >
-                                    <Text style={{ color: formSubject === sub ? '#FFF' : theme.text, fontWeight: '600' }}>{sub}</Text>
+                                    <Text style={{ color: formSubject === sub ? '#FFF' : theme.text, fontWeight: '600' }} importantForAccessibility="no">{sub}</Text>
                                 </TouchableOpacity>
                             ))}
                         </ScrollView>
                         
+                        {/* Manual Subject Fallback */}
+                        <TextInput
+                            style={[styles.inputField, { borderColor: formSubject && !availableSubjects.includes(formSubject) ? theme.primary : theme.borderColor, color: theme.text, marginBottom: 20 }]}
+                            placeholder="Or type custom subject..."
+                            placeholderTextColor={theme.textSecondary}
+                            value={availableSubjects.includes(formSubject) ? '' : formSubject}
+                            onChangeText={setFormSubject}
+                            accessibilityLabel="Custom Subject Input"
+                            accessibilityHint="Type a subject name if it's not in the horizontal list above"
+                        />
 
                         {/* 2. Room, Type, & Duration Row */}
                         <View style={styles.pillContainerRow}>
@@ -392,6 +472,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                                     placeholderTextColor={theme.textSecondary}
                                     value={formRoom}
                                     onChangeText={setFormRoom}
+                                    accessibilityLabel="Room Number"
                                 />
                             </View>
 
@@ -399,13 +480,16 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                             <View>
                                 <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>Type</Text>
                                 <TouchableOpacity 
-                                    style={[styles.compactPill, { borderColor: theme.borderColor, backgroundColor: theme.primary + '20' }]}
+                                    style={[styles.compactPill, { borderColor: theme.borderColor, backgroundColor: formType === 'TH' ? theme.iconBg : theme.primary + '20' }]}
                                     onPress={() => setFormType(formType === 'TH' ? 'PR' : 'TH')}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={`Class type is ${formType === 'TH' ? 'Theory' : 'Practical'}`}
+                                    accessibilityHint="Double tap to toggle between Theory and Practical"
                                 >
-                                    <Text style={[styles.compactPillText, { color: theme.primary }]}>
+                                    <Text style={[styles.compactPillText, { color: formType === 'TH' ? theme.textSecondary : theme.primary }]} importantForAccessibility="no">
                                         {formType}
                                     </Text>
-                                    <Ionicons name="swap-horizontal" size={14} color={formType === 'TH' ? theme.textSecondary : theme.primary} style={{marginLeft: 4}}/>
+                                    <Ionicons name="swap-horizontal" size={14} color={formType === 'TH' ? theme.textSecondary : theme.primary} style={{marginLeft: 4}} importantForAccessibility="no" />
                                 </TouchableOpacity>
                             </View>
 
@@ -425,22 +509,36 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                                             setFormDuration(1);
                                         }
                                     }}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={`Duration is ${formDuration} hour${formDuration > 1 ? 's' : ''}`}
+                                    accessibilityHint="Double tap to toggle between 1 hour and 2 hours"
                                 >
-                                    <Text style={[styles.compactPillText, { color: theme.textSecondary }]}>{formDuration}h</Text>
-                                    <Ionicons name="swap-horizontal" size={14} color={theme.textSecondary} style={{marginLeft: 4}}/>
+                                    <Text style={[styles.compactPillText, { color: theme.textSecondary }]} importantForAccessibility="no">{formDuration}h</Text>
+                                    <Ionicons name="swap-horizontal" size={14} color={theme.textSecondary} style={{marginLeft: 4}} importantForAccessibility="no" />
                                 </TouchableOpacity>
                             </View>
 
                         </View>
 
                         {/* Save & Delete Buttons */}
-                        <TouchableOpacity style={[styles.primaryButton, { backgroundColor: theme.primary, marginBottom: 12 }]} onPress={handleSaveClass}>
-                            <Text style={styles.primaryButtonText}>Save Class to {editingSlot}</Text>
+                        <TouchableOpacity 
+                          style={[styles.primaryButton, { backgroundColor: theme.primary, marginBottom: 12 }]} 
+                          onPress={handleSaveClass}
+                          accessibilityRole="button"
+                          accessibilityLabel={`Save Class to ${editingSlot}`}
+                        >
+                            <Text style={styles.primaryButtonText} importantForAccessibility="no">Save Class to {editingSlot}</Text>
                         </TouchableOpacity>
 
                         {timetable[selectedDay]?.find(c => c.slot === editingSlot) && (
-                             <TouchableOpacity style={[styles.primaryButton, { backgroundColor: theme.destructiveBg }]} onPress={() => handleDeleteClass(editingSlot)}>
-                                 <Text style={[styles.primaryButtonText, { color: theme.error }]}>Clear Slot</Text>
+                             <TouchableOpacity 
+                               style={[styles.primaryButton, { backgroundColor: theme.destructiveBg }]} 
+                               onPress={() => handleDeleteClass(editingSlot)}
+                               accessibilityRole="button"
+                               accessibilityLabel="Clear Slot"
+                               accessibilityHint="Removes this class from the timetable"
+                             >
+                                 <Text style={[styles.primaryButtonText, { color: theme.error }]} importantForAccessibility="no">Clear Slot</Text>
                              </TouchableOpacity>
                         )}
                         <View style={{height: 30}}/>
