@@ -162,7 +162,7 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
       {/* Header */}
       <View style={styles.headerRow}>
         <TouchableOpacity style={styles.backButton} onPress={() => (navigation?.goBack ? navigation.goBack() : console.log('Back'))}>
-            <Ionicons name="caret-back" size={27} color={theme.text} />
+            <Ionicons name="caret-back" size={27} color={theme.primary} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: theme.text }]}>PREDICTOR</Text>
         <TouchableOpacity style={[styles.themeButton, { backgroundColor: theme.card }]} onPress={() => setIsDarkMode(!isDarkMode)}>

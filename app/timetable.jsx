@@ -262,7 +262,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
         {/* Header */}
         <View style={styles.headerRow}>
             <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                <Ionicons name="caret-back" size={27} color={theme.text} />
+                <Ionicons name="caret-back" size={27} color={theme.primary} />
             </TouchableOpacity>
             <Text style={[styles.headerTitle, { color: theme.text }]}>TIMETABLE</Text>
             <TouchableOpacity style={[styles.themeButton, { backgroundColor: theme.card }]} onPress={() => setIsDarkMode(!isDarkMode)}>

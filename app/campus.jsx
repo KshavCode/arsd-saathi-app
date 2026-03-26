@@ -88,7 +88,7 @@ export default function DetailsTab({ navigation, isDarkMode, setIsDarkMode }) {
                 <TouchableOpacity
                     style={styles.backButton}
                     onPress={() => (navigation?.goBack ? navigation.goBack() : console.log('Back'))}>
-                    <Ionicons name="caret-back" size={24} color={theme.text} />
+                    <Ionicons name="caret-back" size={24} color={theme.primary} />
                 </TouchableOpacity>
                 
                 <Text style={[styles.headerTitle, { color: theme.text }]}>PERSONAL DETAILS</Text>

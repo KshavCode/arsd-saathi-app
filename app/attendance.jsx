@@ -21,7 +21,7 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
         headerText: isDarkMode ? '#F8FAFC' : '#64748B',
     };
 
-    const [fullData, setFullData] = useState(null); // The raw JSON
+    const [fullData, setFullData] = useState(null); 
     const [loading, setLoading] = useState(true);
     
     // Selection State
@@ -80,7 +80,7 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
         const theoryRows = fullData.theory?.[selectedSubject] || [];
         const tutorialRows = fullData.practical?.[selectedSubject] || [];
 
-        // We use an object to merge Theory and Tutorial data by Month
+        // Merge Theory and Tutorial data by Month
         const mergedByMonth = {};
 
         const addRowsToMap = (rows, type) => {
@@ -127,7 +127,7 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
                 <TouchableOpacity
                     style={styles.backButton}
                     onPress={() => (navigation?.goBack ? navigation.goBack() : console.log('Back'))}>
-                    <Ionicons name="caret-back" size={27} color={theme.text} />
+                    <Ionicons name="caret-back" size={27} color={theme.primary} />
                 </TouchableOpacity>
 
                 <Text style={[styles.headerTitle, { color: theme.text }]}>ATTENDANCE</Text>
