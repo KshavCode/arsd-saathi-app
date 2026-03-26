@@ -4,10 +4,10 @@ import { decode, encode } from 'base-64';
 import * as Clipboard from 'expo-clipboard';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView, Modal, Platform,
-    ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView, Modal, Platform,
+  ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../constants/themeStyle';
@@ -448,17 +448,6 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                                 </TouchableOpacity>
                             ))}
                         </ScrollView>
-                        
-                        {/* Manual Subject Fallback */}
-                        <TextInput
-                            style={[styles.inputField, { borderColor: formSubject && !availableSubjects.includes(formSubject) ? theme.primary : theme.borderColor, color: theme.text, marginBottom: 20 }]}
-                            placeholder="Or type custom subject..."
-                            placeholderTextColor={theme.textSecondary}
-                            value={availableSubjects.includes(formSubject) ? '' : formSubject}
-                            onChangeText={setFormSubject}
-                            accessibilityLabel="Custom Subject Input"
-                            accessibilityHint="Type a subject name if it's not in the horizontal list above"
-                        />
 
                         {/* 2. Room, Type, & Duration Row */}
                         <View style={styles.pillContainerRow}>
