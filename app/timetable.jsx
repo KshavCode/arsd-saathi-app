@@ -173,7 +173,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
     try {
       const code = encode(JSON.stringify(timetable));
       await Clipboard.setStringAsync(code);
-      Alert.alert("Copied!", "Your timetable code has been copied to the clipboard. Share it with your friends!");
+      Alert.alert("Copied!", "Your timetable code has been copied to the clipboard.");
     } catch (error) {
       Alert.alert("Error", "Could not copy to clipboard.");
     }
@@ -358,7 +358,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                 </View>
             )}
 
-            {/* === RESTORED SHARE TAB === */}
+            {/* === SHARE TAB === */}
             {activeTab === 'share' && (
                 <View style={{ gap: 20, height:700 }}>
                     <View style={[styles.formCard, { backgroundColor: theme.card }]} accessible={true} accessibilityRole="header">
@@ -434,7 +434,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                         
                         {/* 1. Subject Picker */}
                         <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>Select Subject</Text>
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }} accessible={false}>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={true} style={{ marginBottom: 20 }} accessible={false}>
                             {availableSubjects.map((sub) => (
                                 <TouchableOpacity 
                                     key={sub} 
@@ -468,17 +468,17 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                             {/* Type Pill (Switch) */}
                             <View>
                                 <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>Type</Text>
-                                <TouchableOpacity 
-                                    style={[styles.compactPill, { borderColor: theme.borderColor, backgroundColor: formType === 'TH' ? theme.iconBg : theme.primary + '20' }]}
+                                <TouchableOpacity
+                                    style={[styles.compactPill, { borderColor: theme.borderColor, backgroundColor: theme.primary + '20' }]}
                                     onPress={() => setFormType(formType === 'TH' ? 'PR' : 'TH')}
                                     accessibilityRole="button"
                                     accessibilityLabel={`Class type is ${formType === 'TH' ? 'Theory' : 'Practical'}`}
                                     accessibilityHint="Double tap to toggle between Theory and Practical"
                                 >
-                                    <Text style={[styles.compactPillText, { color: formType === 'TH' ? theme.textSecondary : theme.primary }]} importantForAccessibility="no">
+                                    <Text style={[styles.compactPillText, { color: theme.primary }]}>
                                         {formType}
                                     </Text>
-                                    <Ionicons name="swap-horizontal" size={14} color={formType === 'TH' ? theme.textSecondary : theme.primary} style={{marginLeft: 4}} importantForAccessibility="no" />
+                                    <Ionicons name="swap-horizontal" size={14} color={formType === 'TH' ? theme.textSecondary : theme.primary} style={{marginLeft: 4}}/>
                                 </TouchableOpacity>
                             </View>
 
@@ -499,7 +499,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                                         }
                                     }}
                                     accessibilityRole="button"
-                                    accessibilityLabel={`Duration is ${formDuration} hour${formDuration > 1 ? 's' : ''}`}
+                                    accessibilityLabel={`Duration is set to ${formDuration} hour${formDuration > 1 ? 's' : ''}`}
                                     accessibilityHint="Double tap to toggle between 1 hour and 2 hours"
                                 >
                                     <Text style={[styles.compactPillText, { color: theme.textSecondary }]} importantForAccessibility="no">{formDuration}h</Text>
