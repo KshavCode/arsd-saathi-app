@@ -1,68 +1,70 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // 👈 Added AsyncStorage
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../constants/themeStyle';
 
-
 // Component for a Single Faculty Member Card
-const FacultyCard = ({ data, theme }) => (
-    <View style={[styles.facultyCard, { backgroundColor: theme.card, borderColor: theme.borderColor }]}>
-        
-        {/* --- Header: Teacher Identity --- */}
-        <View style={styles.cardHeader}>
-            <View style={styles.headerTextCtx}>
-                <Text style={[styles.teacherName, { color: theme.text }]}>
-                    {data["Faculty Name"] || data.FAC_NAME || "Unknown Faculty"}
-                </Text>
-                <Text style={[styles.teacherCode, { color: theme.textSecondary }]}>
-                    {data.FAC_CODE ? `Faculty Code: ${data.FAC_CODE}` : "No Code"}
-                </Text>
-            </View>
-        </View>
-        
-        <View style={[styles.divider, { backgroundColor: theme.borderColor }]} />
-        
-        {/* --- Body: Subject Details --- */}
-        <View style={styles.cardBody}>
-            <Text style={[styles.label, { color: theme.textSecondary }]}>Teaching Subject</Text>
-            <Text style={[styles.paperName, { color: theme.text }]}>
-                {data["Paper Name"] || data.PAPER_NAME || data.Subject || "N/A"}
-            </Text>
+const FacultyCard = ({ data, theme }) => {
+    const facultyName = data.FAC_NAME || "Unknown Faculty";
+    const paperName = data.PAPER_NAME || data.Subject || "N/A";
+    const section = data["PAPER SECTION"] || data["Section"];
 
-            <View style={styles.badgesRow}>
-                {/* Paper ID Badge */}
-                <View style={[styles.badge, { backgroundColor: theme.iconBg }]}>
-                    <Ionicons name="document-text-outline" size={12} color={theme.primary} style={{ marginRight: 4 }} />
-                    <Text style={[styles.badgeText, { color: theme.primary }]}>
-                        {data["Paper Code"] || data.PAPER_ID || "No ID"}
+    // Create a cohesive string for the screen reader
+    const accessibilityString = `Faculty Name: ${facultyName}. Teaching Subject: ${paperName}. ${section ? `Section: ${section}.` : 'N/A'}`;
+
+    return (
+        <View 
+            style={[styles.facultyCard, { backgroundColor: theme.card, borderColor: theme.borderColor }]}
+            accessible={true}
+            accessibilityRole="text"
+            accessibilityLabel={accessibilityString}
+        >
+            {/* --- Header: Teacher Identity --- */}
+            <View style={styles.cardHeader} importantForAccessibility="no-hide-descendants">
+                <View style={styles.headerTextCtx}>
+                    <Text style={[styles.teacherName, { color: theme.text }]}>
+                        {facultyName}
+                    </Text>
+                    <Text style={[styles.teacherCode, { color: theme.textSecondary }]}>
+                        {data.FAC_CODE ? `Faculty Code: ${data.FAC_CODE}` : "No Code"}
                     </Text>
                 </View>
+            </View>
+            
+            <View style={[styles.divider, { backgroundColor: theme.borderColor }]} />
+            
+            {/* Subject Details --- */}
+            <View style={styles.cardBody} importantForAccessibility="no-hide-descendants">
+                <Text style={[styles.label, { color: theme.textSecondary }]}>Teaching Subject</Text>
+                <Text style={[styles.paperName, { color: theme.text }]}>
+                    {paperName}
+                </Text>
 
-                {/* Section Badge */}
-                {(data["PAPER SECTION"] || data["Section"]) && (
+                <View style={styles.badgesRow}>
+                    {/* Paper ID Badge */}
                     <View style={[styles.badge, { backgroundColor: theme.iconBg }]}>
-                        <Ionicons name="people-outline" size={12} color={theme.primary} style={{ marginRight: 4 }} />
+                        <Ionicons name="document-text-outline" size={12} color={theme.primary} style={{ marginRight: 4 }} />
                         <Text style={[styles.badgeText, { color: theme.primary }]}>
-                            Sec: {data["PAPER SECTION"] || data["Section"]}
+                            {data["Paper Code"] || data.PAPER_ID || "No ID"}
                         </Text>
                     </View>
-                )}
+
+                    {/* Section Badge */}
+                    {section && (
+                        <View style={[styles.badge, { backgroundColor: theme.iconBg }]}>
+                            <Ionicons name="people-outline" size={12} color={theme.primary} style={{ marginRight: 4 }} />
+                            <Text style={[styles.badgeText, { color: theme.primary }]}>
+                                Sec: {section}
+                            </Text>
+                        </View>
+                    )}
+                </View>
             </View>
         </View>
-
-        {/* --- Footer: Contact (Optional) --- */}
-        {data.Email && (
-            <View style={[styles.cardFooter, { borderTopColor: theme.borderColor }]}>
-                <Ionicons name="mail-outline" size={16} color={theme.textSecondary} />
-                <Text style={[styles.emailText, { color: theme.textSecondary }]}>
-                    {data.Email}
-                </Text>
-            </View>
-        )}
-    </View>
-);
+    );
+};
 
 export default function FacultyTab({ navigation, isDarkMode, setIsDarkMode }) {
     
@@ -85,13 +87,12 @@ export default function FacultyTab({ navigation, isDarkMode, setIsDarkMode }) {
                 const rawData = await AsyncStorage.getItem('FACULTY_DATA');
                 if (rawData) {
                     const parsedData = JSON.parse(rawData);
-                    // Ensure it is always an array for FlatList
                     setFacultyList(Array.isArray(parsedData) ? parsedData : [parsedData]);
                 }
             } catch (error) {
                 console.error("Error loading faculty data:", error);
             } finally {
-                // 🔴 Ensures the loading spinner always stops
+                //  loading spinner always stops
                 setLoading(false);
             }
         };
@@ -102,28 +103,37 @@ export default function FacultyTab({ navigation, isDarkMode, setIsDarkMode }) {
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
             <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
 
-            <View style={styles.headerRow}>
+            <View style={styles.headerRow} accessible={false}>
                 <TouchableOpacity
                     style={styles.backButton}
-                    onPress={() => (navigation?.goBack ? navigation.goBack() : console.log('Back'))}>
-                    <Ionicons name="caret-back" size={24} color={theme.primary} />
+                    onPress={() => (navigation?.goBack ? navigation.goBack() : console.log('Back'))}
+                    accessibilityRole="button"
+                    accessibilityLabel="Go Back"
+                    accessibilityHint="Returns to the previous screen"
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                    <Ionicons name="caret-back" size={24} color={theme.primary} importantForAccessibility="no" />
                 </TouchableOpacity>
                 
-                <Text style={[styles.headerTitle, { color: theme.text }]}>FACULTY DETAILS</Text>
+                <Text style={[styles.headerTitle, { color: theme.text }]} accessibilityRole="header" accessibilityLabel='Faculty Details'>FACULTY DETAILS</Text>
                 
                 <TouchableOpacity 
                     style={[styles.themeButton, { backgroundColor: theme.card }]} 
                     onPress={() => setIsDarkMode(!isDarkMode)}
+                    accessibilityRole="button"
+                    accessibilityLabel="Toggle Theme"
+                    accessibilityHint={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
-                        <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} />
+                        <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} importantForAccessibility="no" />
                 </TouchableOpacity>
             </View>
 
             {loading ? (
-                <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 50 }} />
+                <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 50 }} accessibilityLabel="Loading faculty data" />
             ) : facultyList.length === 0 ? (
-                 <View style={styles.centerContainer}>
-                    <Ionicons name="people-outline" size={48} color={theme.textSecondary} style={{ marginBottom: 10, opacity: 0.5 }} />
+                 <View style={styles.centerContainer} accessible={true}>
+                    <Ionicons name="people-outline" size={48} color={theme.textSecondary} style={{ marginBottom: 10, opacity: 0.5 }} importantForAccessibility="no" />
                     <Text style={{ color: theme.textSecondary }}>No faculty details found.</Text>
                 </View>
             ) : (

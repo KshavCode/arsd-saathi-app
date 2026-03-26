@@ -99,8 +99,9 @@ export default function Login({ navigation }) {
                     <LinearGradient
                         colors={[Colors.light.text, Colors.light.primary]}
                         style={[styles.headerBackground, { height: height * 0.40 }]}
+                        importantForAccessibility="no-hide-descendants"
                     >
-                        <SafeAreaView style={styles.headerContent}>
+                        <SafeAreaView style={styles.headerContent} importantForAccessibility="no-hide-descendants">
                             <View style={styles.logoCircle}>
                                 <Image source={require("../assets/images/icon.png")} style={{ width: "70%", height: "70%" }} />
                             </View>
@@ -110,42 +111,76 @@ export default function Login({ navigation }) {
                     </LinearGradient>
 
                     <View style={styles.formContainer}>
-                        <View style={styles.card}>
+                        <View style={styles.card} accessibilityRole="header" accessiblityLabel="Form Container">
                             <Text style={styles.cardTitle}>Student Login</Text>
-                            <Text style={styles.cardSub}>Sync your attendance & profile</Text>
+                            <Text style={styles.cardSub} importantForAccessibility="no">Sync your attendance & profile</Text>
 
                             <View style={styles.inputGroup}>
                                 <View style={styles.inputWrapper}>
-                                    <Ionicons name="id-card-outline" size={20} color="#6B7280" style={styles.inputIcon} />
-                                    <TextInput style={styles.input} placeholder="Roll No. (23/380XX)" placeholderTextColor="#9CA3AF" value={roll} onChangeText={setRoll} autoCapitalize="none" />
+                                    <Ionicons name="id-card-outline" size={20} color="#6B7280" style={styles.inputIcon} importantForAccessibility="no" />
+                                    <TextInput 
+                                        style={styles.input} 
+                                        placeholder="Roll No. (23/380XX)" 
+                                        placeholderTextColor="#9CA3AF" 
+                                        value={roll} 
+                                        onChangeText={setRoll} 
+                                        autoCapitalize="none"
+                                        accessibilityLabel="College Roll Number"
+                                        accessibilityHint="Enter your college roll number"
+                                    />
                                 </View>
                                 <View style={styles.inputWrapper}>
-                                    <Ionicons name="person-outline" size={20} color="#6B7280" style={styles.inputIcon} />
-                                    <TextInput style={styles.input} placeholder="Full Name" placeholderTextColor="#9CA3AF" value={fullName} onChangeText={setFullName} />
+                                    <Ionicons name="person-outline" size={20} color="#6B7280" style={styles.inputIcon} importantForAccessibility="no" />
+                                    <TextInput 
+                                        style={styles.input} 
+                                        placeholder="Full Name" 
+                                        placeholderTextColor="#9CA3AF" 
+                                        value={fullName} 
+                                        onChangeText={setFullName}
+                                        accessibilityLabel="Full Name"
+                                        accessibilityHint="Enter your name exactly as it appears on your ID card"
+                                    />
                                 </View>
                                 <View style={styles.inputWrapper}>
-                                    <Ionicons name="calendar-outline" size={20} color="#6B7280" style={styles.inputIcon} />
-                                    <TextInput style={styles.input} placeholder="Date of Birth (DD-MM-YYYY)" placeholderTextColor="#9CA3AF" value={dob} onChangeText={setDob} keyboardType="numbers-and-punctuation" />
+                                    <Ionicons name="calendar-outline" size={20} color="#6B7280" style={styles.inputIcon} importantForAccessibility="no" />
+                                    <TextInput 
+                                        style={styles.input} 
+                                        placeholder="Date of Birth (DD-MM-YYYY)" 
+                                        placeholderTextColor="#9CA3AF" 
+                                        value={dob} 
+                                        onChangeText={setDob} 
+                                        keyboardType="numbers-and-punctuation"
+                                        accessibilityLabel="Date of Birth"
+                                        accessibilityHint="Enter your date of birth in day dash month dash year format"
+                                    />
                                 </View>
                             </View>
 
-                            {/* CONSENT CHECKBOX - MOVED OUTSIDE INPUTGROUP */}
+                            {/* CONSENT CHECKBOX */}
                             {!isScraping && (
                                 <View style={styles.consentContainer}>
-                                    <TouchableOpacity onPress={() => setConsentGiven(!consentGiven)} style={styles.checkbox}>
-                                        <Ionicons name={consentGiven ? "checkbox" : "square-outline"} size={22} color={consentGiven ? Colors.light.primary : "#9CA3AF"} />
+                                    <TouchableOpacity 
+                                        onPress={() => setConsentGiven(!consentGiven)} 
+                                        style={styles.checkbox}
+                                        accessibilityRole="checkbox"
+                                        accessibilityState={{ checked: consentGiven }}
+                                        accessibilityLabel="Consent to Terms and Privacy Policy"
+                                        accessibilityHint="Check this to agree to the terms and privacy policy"
+                                        hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+                                    >
+                                        <Ionicons name={consentGiven ? "checkbox" : "square-outline"} size={22} color={consentGiven ? Colors.light.primary : "#9CA3AF"} importantForAccessibility="no" />
                                     </TouchableOpacity>
-                                    <Text style={styles.consentText}>
-                                        I agree to the <Text style={styles.linkText} onPress={() => Linking.openURL(TERMS_URL)}>Terms</Text> and <Text style={styles.linkText} onPress={() => Linking.openURL(PRIVACY_URL)}>Privacy Policy</Text> regarding my data.
+                                    <Text style={styles.consentText} accessibilityLabel="I agree to the Terms and Privacy Policy regarding my data.">
+                                        I agree to the <Text style={styles.linkText} onPress={() => Linking.openURL(TERMS_URL)} accessibilityRole="link" accessibilityLabel="Terms and Conditions">Terms</Text> and <Text style={styles.linkText} onPress={() => Linking.openURL(PRIVACY_URL)} accessibilityRole="link" accessibilityLabel="Privacy Policy">Privacy Policy</Text> regarding my data.
                                     </Text>
                                 </View>
                             )}
 
                             <View style={styles.actionArea}>
                                 {isScraping ? (
-                                    <View style={styles.loadingState}>
+                                    <View style={styles.loadingState} accessible={true} accessibilityLabel={`Loading. ${progressMsg}`}>
                                         <ActivityIndicator size="large" color={Colors.light.primary} />
-                                        <Text style={styles.loadingText}>{progressMsg}</Text>
+                                        <Text style={styles.loadingText} importantForAccessibility="no">{progressMsg}</Text>
                                         <ArsdScraper credentials={{ name: fullName, rollNo: roll, dob: dob }} onProgress={setProgressMsg} onFinish={handleCompletion} onError={handleError} />
                                     </View>
                                 ) : (
@@ -154,16 +189,27 @@ export default function Login({ navigation }) {
                                         onPress={handleLogin}
                                         disabled={!isReadyToSync}
                                         activeOpacity={0.8}
+                                        accessibilityRole="button"
+                                        accessibilityState={{ disabled: !isReadyToSync }}
+                                        accessibilityLabel="Connect and Sync"
+                                        accessibilityHint={!isReadyToSync ? "Please fill all fields and check the consent box to continue" : "Submits your credentials to securely sync your college data"}
                                     >
-                                        <Text style={styles.loginButtonText}>Connect & Sync</Text>
-                                        <Ionicons name="arrow-forward" size={20} color="#FFF" />
+                                        <Text style={styles.loginButtonText} importantForAccessibility="no">Connect & Sync</Text>
+                                        <Ionicons name="arrow-forward" size={20} color="#FFF" importantForAccessibility="no" />
                                     </TouchableOpacity>
                                 )}
                             </View>
                         </View>
 
-                        <TouchableOpacity onPress={() => handleFeedback()} style={{ marginTop: 25 }}>
-                            <Text style={[styles.footerText, { color: "#4F46E5", fontWeight: "bold" }]}>
+                        <TouchableOpacity 
+                            onPress={() => handleFeedback()} 
+                            style={{ marginTop: 25 }}
+                            accessibilityRole="button"
+                            accessibilityLabel="Report an Issue"
+                            accessibilityHint="Opens your email app to send feedback or report a bug"
+                            hitSlop={{top: 15, bottom: 15, left: 15, right: 15}}
+                        >
+                            <Text style={[styles.footerText, { color: "#4F46E5", fontWeight: "bold" }]} importantForAccessibility="no">
                                 Having trouble? Report an Issue
                             </Text>
                         </TouchableOpacity>

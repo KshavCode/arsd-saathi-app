@@ -30,12 +30,13 @@ const GridActionButton = ({ title, icon, onPress, theme, isDestructive, accessib
     onPress={onPress}
     activeOpacity={0.8}
     accessibilityRole="button"
-    accessibilityHint="a button to move to feature's screen"
+    accessibilityLabel={title}
+    accessibilityHint={accessibilityHint || `Maps to ${title}`}
   >
-    <View style={[styles.gridActionIconCtx, { backgroundColor: isDestructive ? 'transparent' : theme.iconBg }]}>
+    <View style={[styles.gridActionIconCtx, { backgroundColor: isDestructive ? 'transparent' : theme.iconBg }]} importantForAccessibility="no-hide-descendants">
       <Ionicons name={icon} color={isDestructive ? theme.error : theme.primary} size={24} />
     </View>
-    <Text style={[styles.gridActionText, { color: isDestructive ? theme.error : theme.text }]}>{title}</Text>
+    <Text style={[styles.gridActionText, { color: isDestructive ? theme.error : theme.text }]} importantForAccessibility="no">{title}</Text>
   </TouchableOpacity>
 );
 
@@ -310,17 +311,18 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
         onRequestClose={() => setShowUpdateModal(false)}
         statusBarTranslucent={true}
         navigationBarTranslucent={true}
+        accessibilityViewIsModal={true}
       >
         <View style={[styles.modalOverlay, { backgroundColor: theme.modalOverlay }]}>
           <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
 
             {/* Modal Header Icon */}
-            <View style={[styles.modalIconContainer, { backgroundColor: theme.iconBg }]}>
+            <View style={[styles.modalIconContainer, { backgroundColor: theme.iconBg }]} importantForAccessibility="no-hide-descendants">
               <Ionicons name="rocket" size={36} color={theme.primary} />
             </View>
 
             {/* Modal Text */}
-            <Text style={[styles.modalTitle, { color: theme.text }]}>Update Available!</Text>
+            <Text style={[styles.modalTitle, { color: theme.text }]} accessibilityRole="header">Update Available!</Text>
             <Text style={[styles.modalText, { color: theme.textSecondary }]}>
               Version {updateInfo.version} is ready. We&apos;ve crushed some bugs and added improvements to keep your app running smoothly.
             </Text>
@@ -333,16 +335,30 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
                   Linking.openURL(updateInfo.url);
                   setShowUpdateModal(false);
                 }}
-                accessibilityHint="Downloads the updated application by redirecting to thet download link" accessibilityRole='button'
+                accessibilityRole='button'
+                accessibilityLabel="Update Now"
+                accessibilityHint="Downloads the updated application by redirecting to the download link"
               >
-                <Ionicons name="download-outline" size={18} color="#FFF" style={{marginRight: 6}} />
-                <Text style={styles.modalButtonPrimaryText}>Update Now</Text>
+                <Ionicons name="download-outline" size={18} color="#FFF" style={{marginRight: 6}} importantForAccessibility="no" />
+                <Text style={styles.modalButtonPrimaryText} importantForAccessibility="no">Update Now</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.modalButtonSecondary, { borderColor: theme.separator }]} onPress={() => Linking.openURL("https://github.com/KshavCode/arsd-saathi-app/blob/master/CHANGELOG.md")} accessibilityHint="Redirects to the new updates information of the application" accessibilityRole='button'>
-                <Text style={[styles.modalButtonSecondaryText, { color: theme.text }]}>What&apos;s New</Text>
+              <TouchableOpacity 
+                style={[styles.modalButtonSecondary, { borderColor: theme.separator }]} 
+                onPress={() => Linking.openURL("https://github.com/KshavCode/arsd-saathi-app/blob/master/CHANGELOG.md")} 
+                accessibilityRole='button'
+                accessibilityLabel="What's New"
+                accessibilityHint="Redirects to the new updates information of the application"
+              >
+                <Text style={[styles.modalButtonSecondaryText, { color: theme.text }]} importantForAccessibility="no">What&apos;s New</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={{ marginTop: 15, paddingVertical: 5 }} onPress={() => setShowUpdateModal(false)} accessibilityHint="Remind again when you open the app" accessibilityRole='button'>
-                <Text style={{ color: theme.textSecondary, fontSize: 13, fontWeight: '500' }}>Not Now</Text>
+              <TouchableOpacity 
+                style={{ marginTop: 15, paddingVertical: 5 }} 
+                onPress={() => setShowUpdateModal(false)} 
+                accessibilityRole='button'
+                accessibilityLabel="Not Now"
+                accessibilityHint="Dismiss this dialog and remind again when you open the app next time"
+              >
+                <Text style={{ color: theme.textSecondary, fontSize: 13, fontWeight: '500' }} importantForAccessibility="no">Not Now</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -357,32 +373,53 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
         onRequestClose={() => setShowLogoutModal(false)}
         statusBarTranslucent={true}
         navigationBarTranslucent={true}
+        accessibilityViewIsModal={true}
       >
         <View style={[styles.modalOverlay, { backgroundColor: theme.modalOverlay }]}>
           <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
 
             {/* Modal Header Icon */}
-            <View style={[styles.modalIconContainer, { backgroundColor: theme.error + '20' }]}>
+            <View style={[styles.modalIconContainer, { backgroundColor: theme.error + '20' }]} importantForAccessibility="no-hide-descendants">
               <Ionicons name="alert" size={36} color={theme.error} />
             </View>
 
             {/* Modal Text */}
-            <Text style={[styles.modalTitle, { color: theme.text }]}>Are you sure?</Text>
-            <View style={{flexDirection:'row', gap:7}} accessible={true}>
-              <CheckBox value={deleteTimetable} onValueChange={setDeleteTimetable} color={deleteTimetable ? theme.primary : undefined} accessibilityHint="To remove your saved timetable details permanently from storage" accessibilityRole='checkbox' accessibilityState={{checked:deleteTimetable}}/>
-              <Text style={[styles.modalText, { color: theme.textSecondary }]}>Delete my Timetable</Text>
-            </View>
+            <Text style={[styles.modalTitle, { color: theme.text }]} accessibilityRole="header">Are you sure?</Text>
+            
+            <TouchableOpacity 
+               style={{flexDirection:'row', gap:7, alignItems: 'center'}} 
+               accessible={true}
+               accessibilityRole="checkbox"
+               accessibilityState={{checked: deleteTimetable}}
+               accessibilityLabel="Delete my Timetable"
+               accessibilityHint="Check to permanently remove your saved timetable details from storage upon logout"
+               onPress={() => setDeleteTimetable(!deleteTimetable)}
+               activeOpacity={1}
+            >
+              <CheckBox value={deleteTimetable} onValueChange={setDeleteTimetable} color={deleteTimetable ? theme.primary : undefined} />
+              <Text style={[styles.modalText, { color: theme.textSecondary, marginBottom: 0 }]} importantForAccessibility="no">Delete my Timetable</Text>
+            </TouchableOpacity>
 
             {/* Modal Action Buttons */}
-            <View style={styles.modalActions}>
+            <View style={[styles.modalActions, {marginTop: 25}]}>
               <TouchableOpacity
                 style={[styles.modalButtonPrimary, { backgroundColor: theme.error }]}
-                onPress={executeLogout} accessibilityHint="Confirmation on logout" accessibilityRole='button'>
-                <Ionicons name="log-out-outline" size={18} color="#FFF" style={{marginRight: 6}} />
-                <Text style={styles.modalButtonPrimaryText}>Logout</Text>
+                onPress={executeLogout} 
+                accessibilityRole='button'
+                accessibilityLabel="Logout"
+                accessibilityHint="Confirm and log out of the application"
+              >
+                <Ionicons name="log-out-outline" size={18} color="#FFF" style={{marginRight: 6}} importantForAccessibility="no" />
+                <Text style={styles.modalButtonPrimaryText} importantForAccessibility="no">Logout</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.modalButtonSecondary, { borderColor: theme.separator }]} onPress={() => setShowLogoutModal(false)} accessibilityHint="Cancel the action and return to homepage" accessibilityRole='button'>
-                <Text style={[styles.modalButtonSecondaryText, { color: theme.text }]}>Cancel</Text>
+              <TouchableOpacity 
+                style={[styles.modalButtonSecondary, { borderColor: theme.separator }]} 
+                onPress={() => setShowLogoutModal(false)} 
+                accessibilityRole='button'
+                accessibilityLabel="Cancel"
+                accessibilityHint="Cancel the action and return to homepage"
+              >
+                <Text style={[styles.modalButtonSecondaryText, { color: theme.text }]} importantForAccessibility="no">Cancel</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -395,57 +432,78 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
       )}
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Header Section */}
-        <View style={styles.header} accessible={true}>
-          <View style={{flex: 1}}>
+        <View style={styles.header}>
+          <View style={{flex: 1}} accessible={true} accessibilityRole="header">
             <Text style={[styles.greeting, { color: theme.textSecondary }]}>Welcome back,</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <TouchableOpacity onPress={()=>navigation.navigate("Details")} style={{flexDirection: 'row', gap:5, justifyContent:'center', alignItems:'center'}} accessibilityRole='button' accessibilityHint='Displays your personal details stored in the college database'>
-                <Text style={[styles.username, { color: theme.primary }]} numberOfLines={1}>{userData.name}</Text>
-                <Ionicons name="information-circle" size={15} color={theme.secondary} />
+              <TouchableOpacity 
+                onPress={()=>navigation.navigate("Details")} 
+                style={{flexDirection: 'row', gap:5, justifyContent:'center', alignItems:'center'}} 
+                accessibilityRole='button' 
+                accessibilityLabel={`${userData.name}. View Profile.`}
+                accessibilityHint='Displays your personal details stored in the college database'
+                hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+              >
+                <Text style={[styles.username, { color: theme.primary }]} numberOfLines={1} importantForAccessibility="no">{userData.name}</Text>
+                <Ionicons name="information-circle" size={15} color={theme.secondary} importantForAccessibility="no" />
               </TouchableOpacity>
-                {isSyncing && <ActivityIndicator size="small" color={theme.primary} />}
+                {isSyncing && <ActivityIndicator size="small" color={theme.primary} accessibilityLabel='Syncing your latest data'/>}
             </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 4 }}>
-               <Ionicons name="time-outline" size={12} color={theme.secondary} />
-               <Text style={{ fontSize: 12, color: theme.secondary, fontWeight: '500' }}>Last synced: {lastSynced}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 4 }} >
+               <Ionicons name="time-outline" size={12} color={theme.secondary} importantForAccessibility="no-hide-descendants" />
+               <Text style={{ fontSize: 12, color: theme.secondary, fontWeight: '500' }} accessibilityLabel={`Last synced: ${lastSynced}`}>Last synced: {lastSynced}</Text>
             </View>
           </View>
           
           <View style={styles.topIconContainer}>
-            <TouchableOpacity style={[styles.themeButton, { backgroundColor: theme.card }]} onPress={handleShare}>
-               <Ionicons name='share-social' size={20} color={theme.primary} />
+            <TouchableOpacity 
+              style={[styles.themeButton, { backgroundColor: theme.card }]} 
+              onPress={handleShare}
+              accessibilityRole="button"
+              accessibilityLabel="Share App"
+              accessibilityHint="Share the download link for ArsdSaathi with friends"
+              hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+            >
+               <Ionicons name='share-social' size={20} color={theme.primary} importantForAccessibility="no" />
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.themeButton, { backgroundColor: theme.card }]} onPress={handleTheme}>
-               <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} />
+            <TouchableOpacity 
+              style={[styles.themeButton, { backgroundColor: theme.card }]} 
+              onPress={handleTheme}
+              accessibilityRole="button"
+              accessibilityLabel="Toggle Theme"
+              accessibilityHint={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+              hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+            >
+               <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} importantForAccessibility="no" />
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Hero Dashboard Container (Stacked Layout) */}
-        <View style={[styles.heroContainer, { backgroundColor: theme.card, borderColor: theme.borderColor }]} accessible={true}>
+        <View style={[styles.heroContainer, { backgroundColor: theme.card, borderColor: theme.borderColor }]}>
             
             {/* Top Row: Attendance */}
-            <View style={styles.heroMainRow}>
-                <View style={[styles.heroIconBox, { backgroundColor: isAttendanceLow ? theme.error : "#10B981" }]}>
+            <View style={styles.heroMainRow} accessible={true} accessibilityLabel={`Theory Attendance: ${userData.percent_attendance}%`}>
+                <View style={[styles.heroIconBox, { backgroundColor: isAttendanceLow ? theme.error : "#10B981" }]} importantForAccessibility="no-hide-descendants">
                     <Ionicons name="pie-chart" size={24} color="#FFF" />
                 </View>
-                <View style={styles.heroTextContent}>
+                <View style={styles.heroTextContent} importantForAccessibility="no-hide-descendants">
                     <Text style={[styles.heroValue, { color: theme.text }]}>{userData.percent_attendance}%</Text>
                     <Text style={[styles.heroLabel, { color: theme.textSecondary }]}>Theory Attendance</Text>
                 </View>
-                {isAttendanceLow && <Ionicons name="alert-circle" size={28} color={theme.error} />}
+                {isAttendanceLow && <Ionicons name="alert-circle" size={28} color={theme.error} importantForAccessibility="no" />}
             </View>
 
             {isAttendanceLow && (
-                <Text style={[styles.warningText, { color: theme.error }]}>* Below 67%.</Text>
+                <Text style={[styles.warningText, { color: theme.error }]} accessibilityLabel="Warning: Attendance is below 67 percent.">* Below 67%.</Text>
             )}
 
             <View style={[styles.heroDivider, { backgroundColor: theme.separator }]} />
 
             {/* Middle Row: Mentor */}
-            <View style={styles.mentorRow}>
-                 <Ionicons name="person-outline" size={18} color={theme.primary} />
-                 <View style={{marginLeft: 12, flex: 1}}>
+            <View style={styles.mentorRow} accessible={true} accessibilityLabel={`Assigned Mentor: ${userData.mentor_name}`}>
+                 <Ionicons name="person-outline" size={18} color={theme.primary} importantForAccessibility="no" />
+                 <View style={{marginLeft: 12, flex: 1}} importantForAccessibility="no-hide-descendants">
                      <Text style={[styles.mentorLabel, { color: theme.textSecondary }]}>Assigned Mentor</Text>
                      <Text style={[styles.mentorName, { color: theme.text }]} numberOfLines={2}>{userData.mentor_name}</Text>
                  </View>
@@ -455,8 +513,8 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
             {nextClassInfo && (
                 <>
                     <View style={[styles.heroDivider, { backgroundColor: theme.separator }]} />
-                    <View style={styles.nextClassRow}>
-                        <View style={styles.nextClassHeader}>
+                    <View style={styles.nextClassRow} accessible={true} accessibilityLabel={`Up Next ${nextClassInfo.dayName} at ${nextClassInfo.slot}. Subject: ${nextClassInfo.subject}. Room ${nextClassInfo.room || 'Not Assigned'}. ${nextClassInfo.duration} Hour ${nextClassInfo.type} class.`}>
+                        <View style={styles.nextClassHeader} importantForAccessibility="no-hide-descendants">
                             <View style={{flexDirection: 'row', alignItems: 'center'}}>
                                 <Ionicons name="alarm-outline" size={16} color={theme.success} />
                                 <Text style={[styles.nextClassTitle, { color: theme.success }]}>Up Next ({nextClassInfo.dayName})</Text>
@@ -464,11 +522,11 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
                             <Text style={[styles.nextClassTime, { color: theme.primary }]}>{nextClassInfo.slot}</Text>
                         </View>
                         
-                        <Text style={[styles.nextClassSubject, { color: theme.text }]} numberOfLines={1}>
+                        <Text style={[styles.nextClassSubject, { color: theme.text }]} numberOfLines={1} importantForAccessibility="no">
                             {nextClassInfo.subject}
                         </Text>
                         
-                        <View style={styles.nextClassMetaRow}>
+                        <View style={styles.nextClassMetaRow} importantForAccessibility="no-hide-descendants">
                             <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}>
                                 <Ionicons name="location" size={12} color={theme.textSecondary} />
                                 <Text style={[styles.metaText, { color: theme.textSecondary }]}>Room {nextClassInfo.room || 'N/A'}</Text>
@@ -484,35 +542,35 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
         </View>
 
         {/* Grid Navigation */}
-        <Text style={[styles.sectionHeader, { color: theme.text, marginTop: 10 }]}>Quick Actions</Text>
+        <Text style={[styles.sectionHeader, { color: theme.text, marginTop: 10 }]} accessibilityRole="header" accessibilityLabel='Quick Actions'>Quick Actions</Text>
         <View style={styles.actionsGrid}>
             <GridActionButton title="Attendance" icon="bar-chart" onPress={() => navigation.navigate("Attendance")} theme={theme} />
             <GridActionButton title="Predictor" icon="color-wand" onPress={() => navigation.navigate("Predictor")} theme={theme} />
             <GridActionButton title="Timetable" icon="calendar" onPress={() => navigation.navigate("TimeTable")} theme={theme} />
             <GridActionButton title="Campus Map" icon="compass" onPress={() => navigation.navigate("Campus")} theme={theme} />
             <GridActionButton title="Faculty" icon="people" onPress={() => navigation.navigate("Faculty")} theme={theme} />
-            <GridActionButton title="Logout" icon="log-out" onPress={handleLogout} isDestructive={true} theme={theme}/>
+            <GridActionButton title="Logout" icon="log-out" onPress={handleLogout} isDestructive={true} theme={theme} accessibilityHint="Opens confirmation dialog to securely log out"/>
         </View>
 
         {/* Footer Section */}
         <View style={[styles.footerContainer, { backgroundColor: theme.card }]}>
             <View style={styles.footerGrid}>
-              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(STUDENT_PORTAL_URL)} accessibilityRole="link" accessibilityHint="Redirects to the college's official student portal">
+              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(STUDENT_PORTAL_URL)} accessibilityRole="link" accessibilityHint="Redirects to the college's official student portal" hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
                 <Text style={[styles.footerLink, { color: theme.footer }]}>Official Portal</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(FEES_PORTAL_URL)} accessibilityRole="link" accessibilityHint="Link for fee payment portal">
+              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(FEES_PORTAL_URL)} accessibilityRole="link" accessibilityHint="Link for fee payment portal" hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
                 <Text style={[styles.footerLink, { color: theme.footer }]}>Fee Payment</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(FEE_STRUCTURE_URL)} accessibilityRole="link" accessibilityHint="Redirects to the fee structure on the college website">
+              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(FEE_STRUCTURE_URL)} accessibilityRole="link" accessibilityHint="Redirects to the fee structure on the college website" hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
                 <Text style={[styles.footerLink, { color: theme.footer }]}>Fee Structure</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(SOCIETIES_URL)} accessibilityRole="link" accessibilityHint="a link to check the available socities or clubs found in the college">
+              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(SOCIETIES_URL)} accessibilityRole="link" accessibilityHint="a link to check the available socities or clubs found in the college" hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
                 <Text style={[styles.footerLink, { color: theme.footer }]}>Societies</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(HANDBOOK_URL)} accessibilityRole="link" accessibilityHint="Download the student helper handbook provided by the college.">
+              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(HANDBOOK_URL)} accessibilityRole="link" accessibilityHint="Download the student helper handbook provided by the college." hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
                 <Text style={[styles.footerLink, { color: theme.footer }]}>Handbook</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.footerItem} onPress={() => handleFeedback()} accessibilityRole="link" accessibilityHint="Email the developer's through this link.">
+              <TouchableOpacity style={styles.footerItem} onPress={() => handleFeedback()} accessibilityRole="link" accessibilityHint="Email the developer's through this link." hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
                 <Text style={[styles.footerLink, { color: theme.footer }]}>Report Issue</Text>
               </TouchableOpacity>
             </View>
@@ -520,26 +578,26 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
             <View style={[styles.footerDivider, { backgroundColor: theme.separator }]} />
 
             <View style={styles.footerLegal}>
-              <TouchableOpacity onPress={() => Linking.openURL(TERMS_URL)} accessibilityRole="link" accessibilityHint="Opens the link to Terms and Conditions">
+              <TouchableOpacity onPress={() => Linking.openURL(TERMS_URL)} accessibilityRole="link" accessibilityHint="Opens the link to Terms and Conditions" hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
                 <Text style={[styles.footerLegalText, { color: theme.footer }]}>Terms & Conditions</Text>
               </TouchableOpacity>
-              <Text style={{color: theme.separator}}>•</Text>
-              <TouchableOpacity onPress={() => Linking.openURL(PRIVACY_URL)} accessibilityRole="link" accessibilityHint="Opens the link to the privacy policy of this application">
+              <Text style={{color: theme.separator}} importantForAccessibility="no">•</Text>
+              <TouchableOpacity onPress={() => Linking.openURL(PRIVACY_URL)} accessibilityRole="link" accessibilityHint="Opens the link to the privacy policy of this application" hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
                 <Text style={[styles.footerLegalText, { color: theme.footer }]}>Privacy Policy</Text>
               </TouchableOpacity>
             </View>
         </View>
 
-        <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, marginTop:20}}>
-          <Text style={{ color: theme.secondary, fontSize:15}}>Developed by</Text>
-          <TouchableOpacity onPress={()=>Linking.openURL(KESHAV_URL)} accessibilityRole="link" accessibilityHint="Redirects to the main developer's website">
-              <Text style={{ color: theme.footer, fontWeight: 'bold', fontSize:15 }}>Keshav Pal</Text>
+        <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, marginTop:20}} accessible={true} accessibilityLabel="Developed by Keshav Pal">
+          <Text style={{ color: theme.secondary, fontSize:15}} importantForAccessibility="no">Developed by</Text>
+          <TouchableOpacity onPress={()=>Linking.openURL(KESHAV_URL)} accessibilityRole="link" accessibilityHint="Redirects to the main developer's website" hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+              <Text style={{ color: theme.footer, fontWeight: 'bold', fontSize:15 }} importantForAccessibility="no">Keshav Pal</Text>
           </TouchableOpacity>
         </View>
-        <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4}}>
-          <Text style={{ color: theme.secondary, fontSize:13}}>with</Text>
-          <TouchableOpacity onPress={()=>Linking.openURL(SHIVAM_URL)} accessibilityRole="link" accessibilityHint="Redirects to the developer's github profile">
-              <Text style={{ color: theme.footer, fontWeight: 'bold', fontSize:13 }}>Shivam Yadav</Text>
+        <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4}} accessible={true} accessibilityLabel="Developed with Shivam Yadav">
+          <Text style={{ color: theme.secondary, fontSize:13}} importantForAccessibility="no">with</Text>
+          <TouchableOpacity onPress={()=>Linking.openURL(SHIVAM_URL)} accessibilityRole="link" accessibilityHint="Redirects to the developer's github profile" hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+              <Text style={{ color: theme.footer, fontWeight: 'bold', fontSize:13 }} importantForAccessibility="no">Shivam Yadav</Text>
           </TouchableOpacity>
         </View>
 
