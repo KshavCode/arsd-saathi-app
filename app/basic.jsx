@@ -5,14 +5,18 @@ import { ActivityIndicator, ScrollView, StatusBar, StyleSheet, Text, TouchableOp
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../constants/themeStyle';
 
-
 // Helper component for a single row of detail
 const DetailRow = ({ label, value, icon, theme, isLast }) => (
-    <View style={[styles.detailRow, !isLast && { borderBottomColor: theme.borderColor, borderBottomWidth: 1 }]}>
-        <View style={[styles.iconBox, { backgroundColor: theme.iconBg }]}>
+    <View 
+      style={[styles.detailRow, !isLast && { borderBottomColor: theme.borderColor, borderBottomWidth: 1 }]}
+      accessible={true}
+      accessibilityRole="text"
+      accessibilityLabel={`${label}: ${value || "Not available"}`}
+    >
+        <View style={[styles.iconBox, { backgroundColor: theme.iconBg }]} importantForAccessibility="no-hide-descendants">
             <Ionicons name={icon} size={20} color={theme.primary} />
         </View>
-        <View style={styles.detailTextContainer}>
+        <View style={styles.detailTextContainer} importantForAccessibility="no-hide-descendants">
             <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>{label}</Text>
             <Text style={[styles.detailValue, { color: theme.text }]}>{value || "N/A"}</Text>
         </View>
@@ -84,26 +88,35 @@ export default function DetailsTab({ navigation, isDarkMode, setIsDarkMode }) {
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
             <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
 
-            <View style={styles.headerRow}>
+            <View style={styles.headerRow} accessible={false}>
                 <TouchableOpacity
                     style={styles.backButton}
-                    onPress={() => (navigation?.goBack ? navigation.goBack() : console.log('Back'))}>
-                    <Ionicons name="caret-back" size={24} color={theme.primary} />
+                    onPress={() => (navigation?.goBack ? navigation.goBack() : console.log('Back'))}
+                    accessibilityRole="button"
+                    accessibilityLabel="Go Back"
+                    accessibilityHint="Returns to the previous screen"
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                    <Ionicons name="caret-back" size={24} color={theme.primary} importantForAccessibility="no" />
                 </TouchableOpacity>
                 
-                <Text style={[styles.headerTitle, { color: theme.text }]}>PERSONAL DETAILS</Text>
+                <Text style={[styles.headerTitle, { color: theme.text }]} accessibilityRole="header">PERSONAL DETAILS</Text>
                 
                 <TouchableOpacity 
                     style={[styles.themeButton, { backgroundColor: theme.card }]} 
                     onPress={() => setIsDarkMode(!isDarkMode)}
+                    accessibilityRole="button"
+                    accessibilityLabel="Toggle Theme"
+                    accessibilityHint={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
-                     <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} />
+                     <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} importantForAccessibility="no" />
                 </TouchableOpacity>
             </View>
 
             <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }} showsVerticalScrollIndicator={false}>
                 {loading ? (
-                    <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 50 }} />
+                    <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 50 }} accessibilityLabel="Loading personal details" />
                 ) : (
                     <View style={[styles.cardContainer, { backgroundColor: theme.card, borderColor: theme.borderColor }]}>
                         {profileData ? displayFields.map((field, index) => (
@@ -116,9 +129,9 @@ export default function DetailsTab({ navigation, isDarkMode, setIsDarkMode }) {
                                 isLast={index === displayFields.length - 1}
                             />
                         )) : (
-                            <View style={{ padding: 40, alignItems: 'center' }}>
-                                <Ionicons name="alert-circle-outline" size={40} color={theme.textSecondary} />
-                                <Text style={{ color: theme.textSecondary, marginTop: 10 }}>No details found.</Text>
+                            <View style={{ padding: 40, alignItems: 'center' }} accessible={true} accessibilityLabel="Warning: No details found.">
+                                <Ionicons name="alert-circle-outline" size={40} color={theme.textSecondary} importantForAccessibility="no" />
+                                <Text style={{ color: theme.textSecondary, marginTop: 10 }} importantForAccessibility="no">No details found.</Text>
                             </View>
                         )}
                     </View>
