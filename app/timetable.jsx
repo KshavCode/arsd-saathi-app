@@ -32,10 +32,10 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
     secondary: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
     error: isDarkMode ? Colors.dark.error : Colors.light.error,
     success: isDarkMode ? Colors.dark.success : Colors.light.success,
-    iconBg: isDarkMode ? Colors.light.iconBg : Colors.dark.iconBg,
-    borderColor: isDarkMode ? Colors.light.separator : Colors.dark.separator,
-    destructiveBg: isDarkMode ? Colors.light.destructiveBg : Colors.dark.destructiveBg,
-    destructiveBorder: isDarkMode ? Colors.light.destructiveBorder : Colors.dark.destructiveBorder,
+    iconBg: isDarkMode ? Colors.dark.iconBg : Colors.light.iconBg,
+    borderColor: isDarkMode ? Colors.dark.separator : Colors.light.separator,
+    destructiveBg: isDarkMode ? Colors.dark.destructiveBg : Colors.light.destructiveBg,
+    destructiveBorder: isDarkMode ? Colors.dark.destructiveBorder : Colors.light.destructiveBorder,
   };
 
   const [loading, setLoading] = useState(true);

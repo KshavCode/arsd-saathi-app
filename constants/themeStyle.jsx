@@ -7,12 +7,13 @@ export const Colors = {
         success: '#16A34A',   
         error: '#DC2626',      
         card: '#FFFFFF',
-        iconBg: '#252F45',
+        iconBg: '#F0F4FF',
         iconPlaceholder: '#475569',
-        destructiveBg: '#0e0c0c',
-        destructiveBorder: '#5c2222',
-        separator: '#2E3A52',
-        footer: '#4F46E5'
+        destructiveBg: '#FFF0F0',
+        destructiveBorder: '#FFE0E0',
+        separator: '#F0F0F0',
+        footer: '#4F46E5',
+        borderColor: '#F1F5F9'
     },
     dark: {
         primary: '#60A5FA',
@@ -22,11 +23,12 @@ export const Colors = {
         success: '#4ADE80', 
         error: '#F87171',    
         card: '#1E293B',       
-        iconBg: '#F0F4FF',
+        iconBg: '#252F45',
         iconPlaceholder: '#CBD5E1',
-        destructiveBg: '#FFF0F0',
-        destructiveBorder: '#FFE0E0',
-        separator: '#F0F0F0',
-        footer: '#b2aeff'
+        destructiveBg: '#0e0c0c',
+        destructiveBorder: '#5c2222',
+        separator: '#2E3A52',
+        footer: '#b2aeff',
+        borderColor: '#2E3A52'
     }
 };

@@ -16,7 +16,7 @@ const FacultyCard = ({ data, theme }) => {
 
     return (
         <View 
-            style={[styles.facultyCard, { backgroundColor: theme.card, borderColor: theme.borderColor }]}
+            style={[styles.facultyCard, { backgroundColor: theme.card, borderColor: theme.primary + '40' }]}
             accessible={true}
             accessibilityRole="text"
             accessibilityLabel={accessibilityString}
@@ -70,12 +70,12 @@ export default function FacultyTab({ navigation, isDarkMode, setIsDarkMode }) {
     
     const theme = {
         background: isDarkMode ? Colors.dark.background : Colors.light.background,
-        card: isDarkMode ? '#1A2235' : '#FFFFFF',
+        card: isDarkMode ? Colors.dark.card : Colors.light.card,
         text: isDarkMode ? Colors.dark.text : Colors.light.text,
         textSecondary: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
         primary: isDarkMode ? Colors.dark.primary : Colors.light.primary,
-        iconBg: isDarkMode ? '#252F45' : '#F0F4FF',
-        borderColor: isDarkMode ? '#2E3A52' : '#E2E8F0',
+        iconBg: isDarkMode ? Colors.dark.iconBg : Colors.light.iconBg,
+        borderColor: isDarkMode ? Colors.dark.borderColor : Colors.light.borderColor,
     };
 
     const [facultyList, setFacultyList] = useState([]);
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
     backButton: { width: 40, height: 40, alignItems: 'flex-start', justifyContent: 'center' },
     headerTitle: { fontSize: 18, fontWeight: '700', letterSpacing: 0.5 },
-    themeButton: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
+    themeButton: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
     centerContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 50 },
     
     // --- Faculty Card Styles ---
@@ -162,7 +162,6 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 16,
         marginBottom: 16,
-        shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.05,
         shadowRadius: 6,

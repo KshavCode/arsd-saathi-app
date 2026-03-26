@@ -15,10 +15,8 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
         primary: isDarkMode ? Colors.dark.primary : Colors.light.primary,
         secondary: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
         error: isDarkMode ? Colors.dark.error : Colors.light.error,
-        iconBg: isDarkMode ? Colors.light.iconBg : Colors.dark.iconBg,
-        borderColor: isDarkMode ? Colors.light.separator : Colors.dark.separator,
-        headerBg: isDarkMode ? '#252F45' : '#F8FAFC',
-        headerText: isDarkMode ? '#F8FAFC' : '#64748B',
+        iconBg: isDarkMode ? Colors.dark.iconBg : Colors.light.iconBg,
+        borderColor: isDarkMode ? Colors.dark.separator : Colors.light.separator,
     };
 
     const [fullData, setFullData] = useState(null); 
@@ -261,7 +259,7 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
                                                     style={[
                                                         styles.tableCell, 
                                                         { borderColor: theme.borderColor },
-                                                        isHeaderRow && { backgroundColor: theme.headerBg },
+                                                        isHeaderRow && { backgroundColor: theme.primary + '20' },
                                                         cIdx === COLS - 1 && styles.tableCellLast
                                                     ]}
                                                     importantForAccessibility={isHeaderRow ? "yes" : "no-hide-descendants"} // Hide individual cells from screen reader, rely on row label
@@ -269,7 +267,7 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
                                                     <Text style={[
                                                         styles.cellText, 
                                                         { color: theme.text },
-                                                        isHeaderRow && { color: theme.headerText, fontWeight: '700', fontSize: 10 }, 
+                                                        isHeaderRow && { color: theme.text, fontWeight: '700', fontSize: 10 }, 
                                                         isRowHeader && { fontWeight: '600' }
                                                     ]} numberOfLines={1} adjustsFontSizeToFit>
                                                         {cell}
@@ -312,7 +310,7 @@ const styles = StyleSheet.create({
     headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
     backButton: { width: 40, height: 40, alignItems: 'flex-start', justifyContent: 'center' },
     headerTitle: { fontSize: 18, fontWeight: '700', letterSpacing: 0.5 },
-    themeButton: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
+    themeButton: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
     
     // Empty State
     centerContainer: { flex: 1, height: 400, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 30 },
@@ -328,7 +326,7 @@ const styles = StyleSheet.create({
     
     // Modal Dropdown Styles
     modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center', padding: 20 },
-    modalListContainer: { width: '100%', borderRadius: 16, borderWidth: 1, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 10, elevation: 10 },
+    modalListContainer: { width: '100%', borderRadius: 16, borderWidth: 1, overflow: 'hidden', shadowOpacity: 0.2, shadowRadius: 10, elevation: 10 },
     modalListHeader: { fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase', padding: 16 },
     dropdownItem: { paddingVertical: 16, paddingHorizontal: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 0.5 },
     dropdownItemText: { fontSize: 15 },

@@ -15,12 +15,12 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
     secondary: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
     error: isDarkMode ? Colors.dark.error : Colors.light.error,
     success: isDarkMode ? (Colors.dark.success) : (Colors.light.success),
-    iconBg: isDarkMode ? Colors.light.iconBg : Colors.dark.iconBg,
+    iconBg: isDarkMode ? Colors.dark.iconBg : Colors.light.iconBg,
     iconPlaceholder: isDarkMode ? Colors.dark.iconPlaceholder : Colors.light.iconPlaceholder,
     destructiveBg: isDarkMode ? Colors.dark.destructiveBg : Colors.light.destructiveBg,
     destructiveBorder: isDarkMode ? Colors.dark.destructiveBorder : Colors.light.destructiveBorder,
     separator: isDarkMode ? Colors.dark.separator : Colors.light.separator,
-    borderColor: isDarkMode ? Colors.light.separator : Colors.dark.separator,
+    borderColor: isDarkMode ? Colors.dark.borderColor : Colors.light.borderColor,
     footer: isDarkMode ? Colors.dark.footer : Colors.light.footer,
   };
 

@@ -1,7 +1,6 @@
 # ArsdSaathi v1.4.0 is now available!
 
 ## 💫 What's New?
-- **Know Your Campus**: Having hard time in finding and exploring the campus? Here's the one stop solution!
 - **Additional Links**: More helpful links are added in order to help students
 - **Timetable**: Now students can set the timetable for all other students with the same subject! Using this, the app notifies you 10 minutes before your class starts.
 - **Attendance Predictor**: Shows the marks which can be obtained with predicted attendance percentage.

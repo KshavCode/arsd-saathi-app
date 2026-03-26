@@ -2,6 +2,7 @@ import { FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, PRIVACY_U
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckBox from 'expo-checkbox';
+// import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -19,7 +20,7 @@ const handleFeedback = () => {
 
 // --- Sub-Components ---
 
-// New Square Grid Button
+// Grid Button
 const GridActionButton = ({ title, icon, onPress, theme, isDestructive, accessibilityHint='' }) => (
   <TouchableOpacity 
     style={[
@@ -52,11 +53,11 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
     secondary: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
     error: isDarkMode ? Colors.dark.error : Colors.light.error,
     success: isDarkMode ? Colors.dark.success : Colors.light.success,
-    iconBg: isDarkMode ? Colors.light.iconBg : Colors.dark.iconBg,
+    iconBg: isDarkMode ? Colors.dark.iconBg : Colors.light.iconBg,
     iconPlaceholder: isDarkMode ? Colors.light.iconPlaceholder : Colors.dark.iconPlaceholder,
-    destructiveBg: isDarkMode ? Colors.light.destructiveBg : Colors.dark.destructiveBg,
-    destructiveBorder: isDarkMode ? Colors.light.destructiveBorder : Colors.dark.destructiveBorder,
-    separator: isDarkMode ? Colors.light.separator : Colors.dark.separator,
+    destructiveBg: isDarkMode ? Colors.dark.destructiveBg : Colors.light.destructiveBg,
+    destructiveBorder: isDarkMode ? Colors.dark.destructiveBorder : Colors.light.destructiveBorder,
+    separator: isDarkMode ? Colors.dark.separator : Colors.light.separator,
     footer: isDarkMode ? Colors.dark.footer : Colors.light.footer,
     modalOverlay: 'rgba(0, 0, 0, 0.6)'
   };
@@ -547,7 +548,6 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
             <GridActionButton title="Attendance" icon="bar-chart" onPress={() => navigation.navigate("Attendance")} theme={theme} />
             <GridActionButton title="Predictor" icon="color-wand" onPress={() => navigation.navigate("Predictor")} theme={theme} />
             <GridActionButton title="Timetable" icon="calendar" onPress={() => navigation.navigate("TimeTable")} theme={theme} />
-            <GridActionButton title="Campus Map" icon="compass" onPress={() => navigation.navigate("Campus")} theme={theme} />
             <GridActionButton title="Faculty" icon="people" onPress={() => navigation.navigate("Faculty")} theme={theme} />
             <GridActionButton title="Logout" icon="log-out" onPress={handleLogout} isDestructive={true} theme={theme} accessibilityHint="Opens confirmation dialog to securely log out"/>
         </View>

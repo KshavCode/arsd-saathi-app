@@ -27,12 +27,12 @@ export default function DetailsTab({ navigation, isDarkMode, setIsDarkMode }) {
     
     const theme = {
         background: isDarkMode ? Colors.dark.background : Colors.light.background,
-        card: isDarkMode ? Colors.dark.card : Colors.light.card, // Fixed to use constants if available
+        card: isDarkMode ? Colors.dark.card : Colors.light.card,
         text: isDarkMode ? Colors.dark.text : Colors.light.text,
         textSecondary: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
         primary: isDarkMode ? Colors.dark.primary : Colors.light.primary,
-        iconBg: isDarkMode ? '#252F45' : '#F0F4FF',
-        borderColor: isDarkMode ? '#2E3A52' : '#F1F5F9',
+        iconBg: isDarkMode ? Colors.dark.iconBg : Colors.light.iconBg,
+        borderColor: isDarkMode ? Colors.dark.borderColor : Colors.light.borderColor,
     };
 
     const [profileData, setProfileData] = useState(null);

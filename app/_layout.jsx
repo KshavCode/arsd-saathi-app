@@ -7,7 +7,6 @@ import { Colors } from '../constants/themeStyle';
 
 import Attendance from './attendance';
 import Details from './basic';
-import Campus from './campus';
 import Faculty from './faculty';
 import Home from './home';
 import Login from './index';
@@ -129,10 +128,6 @@ export default function Stack1() {
 
             <Stack.Screen name="TimeTable">
                 {(props) => <Timetable {...props} {...themeProps} />}
-            </Stack.Screen>
-
-            <Stack.Screen name="Campus">
-                {(props) => <Campus {...props} {...themeProps} />}
             </Stack.Screen>
         </Stack.Navigator>
     );
