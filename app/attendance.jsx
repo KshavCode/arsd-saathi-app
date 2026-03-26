@@ -80,7 +80,7 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
         const theoryRows = fullData.theory?.[selectedSubject] || [];
         const tutorialRows = fullData.practical?.[selectedSubject] || [];
 
-        // Merge Theory and Tutorial data by Month
+        // Merge Theory and Practical data by Month
         const mergedByMonth = {};
 
         const addRowsToMap = (rows, type) => {
@@ -118,25 +118,50 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
 
     const COLS = 5; 
 
+    // Helper function to create a readable sentence for screen readers from a table row
+    const getRowAccessibilityLabel = (row, isHeaderRow) => {
+        if (isHeaderRow) return null; // Let standard flow handle the header, or skip it
+        
+        const [month, lecAtt, lecTotal, pracAtt, pracTotal] = row;
+        
+        let label = `In ${month}, `;
+        if (lecAtt !== '-' && lecTotal !== '-') {
+            label += `you attended ${lecAtt} out of ${lecTotal} theory classes. `;
+        }
+        if (pracAtt !== '-' && pracTotal !== '-') {
+            label += `You attended ${pracAtt} out of ${pracTotal} practical classes.`;
+        }
+        return label;
+    };
+
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
             <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
             
             {/* Header */}
-            <View style={styles.headerRow}>
+            <View style={styles.headerRow} accessible={false}>
                 <TouchableOpacity
                     style={styles.backButton}
-                    onPress={() => (navigation?.goBack ? navigation.goBack() : console.log('Back'))}>
-                    <Ionicons name="caret-back" size={27} color={theme.primary} />
+                    onPress={() => (navigation?.goBack ? navigation.goBack() : console.log('Back'))}
+                    accessibilityRole="button"
+                    accessibilityLabel="Go Back"
+                    accessibilityHint="Returns to the previous screen"
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                    <Ionicons name="caret-back" size={27} color={theme.primary} importantForAccessibility="no" />
                 </TouchableOpacity>
 
-                <Text style={[styles.headerTitle, { color: theme.text }]}>ATTENDANCE</Text>
+                <Text style={[styles.headerTitle, { color: theme.text }]} accessibilityRole="header">ATTENDANCE</Text>
 
                 <TouchableOpacity 
                     style={[styles.themeButton, { backgroundColor: theme.card }]} 
                     onPress={() => setIsDarkMode(!isDarkMode)}
+                    accessibilityRole="button"
+                    accessibilityLabel="Toggle Theme"
+                    accessibilityHint={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
-                     <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} />
+                     <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} importantForAccessibility="no" />
                 </TouchableOpacity>
             </View>
 
@@ -144,13 +169,13 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
                 
                 {loading ? (
                     <View style={styles.centerContainer}>
-                        <ActivityIndicator size="large" color={theme.primary} />
+                        <ActivityIndicator size="large" color={theme.primary} accessibilityLabel="Loading attendance data" />
                     </View>
                 ) : (!fullData || subjects.length === 0) ? (
                     
                     /* EMPTY STATE */
-                    <View style={styles.centerContainer}>
-                        <View style={[styles.emptyIconCtx, { backgroundColor: theme.iconBg }]}>
+                    <View style={styles.centerContainer} accessible={true}>
+                        <View style={[styles.emptyIconCtx, { backgroundColor: theme.iconBg }]} importantForAccessibility="no-hide-descendants">
                              <Ionicons name="calendar-outline" size={48} color={theme.primary} style={{ opacity: 0.8 }} />
                         </View>
                         <Text style={[styles.emptyTitle, { color: theme.text }]}>No Record Found</Text>
@@ -169,21 +194,26 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
                                 style={[styles.dropdown, { backgroundColor: theme.card, borderColor: theme.borderColor }]} 
                                 onPress={() => setShowDropdown(true)}
                                 activeOpacity={0.8}
+                                accessibilityRole="button"
+                                accessibilityLabel={`Selected subject: ${selectedSubject}. Open subject list.`}
+                                accessibilityHint="Opens a modal to select a different subject"
                             >
-                                <Text style={[styles.dropdownText, { color: theme.text }]} numberOfLines={1}>
+                                <Text style={[styles.dropdownText, { color: theme.text }]} numberOfLines={1} importantForAccessibility="no">
                                     {selectedSubject}
                                 </Text>
-                                <Ionicons name={'chevron-down'} size={18} color={theme.textSecondary} />
+                                <Ionicons name={'chevron-down'} size={18} color={theme.textSecondary} importantForAccessibility="no" />
                             </TouchableOpacity>
 
-                            <Modal visible={showDropdown} transparent={true} animationType="fade" onRequestClose={() => setShowDropdown(false)}>
+                            <Modal visible={showDropdown} transparent={true} animationType="fade" onRequestClose={() => setShowDropdown(false)} accessibilityViewIsModal={true}>
                                 <TouchableOpacity 
                                     style={styles.modalBackdrop} 
                                     activeOpacity={1} 
                                     onPressOut={() => setShowDropdown(false)} 
+                                    accessibilityLabel="Close subject list" 
+                                    accessibilityRole="button"
                                 >
                                     <View style={[styles.modalListContainer, { backgroundColor: theme.card, borderColor: theme.borderColor }]}>
-                                        <Text style={[styles.modalListHeader, { color: theme.text, backgroundColor: theme.iconBg, borderBottomWidth: .5, borderColor:theme.primary}]}>Select a Subject</Text>
+                                        <Text style={[styles.modalListHeader, { color: theme.text, backgroundColor: theme.iconBg, borderBottomWidth: .5, borderColor:theme.primary}]} accessibilityRole="header">Select a Subject</Text>
                                         <ScrollView style={{maxHeight: 350}} showsVerticalScrollIndicator={true}>
                                             {subjects.map((sub) => (
                                                 <TouchableOpacity 
@@ -193,11 +223,14 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
                                                         setSelectedSubject(sub);
                                                         setShowDropdown(false);
                                                     }}
+                                                    accessibilityRole="button"
+                                                    accessibilityLabel={sub}
+                                                    accessibilityState={{ selected: selectedSubject === sub }}
                                                 >
-                                                    <Text style={[styles.dropdownItemText, { color: theme.textSecondary }, selectedSubject === sub && { color: theme.primary, fontWeight: '700' }]}>
+                                                    <Text style={[styles.dropdownItemText, { color: theme.textSecondary }, selectedSubject === sub && { color: theme.primary, fontWeight: '700' }]} importantForAccessibility="no">
                                                         {sub}
                                                     </Text>
-                                                    {selectedSubject === sub && <Ionicons name="checkmark" size={16} color={theme.primary} />}
+                                                    {selectedSubject === sub && <Ionicons name="checkmark" size={16} color={theme.primary} importantForAccessibility="no" />}
                                                 </TouchableOpacity>
                                             ))}
                                         </ScrollView>
@@ -207,51 +240,62 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
                         </View>
 
                         {/* Table */}
-                        <View style={[styles.tableContainer, { borderColor: theme.borderColor }]}>
-                            {grid.map((row, rIdx) => (
-                                <View key={`row-${rIdx}`} style={[styles.tableRow, { backgroundColor: theme.card }]}>
-                                    {row.map((cell, cIdx) => {
-                                        const isHeaderRow = rIdx === 0;
-                                        const isRowHeader = cIdx === 0 && !isHeaderRow;
-                                        return (
-                                            <View 
-                                                key={`cell-${rIdx}-${cIdx}`} 
-                                                style={[
-                                                    styles.tableCell, 
-                                                    { borderColor: theme.borderColor },
-                                                    isHeaderRow && { backgroundColor: theme.headerBg },
-                                                    cIdx === COLS - 1 && styles.tableCellLast
-                                                ]}
-                                            >
-                                                <Text style={[
-                                                    styles.cellText, 
-                                                    { color: theme.text },
-                                                    isHeaderRow && { color: theme.headerText, fontWeight: '700', fontSize: 10 }, 
-                                                    isRowHeader && { fontWeight: '600' }
-                                                ]} numberOfLines={1} adjustsFontSizeToFit>
-                                                    {cell}
-                                                </Text>
-                                            </View>
-                                        );
-                                    })}
-                                </View>
-                            ))}
+                        <View style={[styles.tableContainer, { borderColor: theme.borderColor }]} accessibilityLabel={`Attendance records for ${selectedSubject}`}>
+                            {grid.map((row, rIdx) => {
+                                const isHeaderRow = rIdx === 0;
+                                const rowAccessibilityLabel = getRowAccessibilityLabel(row, isHeaderRow);
+
+                                return (
+                                    <View 
+                                        key={`row-${rIdx}`} 
+                                        style={[styles.tableRow, { backgroundColor: theme.card }]}
+                                        accessible={!isHeaderRow} // Make the whole row accessible as one unit (except header)
+                                        accessibilityLabel={rowAccessibilityLabel}
+                                        accessibilityRole={isHeaderRow ? "none" : "text"}
+                                    >
+                                        {row.map((cell, cIdx) => {
+                                            const isRowHeader = cIdx === 0 && !isHeaderRow;
+                                            return (
+                                                <View 
+                                                    key={`cell-${rIdx}-${cIdx}`} 
+                                                    style={[
+                                                        styles.tableCell, 
+                                                        { borderColor: theme.borderColor },
+                                                        isHeaderRow && { backgroundColor: theme.headerBg },
+                                                        cIdx === COLS - 1 && styles.tableCellLast
+                                                    ]}
+                                                    importantForAccessibility={isHeaderRow ? "yes" : "no-hide-descendants"} // Hide individual cells from screen reader, rely on row label
+                                                >
+                                                    <Text style={[
+                                                        styles.cellText, 
+                                                        { color: theme.text },
+                                                        isHeaderRow && { color: theme.headerText, fontWeight: '700', fontSize: 10 }, 
+                                                        isRowHeader && { fontWeight: '600' }
+                                                    ]} numberOfLines={1} adjustsFontSizeToFit>
+                                                        {cell}
+                                                    </Text>
+                                                </View>
+                                            );
+                                        })}
+                                    </View>
+                                );
+                            })}
                         </View>
                         
                         {/* Theory Percentage Footer */}
                         {fullData.theory_percentage && (
-                             <View style={[styles.footerInfo, { backgroundColor: theme.iconBg }]}>
-                                <Ionicons name="pie-chart" size={20} color={theme.primary} />
-                                <Text style={[styles.footerText, { color: theme.primary }]}>
+                             <View style={[styles.footerInfo, { backgroundColor: theme.iconBg }]} accessible={true} accessibilityLabel={`Overall Theory Attendance: ${fullData.theory_percentage} percent`}>
+                                <Ionicons name="pie-chart" size={20} color={theme.primary} importantForAccessibility="no" />
+                                <Text style={[styles.footerText, { color: theme.primary }]} importantForAccessibility="no">
                                     Theory Attendance: <Text style={{fontWeight: 'bold'}}>{fullData.theory_percentage}%</Text>
                                 </Text>
                              </View>
                         )}
                         {/* Practical Percentage Footer */}
                         {fullData.practical_percentage && (
-                             <View style={[styles.footerInfo, { backgroundColor: theme.iconBg, marginTop:10 }]}>
-                                <Ionicons name="pie-chart" size={20} color={theme.primary} />
-                                <Text style={[styles.footerText, { color: theme.primary }]}>
+                             <View style={[styles.footerInfo, { backgroundColor: theme.iconBg, marginTop:10 }]} accessible={true} accessibilityLabel={`Overall Practical Attendance: ${fullData.practical_percentage} percent`}>
+                                <Ionicons name="pie-chart" size={20} color={theme.primary} importantForAccessibility="no" />
+                                <Text style={[styles.footerText, { color: theme.primary }]} importantForAccessibility="no">
                                     Practical Attendance: <Text style={{fontWeight: 'bold'}}>{fullData.practical_percentage}%</Text>
                                 </Text>
                              </View>
