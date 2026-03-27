@@ -117,7 +117,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
       const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
       // 1. Check classes for TODAY
-      let todayClasses = timetableData[currentDay] || [];
+      let todayClasses = timetableData[currentDay-1] || [];
       
       // Sort by time just in case
       todayClasses.sort((a, b) => parseTimeToMinutes(a.slot) - parseTimeToMinutes(b.slot));
@@ -126,14 +126,14 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
           const cls = todayClasses[i];
           const classTimeMins = parseTimeToMinutes(cls.slot);
           
-          // If the class hasn't started yet, or just started (within last 15 mins), it's the "next" class
-          if (classTimeMins > currentMinutes - 15) {
+          // it's the "next" class
+          if (classTimeMins > currentMinutes - 10) {
               return { ...cls, dayName: 'Today' };
           }
       }
 
       // 2. If no more classes today, find the first class TOMORROW
-      const tomorrowDay = (currentDay + 1) % 7;
+      const tomorrowDay = (currentDay) % 7;
       let tomorrowClasses = timetableData[tomorrowDay] || [];
       
       if (tomorrowClasses.length > 0) {
