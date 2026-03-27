@@ -241,24 +241,24 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
         </View>
 
         {/* Toggle Theory/Practical */}
-        <View style={[styles.toggleContainer, { backgroundColor: theme.primary }]} accessible={true} accessibilityRole="radiogroup">
+        <View style={[styles.toggleContainer, { backgroundColor: theme.card }]} accessible={true} accessibilityRole="radiogroup">
             <TouchableOpacity 
-                style={[styles.toggleButton, selectedType === 'theory' && [styles.toggleActive, { backgroundColor: theme.background }]]}
+                style={[styles.toggleButton, selectedType === 'theory' && [styles.toggleActive, { backgroundColor: theme.primary }]]}
                 onPress={() => setSelectedType('theory')}
                 accessibilityRole="radio"
                 accessibilityState={{ checked: selectedType === 'theory' }}
                 accessibilityLabel="Theory Classes"
             >
-                <Text style={[styles.toggleText, { color: selectedType === 'theory' ? theme.text : theme.background }]} importantForAccessibility="no">Theory</Text>
+                <Text style={[styles.toggleText, { color: theme.text }]} importantForAccessibility="no">Theory</Text>
             </TouchableOpacity>
             <TouchableOpacity 
-                style={[styles.toggleButton, selectedType === 'practical' && [styles.toggleActive, { backgroundColor: theme.background }]]}
+                style={[styles.toggleButton, selectedType === 'practical' && [styles.toggleActive, { backgroundColor: theme.primary }]]}
                 onPress={() => setSelectedType('practical')}
                 accessibilityRole="radio"
                 accessibilityState={{ checked: selectedType === 'practical' }}
                 accessibilityLabel="Practical Classes"
             >
-                <Text style={[styles.toggleText, { color: selectedType === 'practical' ? theme.text : theme.background }]} importantForAccessibility="no">Practical</Text>
+                <Text style={[styles.toggleText, { color: theme.text }]} importantForAccessibility="no">Practical</Text>
             </TouchableOpacity>
         </View>
 
