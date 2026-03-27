@@ -2,6 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { decode, encode } from 'base-64';
 import * as Clipboard from 'expo-clipboard';
+import * as Notifications from 'expo-notifications';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -83,9 +84,66 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
     initialize();
   }, []);
 
+  const scheduleClassReminders = async (timetableData) => {
+    try {
+        // 1. Request permissions (required for iOS and Android 13+)
+        const { status } = await Notifications.getPermissionsAsync();
+        if (status !== 'granted') {
+            const { status: newStatus } = await Notifications.requestPermissionsAsync();
+            if (newStatus !== 'granted') return;
+        }
+
+        // 2. Clear previous reminders to avoid duplicates
+        await Notifications.cancelAllScheduledNotificationsAsync();
+
+        // 3. Schedule new reminders
+        for (const day of Object.keys(timetableData)) {
+            const classes = timetableData[day];
+            
+            for (const cls of classes) {
+                // Parse "10:30 AM"
+                const [time, modifier] = cls.slot.split(' ');
+                let [hours, minutes] = time.split(':').map(Number);
+                if (hours === 12) hours = 0;
+                if (modifier === 'PM') hours += 12;
+
+                // Set trigger to 10 mins before
+                let triggerMinutes = minutes - 10;
+                let triggerHours = hours;
+
+                if (triggerMinutes < 0) {
+                    triggerMinutes += 60;
+                    triggerHours -= 1;
+                }
+
+                // If class is at 08:30 AM, notification is at 08:20 AM
+                if (triggerHours >= 0) {
+                    await Notifications.scheduleNotificationAsync({
+                        content: {
+                            title: `${cls.subject} is about to start!`,
+                            body: `Proceed to Room ${cls.room || 'N/A'}.`,
+                            data: { screen: 'TimeTable' },
+                        },
+                        trigger: {
+                            weekday: parseInt(day) + 1,
+                            hour: triggerHours,
+                            minute: triggerMinutes,
+                            repeats: true,
+                        },
+                    });
+                }
+            }
+        }
+        console.log("Reminders re-scheduled successfully");
+    } catch (e) {
+        console.error("Notification scheduling failed:", e);
+    }
+  };
+
   const saveTimetable = async (newData) => {
-    setTimetable(newData);
-    await AsyncStorage.setItem('TIMETABLE_DATA', JSON.stringify(newData));
+      setTimetable(newData);
+      await AsyncStorage.setItem('TIMETABLE_DATA', JSON.stringify(newData));
+      await scheduleClassReminders(newData);
   };
 
   // Helper to match subject string with FACULTY_DATA PAPER_NAME
