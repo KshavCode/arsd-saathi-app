@@ -249,7 +249,7 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
                 accessibilityState={{ checked: selectedType === 'theory' }}
                 accessibilityLabel="Theory Classes"
             >
-                <Text style={[styles.toggleText, { color: theme.text }]} importantForAccessibility="no">Theory</Text>
+                <Text style={[styles.toggleText, { color: selectedType === 'theory' ? '#fff' : theme.primary }]} importantForAccessibility="no">Theory</Text>
             </TouchableOpacity>
             <TouchableOpacity 
                 style={[styles.toggleButton, selectedType === 'practical' && [styles.toggleActive, { backgroundColor: theme.primary }]]}
@@ -258,7 +258,7 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
                 accessibilityState={{ checked: selectedType === 'practical' }}
                 accessibilityLabel="Practical Classes"
             >
-                <Text style={[styles.toggleText, { color: theme.text }]} importantForAccessibility="no">Practical</Text>
+                <Text style={[styles.toggleText, { color: selectedType === 'practical' ? '#fff' : theme.primary }]} importantForAccessibility="no">Practical</Text>
             </TouchableOpacity>
         </View>
 
@@ -321,7 +321,7 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
                             <Text style={[styles.counterVal, { color: theme.text }]} accessibilityLabel={`${attendCount} classes planned to attend`}>{attendCount}</Text>
                             <TouchableOpacity 
                               style={[styles.counterBtn, { backgroundColor: theme.background }]} 
-                              onPress={() => setAttendCount(attendCount + 1)}
+                              onPress={() => {if (attendCount < 15) setAttendCount(Math.max(0, attendCount + 1))}}
                               accessibilityRole="button"
                               accessibilityLabel="Increase classes to attend"
                               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
