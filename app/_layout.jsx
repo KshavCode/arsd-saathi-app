@@ -66,12 +66,11 @@ export default function Stack1() {
                 }
             } catch (error) {
                 console.error("Session check failed:", error);
-                setInitialRoute('Login'); // Failsafe
+                setInitialRoute('Login'); 
             } finally {
                 setIsAppReady(true); // Let the app render
             }
         };
-
         verifySession();
     }, []);
 
@@ -90,7 +89,7 @@ export default function Stack1() {
     if (!isAppReady) {
         return (
             <View style={{ flex: 1, backgroundColor: currentBackgroundColor, justifyContent: 'center', alignItems: 'center' }}>
-                <ActivityIndicator size="large" color="#4F46E5" />
+                <ActivityIndicator size="large" color={isDarkMode ? Colors.dark.primary : Colors.light.primary} />
             </View>
         );
     }
