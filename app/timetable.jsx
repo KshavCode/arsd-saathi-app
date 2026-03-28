@@ -303,7 +303,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
             </TouchableOpacity>
         </View>
 
-        <View style={[styles.tabContainer, { backgroundColor: theme.card, marginTop: 10 }]} accessible={true} accessibilityRole="tablist">
+        <View style={[styles.tabContainer, { backgroundColor: theme.card, marginTop: 10, borderColor:theme.secondary, borderWidth:.5 }]} accessible={true} accessibilityRole="tablist">
             {['view', 'edit', 'share'].map((tab) => (
                 <TouchableOpacity
                   key={tab}
@@ -324,7 +324,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                 {DAYS.map((day, index) => (
                 <TouchableOpacity
                   key={day}
-                  style={[styles.dayPill, { backgroundColor: theme.card }, selectedDay === index && { backgroundColor: theme.primary }]}
+                  style={[styles.dayPill, { backgroundColor: theme.card, borderColor:theme.primary, borderWidth:1 }, selectedDay === index && { backgroundColor: theme.primary }]}
                   onPress={() => setSelectedDay(index)}
                   accessibilityRole="button"
                   accessibilityState={{ selected: selectedDay === index }}

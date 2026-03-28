@@ -249,15 +249,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
 
   const executeLogout = async () => {
       try {
-          const keysToRemove = [
-              'USER_CREDENTIALS', 
-              'BASIC_DETAILS', 
-              'ATTENDANCE_DATA', 
-              'FACULTY_DATA', 
-              'MENTOR_DATA', 
-              'LOGIN_TIMESTAMP', 
-              'DATA_TIMESTAMP'
-          ];
+          const keysToRemove = ['USER_CREDENTIALS', 'BASIC_DETAILS', 'ATTENDANCE_DATA', 'FACULTY_DATA', 'MENTOR_DATA', 'LOGIN_TIMESTAMP', 'DATA_TIMESTAMP'];
           
           if (deleteTimetable) {
               keysToRemove.push('TIMETABLE_DATA');

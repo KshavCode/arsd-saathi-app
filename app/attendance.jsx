@@ -188,7 +188,7 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
                         <View style={styles.controlsRow}>
                             <Text style={[styles.selectLabel, { color: theme.textSecondary }]}>Select Subject:</Text>
                             <TouchableOpacity
-                                style={[styles.dropdown, { backgroundColor: theme.card, borderColor: theme.borderColor }]}
+                                style={[styles.dropdown, { backgroundColor: theme.card, borderColor: theme.secondary }]}
                                 onPress={() => setShowDropdown(true)}
                                 activeOpacity={0.8}
                                 accessibilityRole="button"

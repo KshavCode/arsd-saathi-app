@@ -192,7 +192,7 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
         <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>1. Select Subject</Text>
         <View style={{ zIndex: 10, marginBottom: 20 }}>
             <TouchableOpacity 
-                style={[styles.dropdown, { backgroundColor: theme.card, borderColor: theme.borderColor }]} 
+                style={[styles.dropdown, { backgroundColor: theme.card, borderColor: theme.secondary }]} 
                 onPress={() => setShowDropdown(true)}
                 activeOpacity={0.8}
                 accessibilityRole="button"
@@ -241,7 +241,7 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
         </View>
 
         {/* Toggle Theory/Practical */}
-        <View style={[styles.toggleContainer, { backgroundColor: theme.card }]} accessible={true} accessibilityRole="radiogroup">
+        <View style={[styles.toggleContainer, { backgroundColor: theme.card, borderColor:theme.primary, borderWidth:.5 }]} accessible={true} accessibilityRole="radiogroup">
             <TouchableOpacity 
                 style={[styles.toggleButton, selectedType === 'theory' && [styles.toggleActive, { backgroundColor: theme.primary }]]}
                 onPress={() => setSelectedType('theory')}
@@ -360,7 +360,7 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
 
                 {/* Result Card */}
                 <View 
-                  style={[styles.resultCard, { backgroundColor: prediction.isLow ? theme.error : theme.primary }]}
+                  style={[styles.resultCard, { backgroundColor: prediction.isLow ? theme.error : theme.success }]}
                   accessible={true}
                   accessibilityLabel={`Predicted Attendance: ${prediction.newPercentage} percent. Based on ${currentStats.attended + attendCount} out of ${currentStats.held + attendCount + bunkCount} total classes.`}
                 >
