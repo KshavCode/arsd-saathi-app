@@ -2,7 +2,7 @@ import { FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, LIBRARY_U
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckBox from 'expo-checkbox';
-// import Constants from 'expo-constants';
+import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -16,9 +16,6 @@ const handleFeedback = () => {
   const body = "Name: \nRoll Number: \nDOB (optional, for testing): \n\nIssue/Feedback: ";
   Linking.openURL(`mailto:${email}?subject=${subject}&body=${body}`);
 };
-
-
-// --- Sub-Components ---
 
 // Grid Button
 const GridActionButton = ({ title, icon, onPress, theme, isDestructive, accessibilityHint='' }) => (
@@ -42,7 +39,6 @@ const GridActionButton = ({ title, icon, onPress, theme, isDestructive, accessib
 );
 
 // --- Main Screen ---
-
 export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }) {
   const theme = {
     background: isDarkMode ? Colors.dark.background : Colors.light.background,
@@ -78,18 +74,17 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
   useEffect(() => {
     const checkForUpdates = async () => {
       try {
-        // const currentVersion = Constants.expoConfig.version;
-        // const response = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest');
-        // if (!response.ok) return;
-        // const data = await response.json();
-        // const latestVersion = data.tag_name.replace('v', '');
+        const currentVersion = Constants.expoConfig.version;
+        const response = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest');
+        if (!response.ok) return;
+        const data = await response.json();
+        const latestVersion = data.tag_name.replace('v', '');
 
-        // if (latestVersion !== currentVersion) {
-        //     const downloadUrl = data.assets?.[0]?.browser_download_url || data.html_url;
-        //     setUpdateInfo({ version: latestVersion, url: downloadUrl });
-        //     setShowUpdateModal(true);
-        // }
-        console.log("Update Check")
+        if (latestVersion !== currentVersion) {
+            const downloadUrl = data.assets?.[0]?.browser_download_url || data.html_url;
+            setUpdateInfo({ version: latestVersion, url: downloadUrl });
+            setShowUpdateModal(true);
+        }
       } catch (error) {
         console.log("Auto-update check failed:", error); 
       }
@@ -97,7 +92,6 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
     checkForUpdates();
   }, []); 
 
-  // --- HELPER: Parse Time String to Minutes for Comparison ---
   // Converts "10:30 AM" to 630 (minutes since midnight)
   const parseTimeToMinutes = (timeStr) => {
       if (!timeStr) return 0;
@@ -108,7 +102,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
       return hours * 60 + minutes;
   };
 
-  // --- HELPER: Get Next Class from Timetable ---
+  // retrieve next class from timetable
   const getNextClass = (timetableData) => {
       if (!timetableData) return null;
 
@@ -116,23 +110,21 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
       const currentDay = now.getDay();
       const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-      // 1. Check classes for TODAY
+      // Check classes for today
       let todayClasses = timetableData[currentDay-1] || [];
       
-      // Sort by time just in case
+      // Sort by time 
       todayClasses.sort((a, b) => parseTimeToMinutes(a.slot) - parseTimeToMinutes(b.slot));
 
       for (let i = 0; i < todayClasses.length; i++) {
           const cls = todayClasses[i];
           const classTimeMins = parseTimeToMinutes(cls.slot);
-          
-          // it's the "next" class
           if (classTimeMins > currentMinutes - 10) {
               return { ...cls, dayName: 'Today' };
           }
       }
 
-      // 2. If no more classes today, find the first class TOMORROW
+      // otherwise first class of tomorrow
       const tomorrowDay = (currentDay) % 7;
       let tomorrowClasses = timetableData[tomorrowDay] || [];
       
@@ -141,7 +133,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
           return { ...tomorrowClasses[0], dayName: 'Tomorrow' };
       }
 
-      // 3. If no classes tomorrow, fallback
+      // No classes tomorrow
       return null;
   };
 
@@ -255,7 +247,6 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
       setShowLogoutModal(true)
   }
 
-  // --- THE NEW LOGOUT EXECUTION LOGIC ---
   const executeLogout = async () => {
       try {
           const keysToRemove = [
@@ -304,7 +295,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
       
-      {/* --- CUSTOM UPDATE MODAL --- */}
+      {/* --- UPDATE MODAL --- */}
       <Modal
         animationType="fade"
         transparent={true}
@@ -366,7 +357,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
         </View>
       </Modal>
 
-      {/* --- CUSTOM LOGOUT MODAL --- */}
+      {/* --- LOGOUT MODAL --- */}
       <Modal
         animationType="fade"
         transparent={true}
@@ -427,7 +418,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
         </View>
       </Modal>
 
-      {/* Background Scraper Component */}
+      {/* Background Scraper */}
       {isSyncing && savedCredentials && (
           <ArsdScraper credentials={savedCredentials} onProgress={(msg) => console.log("Background Sync:", msg)} onFinish={handleSyncCompletion} onError={handleSyncError} />
       )}
@@ -480,10 +471,10 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
           </View>
         </View>
 
-        {/* Hero Dashboard Container (Stacked Layout) */}
+        {/* Dashboard */}
         <View style={[styles.heroContainer, { backgroundColor: theme.card, borderColor: theme.borderColor }]}>
             
-            {/* Top Row: Attendance */}
+            {/* Top Row - Attendance */}
             <View style={styles.heroMainRow} accessible={true} accessibilityLabel={`Theory Attendance: ${userData.percent_attendance}%`}>
                 <View style={[styles.heroIconBox, { backgroundColor: isAttendanceLow ? theme.error : "#10B981" }]} importantForAccessibility="no-hide-descendants">
                     <Ionicons name="pie-chart" size={24} color="#FFF" />
@@ -501,7 +492,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
 
             <View style={[styles.heroDivider, { backgroundColor: theme.separator }]} />
 
-            {/* Middle Row: Mentor */}
+            {/* Middle Row - Mentor */}
             <View style={styles.mentorRow} accessible={true} accessibilityLabel={`Assigned Mentor: ${userData.mentor_name}`}>
                  <Ionicons name="person-outline" size={18} color={theme.primary} importantForAccessibility="no" />
                  <View style={{marginLeft: 12, flex: 1}} importantForAccessibility="no-hide-descendants">
@@ -510,7 +501,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
                  </View>
             </View>
 
-            {/* --- NEW: Upcoming Class Row --- */}
+            {/* --- Upcoming Class Row --- */}
             {nextClassInfo && (
                 <>
                     <View style={[styles.heroDivider, { backgroundColor: theme.separator }]} />
@@ -542,7 +533,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
             )}
         </View>
 
-        {/* Grid Navigation */}
+        {/* Grid Buttons */}
         <Text style={[styles.sectionHeader, { color: theme.text, marginTop: 10 }]} accessibilityRole="header" accessibilityLabel='Quick Actions'>Quick Actions</Text>
         <View style={styles.actionsGrid}>
             <GridActionButton title="Attendance" icon="bar-chart" onPress={() => navigation.navigate("Attendance")} theme={theme} />
@@ -635,7 +626,7 @@ const styles = StyleSheet.create({
     username: { fontSize: 28, fontWeight: '900', letterSpacing: -0.5 },
     themeButton: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 3 },
     
-    // Hero Container (Stacked Layout)
+    // Dashboard
     heroContainer: { borderRadius: 24, padding: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 12, elevation: 4, marginBottom: 25, borderWidth: 1 },
     heroMainRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     heroIconBox: { width: 56, height: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginRight: 16 },

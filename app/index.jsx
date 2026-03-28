@@ -1,4 +1,6 @@
 import { PRIVACY_URL, TERMS_URL } from '@/constants/links';
+import { Colors } from "@/constants/themeStyle";
+import ArsdScraper from '@/services/ArsdScraper';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
@@ -6,8 +8,6 @@ import * as Linking from "expo-linking";
 import React, { useState } from "react";
 import { ActivityIndicator, Alert, Dimensions, Image, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Colors } from "../constants/themeStyle";
-import ArsdScraper from '../services/ArsdScraper';
 
 const { height } = Dimensions.get("window");
 
@@ -19,14 +19,14 @@ const handleFeedback = () => {
 };
 
 export default function Login({ navigation }) {
-    const [roll, setRoll] = useState("23/38046");
-    const [fullName, setFullName] = useState("Keshav Pal");
-    const [dob, setDob] = useState("02-08-2005");
+    const [roll, setRoll] = useState("");
+    const [fullName, setFullName] = useState("");
+    const [dob, setDob] = useState("");
     const [consentGiven, setConsentGiven] = useState(true);
     const [isScraping, setIsScraping] = useState(false);
     const [progressMsg, setProgressMsg] = useState("");
 
-    // --- LOGIC FIX: Button remains disabled unless inputs are filled AND checkbox is ticked ---
+    // --- Connect button disabled
     const isReadyToSync = roll.length > 0 && fullName.length > 0 && dob.length > 0 && consentGiven;
 
     const handleLogin = () => {
@@ -91,7 +91,7 @@ export default function Login({ navigation }) {
                                 <Image source={require("../assets/images/icon.png")} style={{ width: "70%", height: "70%" }} />
                             </View>
                             <Text style={styles.appName}>ArsdSaathi</Text>
-                            <Text style={styles.tagline}>Your College Companion</Text>
+                            <Text style={styles.tagline}>A College Companion like No Other!</Text>
                         </SafeAreaView>
                     </LinearGradient>
 
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     linkText: { color: '#4F46E5', fontWeight: '700', textDecorationLine: 'underline' },
     actionArea: { marginTop: 15, minHeight: 60, justifyContent: 'center' },
     loginButton: { backgroundColor: Colors.light.primary, flexDirection: "row", alignItems: "center", justifyContent: "center", height: 50, borderRadius: 12, elevation: 4 },
-    disabledButton: { backgroundColor: "#A5B4FC", elevation: 0 },
+    disabledButton: { backgroundColor: "#a5a5a5", elevation: 0 },
     loginButtonText: { color: "#FFF", fontSize: 16, fontWeight: "600", marginRight: 8 },
     loadingState: { alignItems: "center", gap: 8 },
     loadingText: { fontSize: 13, color: "#4F46E5", fontWeight: "600" },

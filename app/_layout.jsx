@@ -1,9 +1,9 @@
+import { Colors } from '@/constants/themeStyle';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createStackNavigator } from '@react-navigation/stack';
 import * as NavigationBar from 'expo-navigation-bar';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, View } from 'react-native';
-import { Colors } from '../constants/themeStyle';
 
 import Attendance from './attendance';
 import Details from './basic';

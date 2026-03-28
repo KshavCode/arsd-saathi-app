@@ -1,13 +1,12 @@
+import { Colors } from '@/constants/themeStyle';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors } from '../constants/themeStyle';
 
-// Helper component for a single row of detail
 const DetailRow = ({ label, value, icon, theme, isLast }) => (
-    <View 
+    <View
       style={[styles.detailRow, !isLast && { borderBottomColor: theme.borderColor, borderBottomWidth: 1 }]}
       accessible={true}
       accessibilityRole="text"
@@ -24,7 +23,6 @@ const DetailRow = ({ label, value, icon, theme, isLast }) => (
 );
 
 export default function DetailsTab({ navigation, isDarkMode, setIsDarkMode }) {
-    
     const theme = {
         background: isDarkMode ? Colors.dark.background : Colors.light.background,
         card: isDarkMode ? Colors.dark.card : Colors.light.card,
@@ -41,19 +39,18 @@ export default function DetailsTab({ navigation, isDarkMode, setIsDarkMode }) {
     useEffect(() => {
         const loadData = async () => {
             try {
-                // Fetch the BASIC_DETAILS key saved by the Scraper
                 const basicRaw = await AsyncStorage.getItem('BASIC_DETAILS');
-                
-                // Also fetch CREDENTIALS as a fallback for name/rollNo if basic is missing
+
+                // fetch credentials in case of error
                 const credsRaw = await AsyncStorage.getItem('USER_CREDENTIALS');
-                
+
                 let combinedData = {};
 
                 if (basicRaw) {
                     combinedData = JSON.parse(basicRaw);
                 }
-                
-                // Merge/Fallback logic
+
+                // Merge
                 if (credsRaw) {
                     const creds = JSON.parse(credsRaw);
                     combinedData.name = combinedData.name || creds.name;
@@ -64,14 +61,12 @@ export default function DetailsTab({ navigation, isDarkMode, setIsDarkMode }) {
             } catch (error) {
                 console.error("Error loading Profile data:", error);
             } finally {
-                // 🔴 CRITICAL FIX: Stop loading whether success or fail
                 setLoading(false);
             }
         };
         loadData();
     }, []);
 
-    // Keys matching your scraper's output
     const displayFields = [
         { key: 'name', label: 'Student Name', icon: 'person' },
         { key: 'rollNo', label: 'College Roll No.', icon: 'id-card' },
@@ -87,7 +82,6 @@ export default function DetailsTab({ navigation, isDarkMode, setIsDarkMode }) {
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
             <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
-
             <View style={styles.headerRow} accessible={false}>
                 <TouchableOpacity
                     style={styles.backButton}
@@ -99,11 +93,11 @@ export default function DetailsTab({ navigation, isDarkMode, setIsDarkMode }) {
                 >
                     <Ionicons name="caret-back" size={24} color={theme.primary} importantForAccessibility="no" />
                 </TouchableOpacity>
-                
+
                 <Text style={[styles.headerTitle, { color: theme.text }]} accessibilityRole="header">PERSONAL DETAILS</Text>
-                
-                <TouchableOpacity 
-                    style={[styles.themeButton, { backgroundColor: theme.card }]} 
+
+                <TouchableOpacity
+                    style={[styles.themeButton, { backgroundColor: theme.card }]}
                     onPress={() => setIsDarkMode(!isDarkMode)}
                     accessibilityRole="button"
                     accessibilityLabel="Toggle Theme"
@@ -120,7 +114,7 @@ export default function DetailsTab({ navigation, isDarkMode, setIsDarkMode }) {
                 ) : (
                     <View style={[styles.cardContainer, { backgroundColor: theme.card, borderColor: theme.borderColor }]}>
                         {profileData ? displayFields.map((field, index) => (
-                            <DetailRow 
+                            <DetailRow
                                 key={field.key}
                                 label={field.label}
                                 value={profileData[field.key]}

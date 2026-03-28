@@ -1,9 +1,9 @@
+import { Colors } from '@/constants/themeStyle';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Modal, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors } from '../constants/themeStyle';
 
 export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode }) {
     const theme = {

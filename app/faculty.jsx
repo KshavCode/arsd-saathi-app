@@ -5,13 +5,12 @@ import { ActivityIndicator, FlatList, StatusBar, StyleSheet, Text, TouchableOpac
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../constants/themeStyle';
 
-// Component for a Single Faculty Member Card
+
 const FacultyCard = ({ data, theme }) => {
     const facultyName = data.FAC_NAME || "Unknown Faculty";
     const paperName = data.PAPER_NAME || data.Subject || "N/A";
     const section = data["PAPER SECTION"] || data["Section"];
 
-    // Create a cohesive string for the screen reader
     const accessibilityString = `Faculty Name: ${facultyName}. Teaching Subject: ${paperName}. ${section ? `Section: ${section}.` : 'N/A'}`;
 
     return (
@@ -43,15 +42,12 @@ const FacultyCard = ({ data, theme }) => {
                 </Text>
 
                 <View style={styles.badgesRow}>
-                    {/* Paper ID Badge */}
                     <View style={[styles.badge, { backgroundColor: theme.iconBg }]}>
                         <Ionicons name="document-text-outline" size={12} color={theme.primary} style={{ marginRight: 4 }} />
                         <Text style={[styles.badgeText, { color: theme.primary }]}>
                             {data["Paper Code"] || data.PAPER_ID || "No ID"}
                         </Text>
                     </View>
-
-                    {/* Section Badge */}
                     {section && (
                         <View style={[styles.badge, { backgroundColor: theme.iconBg }]}>
                             <Ionicons name="people-outline" size={12} color={theme.primary} style={{ marginRight: 4 }} />
@@ -92,7 +88,6 @@ export default function FacultyTab({ navigation, isDarkMode, setIsDarkMode }) {
             } catch (error) {
                 console.error("Error loading faculty data:", error);
             } finally {
-                //  loading spinner always stops
                 setLoading(false);
             }
         };
