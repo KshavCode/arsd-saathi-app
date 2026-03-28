@@ -463,7 +463,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
 
             {/* === SHARE TAB === */}
             {activeTab === 'share' && (
-                <View style={{ gap: 20, height:700 }}>
+                <View style={{ gap: 20, height:900 }}>
                     <View style={[styles.formCard, { backgroundColor: theme.card }]} accessible={true} accessibilityRole="header">
                         <View style={[styles.iconCircle, { backgroundColor: theme.iconBg }]} importantForAccessibility="no-hide-descendants">
                             <Ionicons name="share-social-outline" size={32} color={theme.primary} />
@@ -522,14 +522,14 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                         <Text style={[styles.shareDesc, { color: theme.textSecondary }]} importantForAccessibility="no">Trigger a test reminder to confirm your phone settings are correct.</Text>
                         
                         <TouchableOpacity 
-                            style={[styles.primaryButton, { backgroundColor: theme.success, width: '100%' }]} 
+                            style={[styles.primaryButton, { backgroundColor: theme.primary, width: '100%' }]} 
                             onPress={handleTestNotification}
                             accessibilityRole="button"
                             accessibilityLabel="Test Notifications"
                             accessibilityHint="Fires a test notification in 5 seconds"
                         >
-                            <Ionicons name="notifications" size={18} color="#FFF" style={{ marginRight: 8 }} importantForAccessibility="no" />
-                            <Text style={styles.primaryButtonText} importantForAccessibility="no">Test Now (5s delay)</Text>
+                            <Ionicons name="notifications" size={18} color='#fff' style={{ marginRight: 8 }} importantForAccessibility="no" />
+                            <Text style={styles.primaryButtonText} importantForAccessibility="no">Test Now</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
