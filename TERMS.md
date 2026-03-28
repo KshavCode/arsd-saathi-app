@@ -13,15 +13,19 @@ By using ArsdSaathi, you agree to the following terms. This document is designed
 - **Scraper Logic**: Because the app relies on "scraping" the official website, changes to the college's web portal may cause the app to stop working temporarily.
 - **Maintenance**: We will try our best to release updates and fixes (Patches) in a timely manner, but we do not guarantee 100% uptime.
 
-### 4. User Responsibility
+### 4. Timetable Sharing (User Generated Content)
+- **Public Codes**: When a user generates an export code for their timetable, they acknowledge that any person with access to that code can view the scheduled classes and room numbers contained within.
+- **Content Accuracy**: While the app facilitates sharing, the developer is not liable for academic consequences resulting from incorrect or outdated timetable data manually entered or shared by users.
+
+### 5. User Responsibility
 - **Device Security**: Since your data is stored locally on your phone, you are responsible for keeping your device secure.
 - **Fair Use**: You agree not to use the app to attempt unauthorized access to portal or to interfere with the college's server operations.
 
-### 5. Accuracy of Predictions
+### 6. Accuracy of Predictions
 The 'Attendance Predictor' features are provided for informational and estimation purposes only. While the app strives for mathematical accuracy based on provided data, these projections do not account for teacher-specific adjustments, late portal entries, or manual overrides by the College administration.
 
-### 6. The "Bunk" Clause
+### 7. The "Bunk" Clause
 Users are solely responsible for their actual attendance. ArsdSaathi shall not be held liable for any academic consequences—including but not limited to being barred from examinations or loss of internal assessment marks—resulting from a user's decision to miss classes based on app projections.
 
-### 7. Limitation of Liability
+### 8. Limitation of Liability
 The developers of ArsdSaathi shall not be held liable for any data loss, account issues, or academic consequences resulting from the use of this application. This app is provided "as-is" without any warranties.
