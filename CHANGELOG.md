@@ -1,15 +1,15 @@
 # ArsdSaathi v1.4.0 is now available!
 
 ## 💫 What's New?
-- **Additional Links**: More helpful links are added in order to help students
-- **Timetable**: Now students can set the timetable for all other students with the same subject! Using this, the app notifies you 10 minutes before your class starts.
-- **Attendance Predictor**: Shows the marks which can be obtained with predicted attendance percentage.
-- **Accessibility**: Every functional element of the app is supporting accessibility, essential for the differently abled students.
-- **Themes**: Students can choose from different themes according to their liking! Make ArsdSaathi one of your own!
+- **Optimized User Interface**: Modified the application layout to facilitate a "minimal action" workflow.
+- **Timetable Management**: Introduced a shareable, customizable and flexible timetable system which allow users to manually append GE, SEC, and VAC, along with their semester subjects. Reflects the next class in the dashboard as well!
+- **Accessibility**: Eevery functional element has been optimized for Screen Readers and assistive technologies.
+- **Additional Links**: More helpful links are added in order to help students access various resources in one click.
 
 ## 🔍 Fixes
-- **Attendance Predictor**: Now the number of classes are limited. Earlier, a student could exploit the 'plus' button to estimate for 200 classes. Now, limit has been set to 50.
-- **Home Layout**: Enhanced the User Experience with grid based buttons and display of information is now more organized.
+- **Attendance Predictor**: Predictive class increments are now capped at a maximum of 15 sessions to maintain data integrity and practical use cases. Moreover, displays potential attendance marks awarded for percentage based on range.
+- **Home Layout**: Transitioned the Home Layout to a high-efficiency grid system, reducing visual clutter and improving the display of information.
+- **Log Out Confirmation**: A standardized dialogue system now prevents accidental session termination, requiring explicit user verification!
 
 
 ## 📦 How to Install
@@ -21,7 +21,7 @@
 ## 🔒 Security & Verification
 To verify the integrity of this APK, you can compare the SHA-256 checksum:
 ```bash
-2e8859ae9d97aafc81d5dc8a7f57ddf90d083b3e024ebe7bebf79970345ce653
+sha256_code_here
 ```
 
 🚩 Issues
