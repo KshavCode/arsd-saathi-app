@@ -41,7 +41,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
 
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('view'); 
-  const [selectedDay, setSelectedDay] = useState(new Date().getDay());
+  const [selectedDay, setSelectedDay] = useState(new Date().getDay()-1);
   
   const [timetable, setTimetable] = useState(DEFAULT_TIMETABLE);
   const [availableSubjects, setAvailableSubjects] = useState([]);
