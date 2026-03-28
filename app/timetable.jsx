@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { decode, encode } from 'base-64';
 import * as Clipboard from 'expo-clipboard';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, Share, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../constants/themeStyle';
 
@@ -173,8 +173,9 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
         Alert.alert("Error!", "Kindly create your timetable first.");
         return;
       }
-      await Clipboard.setStringAsync(code);
       Alert.alert("Copied!", "Your timetable code has been copied to the clipboard.");
+      await Clipboard.setStringAsync(code);
+      await Share.share({ message: code, title: 'Timetable Import Code for ArsdSaathi' });
     } catch (error) {
       Alert.alert("Error", "Could not copy to clipboard.");
       console.log(error)
