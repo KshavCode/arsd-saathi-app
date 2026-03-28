@@ -5,10 +5,10 @@ import * as Clipboard from 'expo-clipboard';
 import * as Notifications from 'expo-notifications';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView, Modal, Platform,
-  ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView, Modal, Platform,
+    ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../constants/themeStyle';
@@ -86,28 +86,42 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
 
   const scheduleClassReminders = async (timetableData) => {
     try {
-        // 1. Request permissions (required for iOS and Android 13+)
-        const { status } = await Notifications.getPermissionsAsync();
-        if (status !== 'granted') {
-            const { status: newStatus } = await Notifications.requestPermissionsAsync();
-            if (newStatus !== 'granted') return;
+        // 1. Setup Android Channel (Required for standalone builds)
+        if (Platform.OS === 'android') {
+            await Notifications.setNotificationChannelAsync('class-reminders', {
+                name: 'Class Reminders',
+                importance: Notifications.AndroidImportance.MAX,
+                vibrationPattern: [0, 250, 250, 250],
+                lightColor: '#9a66f1',
+            });
         }
 
-        // 2. Clear previous reminders to avoid duplicates
+        // 2. Request runtime permissions (For Android 13+)
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        if (existingStatus !== 'granted') {
+            const { status } = await Notifications.requestPermissionsAsync();
+            finalStatus = status;
+        }
+
+        if (finalStatus !== 'granted') {
+            console.log("Notification permissions not granted.");
+            return;
+        }
+
+        // 3. Clear existing to prevent duplicates
         await Notifications.cancelAllScheduledNotificationsAsync();
 
-        // 3. Schedule new reminders
+        // 4. Schedule based on your Timetable structure
         for (const day of Object.keys(timetableData)) {
             const classes = timetableData[day];
             
             for (const cls of classes) {
-                // Parse "10:30 AM"
                 const [time, modifier] = cls.slot.split(' ');
                 let [hours, minutes] = time.split(':').map(Number);
                 if (hours === 12) hours = 0;
                 if (modifier === 'PM') hours += 12;
 
-                // Set trigger to 10 mins before
                 let triggerMinutes = minutes - 10;
                 let triggerHours = hours;
 
@@ -116,27 +130,58 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                     triggerHours -= 1;
                 }
 
-                // If class is at 08:30 AM, notification is at 08:20 AM
                 if (triggerHours >= 0) {
                     await Notifications.scheduleNotificationAsync({
                         content: {
-                            title: `${cls.subject} is about to start!`,
-                            body: `Proceed to Room ${cls.room || 'N/A'}.`,
+                            title: `Class in 10 mins: ${cls.subject}`,
+                            body: `Room ${cls.room || 'N/A'}. Head over now!`,
+                            sound: true,
                             data: { screen: 'TimeTable' },
+                            priority: Notifications.AndroidNotificationPriority.MAX,
                         },
                         trigger: {
-                            weekday: parseInt(day) + 1,
+                            weekday: parseInt(day) + 1, // 1=Sun, 2=Mon... 7=Sat
                             hour: triggerHours,
                             minute: triggerMinutes,
                             repeats: true,
+                            channelId: 'class-reminders', // Must match the channel ID above
                         },
                     });
                 }
             }
         }
-        console.log("Reminders re-scheduled successfully");
+        console.log("All class reminders successfully scheduled!");
     } catch (e) {
-        console.error("Notification scheduling failed:", e);
+        console.error("Scheduler Error:", e);
+    }
+  };
+
+  // --- NEW: Test Notification Helper ---
+  const handleTestNotification = async () => {
+    try {
+        if (Platform.OS === 'android') {
+            await Notifications.setNotificationChannelAsync('class-reminders', {
+                name: 'Class Reminders',
+                importance: Notifications.AndroidImportance.MAX,
+                vibrationPattern: [0, 250, 250, 250],
+                lightColor: '#9a66f1',
+            });
+        }
+        
+        await Notifications.scheduleNotificationAsync({
+            content: {
+                title: "Test :0",
+                body: "This is a test notification. It works!",
+                sound: true,
+            },
+            trigger: {
+                seconds: 5, // Fire in 5 seconds
+                channelId: 'class-reminders',
+            },
+        });
+        Alert.alert("Success", "A test notification will appear in 5 seconds.");
+    } catch (error) {
+        Alert.alert("Test Failed", error.message);
     }
   };
 
@@ -465,6 +510,26 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                             accessibilityHint="Overwrites your current timetable with the pasted code data"
                         >
                             <Text style={[styles.primaryButtonText, !importCode && { color: theme.textSecondary }]} importantForAccessibility="no">Import Data</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* NEW: TEST NOTIFICATION BUTTON */}
+                    <View style={[styles.formCard, { backgroundColor: theme.card }]} accessible={true} accessibilityRole="header">
+                        <View style={[styles.iconCircle, { backgroundColor: theme.iconBg }]} importantForAccessibility="no-hide-descendants">
+                            <Ionicons name="notifications-outline" size={32} color={theme.primary} />
+                        </View>
+                        <Text style={[styles.shareTitle, { color: theme.text }]} importantForAccessibility="no">Test Notifications</Text>
+                        <Text style={[styles.shareDesc, { color: theme.textSecondary }]} importantForAccessibility="no">Trigger a test reminder to confirm your phone settings are correct.</Text>
+                        
+                        <TouchableOpacity 
+                            style={[styles.primaryButton, { backgroundColor: theme.success, width: '100%' }]} 
+                            onPress={handleTestNotification}
+                            accessibilityRole="button"
+                            accessibilityLabel="Test Notifications"
+                            accessibilityHint="Fires a test notification in 5 seconds"
+                        >
+                            <Ionicons name="notifications" size={18} color="#FFF" style={{ marginRight: 8 }} importantForAccessibility="no" />
+                            <Text style={styles.primaryButtonText} importantForAccessibility="no">Test Now (5s delay)</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
