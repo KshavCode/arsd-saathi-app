@@ -17,3 +17,5 @@ export const FEES_PORTAL_URL = 'http://www.arsdcollege.in/OnlinePayment_ARSD/Stu
 export const FEE_STRUCTURE_URL = 'https://arsdcollege.ac.in/fee-structure/';
 
 export const HANDBOOK_URL = 'https://arsdcollege.ac.in/wp-content/uploads/2024/08/Student%20Handbook%202024-25.pdf';
+
+export const LIBRARY_URL = 'https://library.arsdcollege.ac.in/';

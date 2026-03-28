@@ -1,4 +1,4 @@
-import { FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, PRIVACY_URL, SHIVAM_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
+import { FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, LIBRARY_URL, PRIVACY_URL, SHIVAM_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckBox from 'expo-checkbox';
@@ -564,14 +564,14 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
               <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(FEE_STRUCTURE_URL)} accessibilityRole="link" accessibilityHint="Redirects to the fee structure on the college website" hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
                 <Text style={[styles.footerLink, { color: theme.footer }]}>Fee Structure</Text>
               </TouchableOpacity>
+              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(LIBRARY_URL)} accessibilityRole="link" accessibilityHint="Redirects to the fee structure on the college website" hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+                <Text style={[styles.footerLink, { color: theme.footer }]}>Library</Text>
+              </TouchableOpacity>
               <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(SOCIETIES_URL)} accessibilityRole="link" accessibilityHint="a link to check the available socities or clubs found in the college" hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
                 <Text style={[styles.footerLink, { color: theme.footer }]}>Societies</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(HANDBOOK_URL)} accessibilityRole="link" accessibilityHint="Download the student helper handbook provided by the college." hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
                 <Text style={[styles.footerLink, { color: theme.footer }]}>Handbook</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.footerItem} onPress={() => handleFeedback()} accessibilityRole="link" accessibilityHint="Email the developer's through this link." hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
-                <Text style={[styles.footerLink, { color: theme.footer }]}>Report Issue</Text>
               </TouchableOpacity>
             </View>
 
@@ -584,6 +584,11 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
               <Text style={{color: theme.separator}} importantForAccessibility="no">•</Text>
               <TouchableOpacity onPress={() => Linking.openURL(PRIVACY_URL)} accessibilityRole="link" accessibilityHint="Opens the link to the privacy policy of this application" hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
                 <Text style={[styles.footerLegalText, { color: theme.footer }]}>Privacy Policy</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={[styles.footerLegal, {marginTop: 15}]}>
+              <TouchableOpacity style={styles.footerItem} onPress={() => handleFeedback()} accessibilityRole="link" accessibilityHint="Email the developer's through this link." hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+                <Text style={[styles.footerLink, { color: theme.footer }]}>Report an Issue?</Text>
               </TouchableOpacity>
             </View>
         </View>
@@ -663,7 +668,7 @@ const styles = StyleSheet.create({
 
     // Footer Block
     footerContainer: { borderRadius: 24, padding: 20, marginTop: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
-    footerGrid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: 16 },
+    footerGrid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: 15 },
     footerItem: { width: '33%', alignItems: 'center' },
     footerLink: { fontSize: 12, fontWeight: '600', textAlign: 'center' },
     footerDivider: { height: 1, width: '100%', marginVertical: 16 },
