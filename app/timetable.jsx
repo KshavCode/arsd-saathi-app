@@ -94,7 +94,6 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
 
   const scheduleClassReminders = async (timetableData) => {
     try {
-        // 1. Setup Android Channel (Required for standalone builds)
         if (Platform.OS === 'android') {
             await Notifications.setNotificationChannelAsync('class-reminders', {
                 name: 'Class Reminders',
@@ -104,7 +103,6 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
             });
         }
 
-        // 2. Request runtime permissions (For Android 13+)
         const { status: existingStatus } = await Notifications.getPermissionsAsync();
         let finalStatus = existingStatus;
         if (existingStatus !== 'granted') {
@@ -112,18 +110,19 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
             finalStatus = status;
         }
 
-        if (finalStatus !== 'granted') {
-            console.log("Notification permissions not granted.");
-            return;
-        }
+        if (finalStatus !== 'granted') return;
 
-        // 3. Clear existing to prevent duplicates
         await Notifications.cancelAllScheduledNotificationsAsync();
 
-        // 4. Schedule based on your Timetable structure
+        const now = new Date();
+        const currentDay = now.getDay(); // 0 (Sun) to 6 (Sat)
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+
         for (const day of Object.keys(timetableData)) {
             const classes = timetableData[day];
-            
+            const scheduleDay = parseInt(day); // 0-6 (Sun-Sat)
+
             for (const cls of classes) {
                 const [time, modifier] = cls.slot.split(' ');
                 let [hours, minutes] = time.split(':').map(Number);
@@ -139,6 +138,12 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                 }
 
                 if (triggerHours >= 0) {
+                    if (scheduleDay === currentDay) {
+                        if (triggerHours < currentHour || (triggerHours === currentHour && triggerMinutes <= currentMinute)) {
+                            continue; 
+                        }
+                    }
+
                     await Notifications.scheduleNotificationAsync({
                         content: {
                             title: `Class in 10 mins: ${cls.subject}`,
@@ -148,23 +153,23 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                             priority: Notifications.AndroidNotificationPriority.MAX,
                         },
                         trigger: {
-                            weekday: parseInt(day) + 1, // 1=Sun, 2=Mon... 7=Sat
+                            weekday: scheduleDay + 1, // 1=Sun, 2=Mon...
                             hour: triggerHours,
                             minute: triggerMinutes,
                             repeats: true,
-                            channelId: 'class-reminders', // Must match the channel ID above
+                            channelId: 'class-reminders',
                         },
                     });
                 }
             }
         }
-        console.log("All class reminders successfully scheduled!");
+        console.log("Class reminders cleaned and scheduled.");
     } catch (e) {
         console.error("Scheduler Error:", e);
     }
   };
 
-  // --- NEW: Test Notification Helper ---
+  // Test Notification Helper ---
   const handleTestNotification = async () => {
     try {
         if (Platform.OS === 'android') {
