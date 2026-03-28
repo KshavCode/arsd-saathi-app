@@ -71,7 +71,7 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
               return;
           }
 
-          log("🔑 Verifying credentials...");
+          log("Verifying credentials...");
           input.value = "${credentials.rollNo}";
           document.getElementById("txtname").value = "${credentials.name}";
           
@@ -105,7 +105,7 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
 
         waitForElement("lbleno", (el) => {
           if (!el) return;
-          log("Extracting Profile...");
+          log("Extracting information...");
           const profile = {
             name: getText("lblname") || "${credentials.name}",
             rollNo: getText("lblrollno") || "${credentials.rollNo}",
@@ -211,7 +211,6 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
                 // STEP 3: Scrape Practical, Combine, and Redirect
                 const prData = scrapeTableData();
                 
-                // 🛠️ FIX 2 (Continued): Retrieve both from storage
                 const savedTemp = JSON.parse(sessionStorage.getItem('TEMP_TE_DATA') || '{"data":{}, "percent":"0"}');
                 const teData = savedTemp.data;
                 const theoryPercent = savedTemp.percent;
@@ -270,7 +269,7 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
       // REDIRECT
       else if (url.includes("Home.aspx") || document.body.innerText.includes("Welcome")) {
         sessionStorage.removeItem("login_attempted");
-        log("🚀 Login Success! Redirecting...");
+        log("Retrieving data...");
         window.location.href = "https://www.arsdcollege.in/Internet/Student/STD_Basic_Details.aspx";
       }
 

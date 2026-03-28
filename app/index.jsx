@@ -22,7 +22,7 @@ export default function Login({ navigation }) {
     const [roll, setRoll] = useState("");
     const [fullName, setFullName] = useState("");
     const [dob, setDob] = useState("");
-    const [consentGiven, setConsentGiven] = useState(true);
+    const [consentGiven, setConsentGiven] = useState(false);
     const [isScraping, setIsScraping] = useState(false);
     const [progressMsg, setProgressMsg] = useState("");
 
