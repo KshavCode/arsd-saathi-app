@@ -1,4 +1,4 @@
-import { FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, LIBRARY_URL, PRIVACY_URL, SHIVAM_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
+import { FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, LIBRARY_URL, PRIVACY_URL, SAMARTH_URL, SHIVAM_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckBox from 'expo-checkbox';
@@ -541,6 +541,9 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
               <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(STUDENT_PORTAL_URL)} accessibilityRole="link" accessibilityHint="Redirects to the college's official student portal" hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
                 <Text style={[styles.footerLink, { color: theme.footer }]}>Official Portal</Text>
               </TouchableOpacity>
+              <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(SAMARTH_URL)} accessibilityRole="link" accessibilityHint="Link for fee payment portal" hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+                <Text style={[styles.footerLink, { color: theme.footer }]}>Samarth eGov</Text>
+              </TouchableOpacity>
               <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(FEES_PORTAL_URL)} accessibilityRole="link" accessibilityHint="Link for fee payment portal" hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
                 <Text style={[styles.footerLink, { color: theme.footer }]}>Fee Payment</Text>
               </TouchableOpacity>
@@ -650,9 +653,9 @@ const styles = StyleSheet.create({
     gridActionText: { fontSize: 14, fontWeight: '700', textAlign: 'center' },
 
     // Footer Block
-    footerContainer: { borderRadius: 24, padding: 20, marginTop: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
+    footerContainer: { borderRadius: 24, padding: 20, marginTop: 30, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
     footerGrid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: 15 },
-    footerItem: { width: '33%', alignItems: 'center' },
+    footerItem: { width: '50%', alignItems: 'center' },
     footerLink: { fontSize: 12, fontWeight: '600', textAlign: 'center' },
     footerDivider: { height: 1, width: '100%', marginVertical: 16 },
     footerLegal: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 12 },
