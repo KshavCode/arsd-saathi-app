@@ -169,6 +169,10 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
   const handleExport = async () => {
     try {
       const code = encode(JSON.stringify(timetable));
+      if (code === "eyIwIjpbXSwiMSI6W10sIjIiOltdLCIzIjpbXSwiNCI6W10sIjUiOltdLCI2IjpbXX0=") {
+        Alert.alert("Error!", "Kindly create your timetable first.");
+        return;
+      }
       await Clipboard.setStringAsync(code);
       Alert.alert("Copied!", "Your timetable code has been copied to the clipboard.");
     } catch (error) {
@@ -357,7 +361,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
             )}
 
             {activeTab === 'share' && (
-                <View style={{ gap: 20, height:900 }}>
+                <View style={{ gap: 20, height:800 }}>
                     <View style={[styles.formCard, { backgroundColor: theme.card }]} accessible={true} accessibilityRole="header">
                         <View style={[styles.iconCircle, { backgroundColor: theme.iconBg }]} importantForAccessibility="no-hide-descendants">
                             <Ionicons name="share-social-outline" size={32} color={theme.primary} />
