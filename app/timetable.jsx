@@ -23,6 +23,14 @@ const TIME_SLOTS = [
 
 const DEFAULT_TIMETABLE = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,  
+    shouldSetBadge: false,    
+  }),
+});
+
 export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode }) {
   const theme = {
     background: isDarkMode ? Colors.dark.background : Colors.light.background,
