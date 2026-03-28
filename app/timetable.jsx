@@ -94,80 +94,89 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
 
   const scheduleClassReminders = async (timetableData) => {
     try {
-        if (Platform.OS === 'android') {
-            await Notifications.setNotificationChannelAsync('class-reminders', {
-                name: 'Class Reminders',
-                importance: Notifications.AndroidImportance.MAX,
-                vibrationPattern: [0, 250, 250, 250],
-                lightColor: '#9a66f1',
-            });
+      // 1. Android Channel Setup
+      if (Platform.OS === 'android') {
+        await Notifications.setNotificationChannelAsync('class-reminders', {
+          name: 'Class Reminders',
+          importance: Notifications.AndroidImportance.MAX,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: '#9a66f1',
+        });
+      }
+    
+      // 2. Permissions check
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== 'granted') return;
+    
+      // 3. Clear all previous to prevent ghost notifications
+      await Notifications.cancelAllScheduledNotificationsAsync();
+    
+      const now = new Date();
+    
+      for (const dayKey of Object.keys(timetableData)) {
+        const classes = timetableData[dayKey];
+        const targetDay = parseInt(dayKey); // 0 (Sun) - 6 (Sat)
+        
+        for (const cls of classes) {
+          // Parse time (e.g., "10:30 AM")
+          const [time, modifier] = cls.slot.split(' ');
+          let [hours, minutes] = time.split(':').map(Number);
+          if (hours === 12) hours = 0;
+          if (modifier === 'PM') hours += 12;
+        
+          // Calculate trigger time (10 mins before)
+          let triggerMinutes = minutes - 10;
+          let triggerHours = hours;
+          if (triggerMinutes < 0) {
+            triggerMinutes += 60;
+            triggerHours -= 1;
+          }
+        
+          // --- THE "NO-INSTANT-FIRE" MATH ---
+          let triggerDate = new Date(now);
+          
+          // Calculate days until the next occurrence of this weekday
+          // targetDay is 0-6, now.getDay() is 0-6
+          let daysUntil = (targetDay - now.getDay() + 7) % 7;
+        
+          // Set the time for the triggerDate
+          triggerDate.setHours(triggerHours, triggerMinutes, 0, 0);
+        
+          // If the day is today, but the time has already passed, move to next week
+          if (daysUntil === 0 && triggerDate <= now) {
+            daysUntil = 7;
+          }
+        
+          // Adjust the date by the calculated days
+          triggerDate.setDate(now.getDate() + daysUntil);
+        
+          // 4. Schedule with an absolute Date object
+          await Notifications.scheduleNotificationAsync({
+            content: {
+              title: `Class in 10 mins: ${cls.subject}`,
+              body: `Room ${cls.room || 'N/A'}. Head over now!`,
+              sound: true,
+              data: { screen: 'TimeTable' },
+              priority: Notifications.AndroidNotificationPriority.MAX,
+            },
+            trigger: {
+              date: triggerDate, // Use the specific Date object
+              repeats: true,     // This tells Expo to fire every 7 days from this date
+              channelId: 'class-reminders',
+            },
+          });
         }
-
-        const { status: existingStatus } = await Notifications.getPermissionsAsync();
-        let finalStatus = existingStatus;
-        if (existingStatus !== 'granted') {
-            const { status } = await Notifications.requestPermissionsAsync();
-            finalStatus = status;
-        }
-
-        if (finalStatus !== 'granted') return;
-
-        await Notifications.cancelAllScheduledNotificationsAsync();
-
-        const now = new Date();
-        const currentDay = now.getDay(); // 0 (Sun) to 6 (Sat)
-        const currentHour = now.getHours();
-        const currentMinute = now.getMinutes();
-
-        for (const day of Object.keys(timetableData)) {
-            const classes = timetableData[day];
-            const scheduleDay = parseInt(day); // 0-6 (Sun-Sat)
-
-            for (const cls of classes) {
-                const [time, modifier] = cls.slot.split(' ');
-                let [hours, minutes] = time.split(':').map(Number);
-                if (hours === 12) hours = 0;
-                if (modifier === 'PM') hours += 12;
-
-                let triggerMinutes = minutes - 10;
-                let triggerHours = hours;
-
-                if (triggerMinutes < 0) {
-                    triggerMinutes += 60;
-                    triggerHours -= 1;
-                }
-
-                if (triggerHours >= 0) {
-                    if (scheduleDay === currentDay) {
-                        if (triggerHours < currentHour || (triggerHours === currentHour && triggerMinutes <= currentMinute)) {
-                            continue; 
-                        }
-                    }
-
-                    await Notifications.scheduleNotificationAsync({
-                        content: {
-                            title: `Class in 10 mins: ${cls.subject}`,
-                            body: `Room ${cls.room || 'N/A'}. Head over now!`,
-                            sound: true,
-                            data: { screen: 'TimeTable' },
-                            priority: Notifications.AndroidNotificationPriority.MAX,
-                        },
-                        trigger: {
-                            weekday: scheduleDay + 1, // 1=Sun, 2=Mon...
-                            hour: triggerHours,
-                            minute: triggerMinutes,
-                            repeats: true,
-                            channelId: 'class-reminders',
-                        },
-                    });
-                }
-            }
-        }
-        console.log("Class reminders cleaned and scheduled.");
+      }
+      console.log("Success: Reminders scheduled for future only.");
     } catch (e) {
-        console.error("Scheduler Error:", e);
+      console.error("Scheduler Error:", e);
     }
-  };
+};
 
   // Test Notification Helper ---
   const handleTestNotification = async () => {
