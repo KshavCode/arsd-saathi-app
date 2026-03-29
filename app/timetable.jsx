@@ -1,5 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Clipboard from 'expo-clipboard';
 import * as Linking from 'expo-linking';
 import LZString from 'lz-string';
 import React, { useEffect, useState } from 'react';
@@ -34,7 +35,6 @@ const serializeTimetable = (tt) => {
   }
 
   const days = [];
-  // Pass 2: Encode the timetable using the dictionary index
   for (let d = 0; d < 6; d++) {
     if (tt[d] && tt[d].length > 0) {
       const classes = tt[d].map(c => {
@@ -244,14 +244,16 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
       }
 
       const tinyCode = LZString.compressToEncodedURIComponent(flatString);
-      const shareableLink = Linking.createURL(`timetable?data=${tinyCode}`);
-
+      
+      Alert.alert("Copied To Clipboard!", "Your timetable code has been generated.");
+      await Clipboard.setStringAsync(tinyCode);
       await Share.share({ 
-          message: `Import my timetable to ArsdSaathi! Tap the link below:\n\n${shareableLink}`,
+          message: tinyCode,
           title: 'Timetable Import Link' 
       });
     } catch (error) {
       Alert.alert("Error", "Could not generate link.");
+      console.log(error)
     }
   };
 
