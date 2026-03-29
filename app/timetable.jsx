@@ -489,12 +489,12 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
         {/* --- SUBJECT EDIT MODAL --- */}
         <Modal visible={showSubjectModal} transparent animationType="slide" accessibilityViewIsModal={true}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-                <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} accessibilityLabel="Close modal" accessibilityRole="button" onPress={() => setShowSubjectModal(false)}>
+                <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} accessibilityLabel="Close modal" accessibilityRole="button">
                 <View style={[styles.modalContent, { backgroundColor: theme.card }]} accessible={false}>
                     <View style={styles.modalHeaderRow} accessible={true}>
                         <Text style={[styles.modalHeader, { color: theme.text }]} accessibilityRole="header" accessibilityLabel={`Editing slot of ${editingSlot}`}>Slot: {editingSlot}</Text>
                         <TouchableOpacity onPress={() => setShowSubjectModal(false)} hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}>
-                            <Ionicons name="close-circle" size={28} color={theme.textSecondary} />
+                            <Ionicons name="close-circle" size={28} color={theme.error} />
                         </TouchableOpacity>
                     </View>
 
