@@ -3,7 +3,7 @@
 ## 💫 What's New?
 - **Optimized User Interface**: Modified the application layout to facilitate a "minimal action" workflow.
 - **Timetable Management**: Introduced a shareable, customizable and flexible timetable system which allow users to manually append GE, SEC, and VAC, along with their semester subjects. Reflects the next class in the dashboard as well!
-- **Accessibility**: Eevery functional element has been optimized for Screen Readers and assistive technologies.
+- **Accessibility**: Every functional element has been optimized for Screen Readers and assistive technologies.
 - **Additional Links**: More helpful links are added in order to help students access various resources in one click.
 
 ## 🔍 Fixes
@@ -21,7 +21,7 @@
 ## 🔒 Security & Verification
 To verify the integrity of this APK, you can compare the SHA-256 checksum:
 ```bash
-sha256_code_here
+89f4f71a7a59fa4c0c866bd05bc7c759d837f68ddc1ada724f44cf32c599e9b4
 ```
 
 🚩 Issues
