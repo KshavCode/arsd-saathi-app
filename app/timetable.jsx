@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { decode, encode } from 'base-64';
-import * as Clipboard from 'expo-clipboard';
+import * as Linking from 'expo-linking';
+import LZString from 'lz-string';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, Share, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,6 +16,78 @@ const TIME_SLOTS = [
 ];
 
 const DEFAULT_TIMETABLE = { 0:[], 1: [], 2: [], 3: [], 4: [], 5: []};
+
+// --- DICTIONARY-BASED ULTRA SERIALIZER ---
+const serializeTimetable = (tt) => {
+  const subjectDict = [];
+  
+  // Pass 1: Build dictionary of unique subjects
+  for (let d = 0; d < 6; d++) {
+    if (tt[d]) {
+      tt[d].forEach(c => {
+         const cleanSub = (c.subject || '').replace(/[|~$,:]/g, '');
+         if (cleanSub && !subjectDict.includes(cleanSub)) {
+             subjectDict.push(cleanSub);
+         }
+      });
+    }
+  }
+
+  const days = [];
+  // Pass 2: Encode the timetable using the dictionary index
+  for (let d = 0; d < 6; d++) {
+    if (tt[d] && tt[d].length > 0) {
+      const classes = tt[d].map(c => {
+        const t = TIME_SLOTS.indexOf(c.slot);
+        const cleanSub = (c.subject || '').replace(/[|~$,:]/g, '');
+        const sIdx = subjectDict.indexOf(cleanSub); 
+        const r = (c.room || '').replace(/[|~$,:]/g, '');
+        const p = c.type === 'PR' ? 1 : 0;
+        const dur = c.duration || 1;
+        
+        // Drop trailing defaults
+        if (dur === 1 && p === 0 && !r) return `${t}|${sIdx}`;
+        if (dur === 1 && p === 0) return `${t}|${sIdx}|${r}`;
+        if (dur === 1) return `${t}|${sIdx}|${r}|${p}`;
+        return `${t}|${sIdx}|${r}|${p}|${dur}`;
+      }).join(';');
+      days.push(`${d}:${classes}`);
+    }
+  }
+  
+  // Combine Dictionary and Schedule
+  return subjectDict.join(',') + '~' + days.join('$');
+};
+
+const deserializeTimetable = (str) => {
+  const tt = { 0:[], 1:[], 2:[], 3:[], 4:[], 5:[] };
+  if (!str || !str.includes('~')) return tt;
+  
+  const parts = str.split('~');
+  const subjectDict = parts[0].split(',');
+  const daysStr = parts[1];
+
+  if (!daysStr) return tt;
+
+  daysStr.split('$').forEach(dayStr => {
+    const [d, classesStr] = dayStr.split(':');
+    if (classesStr) {
+      tt[d] = classesStr.split(';').map(cStr => {
+        const p = cStr.split('|');
+        return {
+          id: `${d}-${TIME_SLOTS[p[0]]}`,
+          slot: TIME_SLOTS[p[0]],
+          subject: subjectDict[parseInt(p[1], 10)] || '', 
+          room: p[2] || '',
+          type: p[3] === '1' ? 'PR' : 'TH',
+          duration: p[4] ? parseInt(p[4], 10) : 1
+        };
+      });
+    }
+  });
+  return tt;
+};
+// -----------------------------------------
 
 export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode }) {
   const theme = {
@@ -57,7 +129,6 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
   useEffect(() => {
     const initialize = async () => {
       try {
-        // Fetch Attendance for Subject Names
         const attRaw = await AsyncStorage.getItem('ATTENDANCE_DATA');
         if (attRaw) {
           const data = JSON.parse(attRaw);
@@ -66,35 +137,35 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
           setAvailableSubjects([...new Set([...theory, ...practical])]);
         }
 
-        // Fetch Faculty Data
         const facRaw = await AsyncStorage.getItem('FACULTY_DATA');
         if (facRaw) {
             setFacultyList(JSON.parse(facRaw));
         }
 
-        // Fetch Timetable
         const ttRaw = await AsyncStorage.getItem('TIMETABLE_DATA');
         if (ttRaw) { setTimetable(JSON.parse(ttRaw)); }
       } catch (error) { console.error(error); } finally { setLoading(false); }
     };
     initialize();
+
+    // DEEP LINK LISTENER
+    const subscription = Linking.addEventListener('url', ({ url }) => handleDeepLink(url));
+    Linking.getInitialURL().then((url) => { if (url) handleDeepLink(url); });
+
+    return () => subscription.remove();
   }, []);
-
-
 
   const saveTimetable = async (newData) => {
       setTimetable(newData);
       await AsyncStorage.setItem('TIMETABLE_DATA', JSON.stringify(newData));
   };
 
-  // Helper to match subject string with FACULTY_DATA PAPER_NAME
   const getFacultyName = (subjectName) => {
       if (!facultyList || facultyList.length === 0 || !subjectName) return null;
       const match = facultyList.find(f =>
           f.PAPER_NAME &&
           f.PAPER_NAME.trim().toLowerCase() === subjectName.trim().toLowerCase()
       );
-      // Fallback: If exact match fails, check if one string contains the other
       if (!match) {
           const looseMatch = facultyList.find(f =>
              f.PAPER_NAME &&
@@ -132,10 +203,8 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
       duration: formDuration,
     };
 
-    // Remove existing class at this slot (if editing)
     let updatedDay = timetable[selectedDay].filter(item => item.slot !== editingSlot);
 
-    // If it's a 2-hour class, ensure the next slot iscleared
     if (formDuration === 2) {
         const currentIndex = TIME_SLOTS.indexOf(editingSlot);
         if (currentIndex + 1 < TIME_SLOTS.length) {
@@ -145,8 +214,6 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
     }
 
     updatedDay.push(newClass);
-
-    // Sort by template order
     updatedDay.sort((a, b) => TIME_SLOTS.indexOf(a.slot) - TIME_SLOTS.indexOf(b.slot));
 
     saveTimetable({ ...timetable, [selectedDay]: updatedDay });
@@ -164,45 +231,56 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
       if (startIndex + duration < TIME_SLOTS.length) {
           return TIME_SLOTS[startIndex + duration];
       }
-      return "05:30 PM"; // College closing time
+      return "05:30 PM";
   };
 
-  // --- SHARE LOGIC ---
-  const handleExport = async () => {
+  // --- EXPORT/IMPORT LOGIC ---
+  const handleExportLink = async () => {
     try {
-      console.log(timetable)
-      const code = encode(JSON.stringify(timetable));
-      if (code === "eyIwIjpbXSwiMSI6W10sIjIiOltdLCIzIjpbXSwiNCI6W10sIjUiOltdLCI2IjpbXX0=") {
+      const flatString = serializeTimetable(timetable);
+      if (!flatString || !flatString.includes('~')) {
         Alert.alert("Error!", "Kindly create your timetable first.");
         return;
       }
-      Alert.alert("Copied!", "Your timetable code has been copied to the clipboard.");
-      await Clipboard.setStringAsync(code);
-      await Share.share({ message: code, title: 'Timetable Import Code for ArsdSaathi' });
+
+      const tinyCode = LZString.compressToEncodedURIComponent(flatString);
+      const shareableLink = Linking.createURL(`timetable?data=${tinyCode}`);
+
+      await Share.share({ 
+          message: `Import my timetable to ArsdSaathi! Tap the link below:\n\n${shareableLink}`,
+          title: 'Timetable Import Link' 
+      });
     } catch (error) {
-      Alert.alert("Error", "Could not copy to clipboard.");
-      console.log(error)
+      Alert.alert("Error", "Could not generate link.");
     }
   };
 
-  const handleImport = () => {
-    try {
-      const decodedString = decode(importCode);
-      const decodedData = JSON.parse(decodedString);
+  const handleDeepLink = (url) => {
+      const data = Linking.parse(url);
+      if (data.queryParams?.data) {
+          processImportData(data.queryParams.data);
+      }
+  };
 
-      // Basic validation
-      if (decodedData && typeof decodedData === 'object' && decodedData['1']) {
-        saveTimetable(decodedData);
-        setImportCode('');
-        Alert.alert("Success", "Timetable imported successfully!");
-        setActiveTab('view');
+  const processImportData = (dataString) => {
+    try {
+      let code = dataString;
+      if (dataString.includes('?data=')) {
+          code = dataString.split('?data=')[1];
       }
-      else {
-        throw new Error("Invalid format");
-      }
+
+      const rawString = LZString.decompressFromEncodedURIComponent(code);
+      if (!rawString) throw new Error("Decompression failed");
+
+      const expandedData = deserializeTimetable(rawString);
+      saveTimetable({...DEFAULT_TIMETABLE, ...expandedData});
+
+      setImportCode('');
+      Alert.alert("Success", "Timetable imported successfully!");
+      setActiveTab('view');
+      
     } catch (e) {
-      Alert.alert("Invalid Code", "The code you pasted is invalid or corrupted.");
-      console.log(e)
+      Alert.alert("Invalid Link", "The link or code you pasted is invalid or corrupted.");
     }
   };
 
@@ -219,7 +297,6 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
       if (existingClass) {
         const facultyName = getFacultyName(existingClass.subject);
 
-        // Accessibility string
         const endTimeStr = getEndTime(time, existingClass.duration);
         const classTypeFull = existingClass.type === 'TH' ? 'Theory' : 'Practical';
         const a11yLabel = `${time} to ${endTimeStr}. ${existingClass.subject}. Room ${existingClass.room || 'Not assigned'}. ${classTypeFull} class. ${facultyName ? `Taught by ${facultyName}` : ''}. ${isEditMode ? 'Double tap to edit this slot.' : ''}`;
@@ -293,7 +370,6 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
               onPress={() => navigation.goBack()}
               accessibilityRole="button"
               accessibilityLabel="Go Back"
-              accessibilityHint="Returns to the previous screen"
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
                 <Ionicons name="caret-back" size={27} color={theme.primary} importantForAccessibility="no" />
@@ -304,7 +380,6 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
               onPress={() => setIsDarkMode(!isDarkMode)}
               accessibilityRole="button"
               accessibilityLabel="Toggle Theme"
-              accessibilityHint={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
                 <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} importantForAccessibility="no" />
@@ -359,84 +434,72 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
 
             {activeTab === 'edit' && (
                 <View>
-                    <Text style={[styles.sectionLabel, { color: theme.textSecondary, marginBottom: 16 }]} accessibilityRole="header" accessibilityLabel="Tap the slot to assign subject">Tap a slot to assign a subject</Text>
+                    <Text style={[styles.sectionLabel, { color: theme.textSecondary, marginBottom: 16 }]} accessibilityRole="header">Tap a slot to assign a subject</Text>
                     {renderSlots(true)}
                 </View>
             )}
 
             {activeTab === 'share' && (
                 <View style={{ gap: 20, height:800 }}>
-                    <View style={[styles.formCard, { backgroundColor: theme.card }]} accessible={true} accessibilityRole="header">
-                        <View style={[styles.iconCircle, { backgroundColor: theme.iconBg }]} importantForAccessibility="no-hide-descendants">
+                    {/* Export Card */}
+                    <View style={[styles.formCard, { backgroundColor: theme.card }]}>
+                        <View style={[styles.iconCircle, { backgroundColor: theme.iconBg }]}>
                             <Ionicons name="share-social-outline" size={32} color={theme.primary} />
                         </View>
-                        <Text style={[styles.shareTitle, { color: theme.text }]} importantForAccessibility="no">Export Timetable</Text>
-                        <Text style={[styles.shareDesc, { color: theme.textSecondary }]} importantForAccessibility="no">Copy your timetable as a code to share with other ArsdSaathi Users.</Text>
+                        <Text style={[styles.shareTitle, { color: theme.text }]}>Share Timetable</Text>
+                        <Text style={[styles.shareDesc, { color: theme.textSecondary }]}>Generate a magic link to send your schedule directly to your classmates via WhatsApp.</Text>
 
                         <TouchableOpacity
                           style={[styles.primaryButton, { backgroundColor: theme.primary, width: '100%' }]}
-                          onPress={handleExport}
-                          accessibilityRole="button"
-                          accessibilityLabel="Copy Export Code"
-                          accessibilityHint="Copies your current timetable data to the clipboard"
+                          onPress={handleExportLink}
                         >
-                            <Ionicons name="copy-outline" size={18} color="#FFF" style={{ marginRight: 8 }} importantForAccessibility="no" />
-                            <Text style={styles.primaryButtonText} importantForAccessibility="no">Copy Code</Text>
+                            <Ionicons name="paper-plane-outline" size={18} color="#FFF" style={{ marginRight: 8 }} />
+                            <Text style={styles.primaryButtonText}>Share Link</Text>
                         </TouchableOpacity>
                     </View>
 
-                    <View style={[styles.formCard, { backgroundColor: theme.card }]} accessible={true} accessibilityRole="header">
-                        <View style={[styles.iconCircle, { backgroundColor: theme.iconBg }]} importantForAccessibility="no-hide-descendants">
+                    {/* Import Card (Manual Fallback) */}
+                    <View style={[styles.formCard, { backgroundColor: theme.card }]}>
+                        <View style={[styles.iconCircle, { backgroundColor: theme.iconBg }]}>
                             <Ionicons name="download-outline" size={32} color={theme.primary} />
                         </View>
-                        <Text style={[styles.shareTitle, { color: theme.text }]} importantForAccessibility="no">Import Timetable</Text>
-                        <Text style={[styles.shareDesc, { color: theme.textSecondary }]} importantForAccessibility="no">Paste a valid timetable code to save it.</Text>
+                        <Text style={[styles.shareTitle, { color: theme.text }]}>Manual Import</Text>
+                        <Text style={[styles.shareDesc, { color: theme.textSecondary }]}>If the link didn&apos;t open automatically, just paste the URL or the code here.</Text>
 
                         <TextInput
                             style={[styles.inputField, { borderColor: theme.primary, color: theme.text, width: '100%', marginBottom: 16 }]}
-                            placeholder="Paste code here..."
+                            placeholder="Paste link here..."
                             placeholderTextColor={theme.textSecondary}
                             value={importCode}
                             onChangeText={setImportCode}
-                            accessibilityLabel="Import Code Input"
-                            accessibilityHint="Paste the timetable code here"
                         />
 
                         <TouchableOpacity
                             style={[styles.primaryButton, { backgroundColor: importCode ? theme.primary : theme.borderColor, width: '100%' }]}
-                            onPress={handleImport}
+                            onPress={() => processImportData(importCode)}
                             disabled={!importCode}
-                            accessibilityRole="button"
-                            accessibilityState={{ disabled: !importCode }}
-                            accessibilityLabel="Import Data"
-                            accessibilityHint="Overwrites your current timetable with the pasted code data"
                         >
-                            <Text style={[styles.primaryButtonText, !importCode && { color: theme.textSecondary }]} importantForAccessibility="no">Import Data</Text>
+                            <Text style={[styles.primaryButtonText, !importCode && { color: theme.textSecondary }]}>Import Data</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
             )}
         </ScrollView>
 
+        {/* --- SUBJECT EDIT MODAL --- */}
         <Modal visible={showSubjectModal} transparent animationType="slide" accessibilityViewIsModal={true}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
                 <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} accessibilityLabel="Close modal" accessibilityRole="button" onPress={() => setShowSubjectModal(false)}>
                 <View style={[styles.modalContent, { backgroundColor: theme.card }]} accessible={false}>
                     <View style={styles.modalHeaderRow} accessible={true}>
                         <Text style={[styles.modalHeader, { color: theme.text }]} accessibilityRole="header" accessibilityLabel={`Editing slot of ${editingSlot}`}>Slot: {editingSlot}</Text>
-                        <TouchableOpacity
-                          onPress={() => setShowSubjectModal(false)}
-                          accessibilityRole="button"
-                          accessibilityLabel="Close editor"
-                          hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-                        >
-                            <Ionicons name="close-circle" size={28} color={theme.textSecondary} importantForAccessibility="no" />
+                        <TouchableOpacity onPress={() => setShowSubjectModal(false)} hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}>
+                            <Ionicons name="close-circle" size={28} color={theme.textSecondary} />
                         </TouchableOpacity>
                     </View>
 
                     <ScrollView style={{ padding: 20, maxHeight: 500 }} showsVerticalScrollIndicator={false}>
 
-                        {/* 1. Subject Picker */}
                         <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>Select Subject</Text>
                         <ScrollView horizontal showsHorizontalScrollIndicator={true} style={{ marginBottom: 20 }} accessible={false}>
                             {availableSubjects.map((sub) => (
@@ -444,19 +507,13 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                                     key={sub}
                                     style={[styles.chip, { backgroundColor: formSubject === sub ? theme.primary : theme.iconBg }]}
                                     onPress={() => setFormSubject(sub)}
-                                    accessibilityRole="button"
-                                    accessibilityState={{ selected: formSubject === sub }}
-                                    accessibilityLabel={sub}
                                 >
-                                    <Text style={{ color: formSubject === sub ? '#FFF' : theme.text, fontWeight: '600' }} importantForAccessibility="no">{sub}</Text>
+                                    <Text style={{ color: formSubject === sub ? '#FFF' : theme.text, fontWeight: '600' }}>{sub}</Text>
                                 </TouchableOpacity>
                             ))}
                         </ScrollView>
 
-                        {/* 2. Room, Type, & Duration Row */}
                         <View style={styles.pillContainerRow}>
-
-                            {/* Room Input */}
                             <View style={{flex:1, width:100}}>
                                 <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>Room</Text>
                                 <TextInput
@@ -465,28 +522,20 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                                     placeholderTextColor={theme.textSecondary}
                                     value={formRoom}
                                     onChangeText={setFormRoom}
-                                    accessibilityLabel="Room Number"
                                 />
                             </View>
 
-                            {/* Type */}
                             <View>
                                 <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>Type</Text>
                                 <TouchableOpacity
                                     style={[styles.compactPill, { borderColor: theme.borderColor, backgroundColor: theme.primary + '20' }]}
                                     onPress={() => setFormType(formType === 'TH' ? 'PR' : 'TH')}
-                                    accessibilityRole="button"
-                                    accessibilityLabel={`Class type is ${formType === 'TH' ? 'Theory' : 'Practical'}`}
-                                    accessibilityHint="Double tap to toggle between Theory and Practical"
                                 >
-                                    <Text style={[styles.compactPillText, { color: theme.primary }]}>
-                                        {formType}
-                                    </Text>
+                                    <Text style={[styles.compactPillText, { color: theme.primary }]}>{formType}</Text>
                                     <Ionicons name="swap-horizontal" size={14} color={formType === 'TH' ? theme.textSecondary : theme.primary} style={{marginLeft: 4}}/>
                                 </TouchableOpacity>
                             </View>
 
-                            {/* Duration */}
                             <View>
                                 <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>Hrs</Text>
                                 <TouchableOpacity
@@ -495,48 +544,32 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                                         if (formDuration === 1) {
                                             if (TIME_SLOTS.indexOf(editingSlot) === TIME_SLOTS.length - 1) {
                                                 Alert.alert("Invalid", "Cannot schedule a 2-hour class at 4:30 PM.");
-                                            }
-                                            else {
-                                              setFormDuration(2);
-                                            }
-                                        } else {
-                                            setFormDuration(1);
-                                        }
+                                            } else setFormDuration(2);
+                                        } else setFormDuration(1);
                                     }}
-                                    accessibilityRole="button"
-                                    accessibilityLabel={`Duration is set to ${formDuration} hour${formDuration > 1 ? 's' : ''}`}
-                                    accessibilityHint="Double tap to toggle between 1 hour and 2 hours"
                                 >
-                                    <Text style={[styles.compactPillText, { color: theme.textSecondary }]} importantForAccessibility="no">{formDuration}h</Text>
-                                    <Ionicons name="swap-horizontal" size={14} color={theme.textSecondary} style={{marginLeft: 4}} importantForAccessibility="no" />
+                                    <Text style={[styles.compactPillText, { color: theme.textSecondary }]}>{formDuration}h</Text>
+                                    <Ionicons name="swap-horizontal" size={14} color={theme.textSecondary} style={{marginLeft: 4}} />
                                 </TouchableOpacity>
                             </View>
-
                         </View>
 
-                        {/* Save & Delete Buttons */}
                         <TouchableOpacity
                           style={[styles.primaryButton, { backgroundColor: theme.primary, marginBottom: 12 }]}
                           onPress={handleSaveClass}
-                          accessibilityRole="button"
-                          accessibilityLabel={`Save Class to ${editingSlot}`}
                         >
-                            <Text style={styles.primaryButtonText} importantForAccessibility="no">Save Class to {editingSlot}</Text>
+                            <Text style={styles.primaryButtonText}>Save Class to {editingSlot}</Text>
                         </TouchableOpacity>
 
                         {timetable[selectedDay]?.find(c => c.slot === editingSlot) && (
                              <TouchableOpacity
                                style={[styles.primaryButton, { backgroundColor: theme.destructiveBg }]}
                                onPress={() => handleDeleteClass(editingSlot)}
-                               accessibilityRole="button"
-                               accessibilityLabel="Clear Slot"
-                               accessibilityHint="Removes this class from the timetable"
                              >
-                                 <Text style={[styles.primaryButtonText, { color: theme.error }]} importantForAccessibility="no">Clear Slot</Text>
+                                 <Text style={[styles.primaryButtonText, { color: theme.error }]}>Clear Slot</Text>
                              </TouchableOpacity>
                         )}
                         <View style={{height: 30}}/>
-
                     </ScrollView>
                 </View>
                 </TouchableOpacity>
@@ -588,7 +621,6 @@ const styles = StyleSheet.create({
   chip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, marginRight: 10 },
   inputField: { width: '100%', borderWidth: 1, borderRadius: 16, padding: 16, fontSize: 16, fontWeight: '600' },
 
-  // New Layout Styles
   pillContainerRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 30, alignItems: 'flex-end' },
   compactPill: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16, paddingVertical: 15, borderRadius: 16, borderWidth: 1 },
   compactPillText: { fontSize: 15, fontWeight: '800' },
