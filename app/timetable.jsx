@@ -15,7 +15,7 @@ const TIME_SLOTS = [
   '12:30 PM', '01:30 PM', '02:30 PM', '03:30 PM', '04:30 PM'
 ];
 
-const DEFAULT_TIMETABLE = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: [] };
+const DEFAULT_TIMETABLE = { 0:[], 1: [], 2: [], 3: [], 4: [], 5: []};
 
 export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode }) {
   const theme = {
@@ -33,13 +33,15 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
     destructiveBorder: isDarkMode ? Colors.dark.destructiveBorder : Colors.light.destructiveBorder,
   };
 
+  let day = new Date().getDay()-1;
+
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('view');
-  const [selectedDay, setSelectedDay] = useState(new Date().getDay()-1);
+  const [selectedDay, setSelectedDay] = useState(day === -1 ? 0 : day);
 
   const [timetable, setTimetable] = useState(DEFAULT_TIMETABLE);
   const [availableSubjects, setAvailableSubjects] = useState([]);
-  const [facultyList, setFacultyList] = useState([]); // Store FACULTY_DATA
+  const [facultyList, setFacultyList] = useState([]); 
 
   // Form States (Slot-Based)
   const [showSubjectModal, setShowSubjectModal] = useState(false);
@@ -168,6 +170,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
   // --- SHARE LOGIC ---
   const handleExport = async () => {
     try {
+      console.log(timetable)
       const code = encode(JSON.stringify(timetable));
       if (code === "eyIwIjpbXSwiMSI6W10sIjIiOltdLCIzIjpbXSwiNCI6W10sIjUiOltdLCI2IjpbXX0=") {
         Alert.alert("Error!", "Kindly create your timetable first.");
