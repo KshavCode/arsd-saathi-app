@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { titleCase } from 'title-case';
 import { Colors } from '../constants/themeStyle';
 
 
@@ -24,7 +25,7 @@ const FacultyCard = ({ data, theme }) => {
             <View style={styles.cardHeader} importantForAccessibility="no-hide-descendants">
                 <View style={styles.headerTextCtx}>
                     <Text style={[styles.teacherName, { color: theme.text }]}>
-                        {facultyName}
+                        {titleCase(facultyName.toLowerCase())}
                     </Text>
                     <Text style={[styles.teacherCode, { color: theme.textSecondary }]}>
                         {data.FAC_CODE ? `Faculty Code: ${data.FAC_CODE}` : "No Code"}

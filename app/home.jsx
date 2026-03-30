@@ -7,6 +7,7 @@ import * as Linking from 'expo-linking';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { titleCase } from 'title-case';
 import { Colors } from '../constants/themeStyle';
 import ArsdScraper from '../services/ArsdScraper';
 
@@ -24,7 +25,7 @@ const GridActionButton = ({ title, icon, onPress, theme, isDestructive, accessib
       styles.gridActionCard, 
       { backgroundColor: theme.card },
       isDestructive && { backgroundColor: theme.destructiveBg, borderWidth: 1, borderColor: theme.destructiveBorder }
-    ]} 
+    ]}
     onPress={onPress}
     activeOpacity={0.8}
     accessibilityRole="button"
@@ -428,7 +429,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
                 accessibilityHint='Displays your personal details stored in the college database'
                 hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
               >
-                <Text style={[styles.username, { color: theme.primary }]} numberOfLines={1} importantForAccessibility="no">{userData.name}</Text>
+                <Text style={[styles.username, { color: theme.primary }]} numberOfLines={1} importantForAccessibility="no">{titleCase(userData.name.toLowerCase())}</Text>
                 <Ionicons name="information-circle" size={15} color={theme.secondary} importantForAccessibility="no" />
               </TouchableOpacity>
                 {isSyncing && <ActivityIndicator size="small" color={theme.primary} accessibilityLabel='Syncing your latest data'/>}
@@ -495,13 +496,13 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
 
             {/* --- Upcoming Class Row --- */}
             {nextClassInfo && (
-                <>
+                <TouchableOpacity onPress={()=>navigation.navigate('TimeTable')}>
                     <View style={[styles.heroDivider, { backgroundColor: theme.separator }]} />
                     <View style={styles.nextClassRow} accessible={true} accessibilityLabel={`Up Next ${nextClassInfo.dayName} at ${nextClassInfo.slot}. Subject: ${nextClassInfo.subject}. Room ${nextClassInfo.room || 'Not Assigned'}. ${nextClassInfo.duration} Hour ${nextClassInfo.type} class.`}>
                         <View style={styles.nextClassHeader} importantForAccessibility="no-hide-descendants">
                             <View style={{flexDirection: 'row', alignItems: 'center'}}>
                                 <Ionicons name="alarm-outline" size={16} color={theme.success} />
-                                <Text style={[styles.nextClassTitle, { color: theme.success }]}>Up Next ({nextClassInfo.dayName})</Text>
+                                <Text style={[styles.nextClassTitle, { color: theme.success }]}>Next Class - {nextClassInfo.dayName}</Text>
                             </View>
                             <Text style={[styles.nextClassTime, { color: theme.primary }]}>{nextClassInfo.slot}</Text>
                         </View>
@@ -521,7 +522,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
                             </View>
                         </View>
                     </View>
-                </>
+                </TouchableOpacity>
             )}
         </View>
 
