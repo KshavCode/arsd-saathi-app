@@ -376,8 +376,8 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
         {/* MARKS INFO */}
         <View style={{padding:10}}>
           <Text style={[styles.infoText, { color: theme.textSecondary, fontSize:18, marginTop:10, textAlign:'justify' }]} accessibilityRole="header" accessibilityLabel="Marks Reward System">MARKS REWARD SYSTEM</Text>
-          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]} accessibilityLabel="85 and above % of attendance gives you 6 marks">x &lt; 85% = 6 marks</Text>
-          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]} accessibilityLabel="Between 80 and 85% of attendance gives you 4.8 marks">85% &lt; x &lt; 80%  = 4.8 marks</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]} accessibilityLabel="85 and above % of attendance gives you 6 marks">85% &lt; x = 6 marks</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]} accessibilityLabel="Between 80 and 85% of attendance gives you 4.8 marks">80% &lt; x &lt; 85%  = 4.8 marks</Text>
           <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]} accessibilityLabel="Between 75 and 80% of attendance gives you 3.6 marks">75% &lt; x &lt; 80%  = 3.6 marks</Text>
           <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]} accessibilityLabel="Between 70 and 75% of attendance gives you 2.4 marks">70% &lt; x &lt; 75%  = 2.4 marks</Text>
           <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]} accessibilityLabel="Between 67 and 70% of attendance gives you 1.2 marks">67% &lt; x &lt; 70%  = 1.2 marks</Text>
