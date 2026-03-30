@@ -15,19 +15,15 @@ import Timetable from './timetable';
 
 const Stack = createStackNavigator();
 
-// Time Constants (in milliseconds)
 const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
 const TWO_DAYS = 2 * 24 * 60 * 60 * 1000;
 
 export default function Stack1() {
     const [isDarkMode, setIsDarkMode] = useState(false);
-    
-    // --- GATEKEEPER STATE ---
     const [isAppReady, setIsAppReady] = useState(false);
     const [initialRoute, setInitialRoute] = useState('Login');
     const [homeParams, setHomeParams] = useState({ requiresSync: false });
 
-    // 1. Check Timestamps before showing the app
     useEffect(() => {
         const verifySession = async () => {
             try {
@@ -37,38 +33,25 @@ export default function Stack1() {
                 const dataTimestampStr = await AsyncStorage.getItem('DATA_TIMESTAMP');
                 const savedTheme = await AsyncStorage.getItem('DARK_THEME');
 
-                if (savedTheme !== null) {
-                    setIsDarkMode(JSON.parse(savedTheme));
-                }
+                if (savedTheme !== null) setIsDarkMode(JSON.parse(savedTheme));
 
-                // Check 1: Do we have credentials at all?
                 if (!credentialsStr || !loginTimestampStr) {
                     setInitialRoute('Login');
                 } else {
                     const loginAge = now - parseInt(loginTimestampStr);
-                    
-                    // Check 2: Are credentials older than 30 days?
                     if (loginAge > THIRTY_DAYS) {
                         await AsyncStorage.multiRemove(['USER_CREDENTIALS', 'LOGIN_TIMESTAMP']);
                         setInitialRoute('Login');
                     } else {
-                        // Credentials are valid, go to Home
                         setInitialRoute('Home');
-                        
-                        // Check 3: Is the data older than 2 days?
                         const dataAge = now - parseInt(dataTimestampStr || "0");
-                        if (dataAge > TWO_DAYS) {
-                            setHomeParams({ requiresSync: true }); // Tell Home to scrape in background
-                        } else {
-                            setHomeParams({ requiresSync: false }); // Data is fresh
-                        }
+                        if (dataAge > TWO_DAYS) setHomeParams({ requiresSync: true });
                     }
                 }
             } catch (error) {
-                console.error("Session check failed:", error);
                 setInitialRoute('Login'); 
             } finally {
-                setIsAppReady(true); // Let the app render
+                setIsAppReady(true);
             }
         };
         verifySession();
@@ -85,7 +68,6 @@ export default function Stack1() {
     const currentBackgroundColor = isDarkMode ? Colors.dark.background : Colors.light.background;
     const themeProps = { isDarkMode, setIsDarkMode };
 
-    // 3. Show a loading spinner while checking AsyncStorage
     if (!isAppReady) {
         return (
             <View style={{ flex: 1, backgroundColor: currentBackgroundColor, justifyContent: 'center', alignItems: 'center' }}>
@@ -95,39 +77,38 @@ export default function Stack1() {
     }
 
     return (
-        <Stack.Navigator 
-            initialRouteName={initialRoute} // <--- Dynamically set to Login or Home
-            screenOptions={{ 
-                headerShown: false,
-                cardStyle: { backgroundColor: currentBackgroundColor } 
-            }}
-        >
-            <Stack.Screen name="Login" component={Login} />
+            <Stack.Navigator 
+                initialRouteName={initialRoute}
+                screenOptions={{ 
+                    headerShown: false,
+                    cardStyle: { backgroundColor: currentBackgroundColor } 
+                }}
+            >
+                <Stack.Screen name="Login" component={Login} />
+                
+                <Stack.Screen name="Home" initialParams={homeParams}>
+                    {(props) => <Home {...props} {...themeProps} />}
+                </Stack.Screen>
             
-            {/* We pass the homeParams to the initial route */}
-            <Stack.Screen name="Home" initialParams={homeParams}>
-                {(props) => <Home {...props} {...themeProps} />}
-            </Stack.Screen>
-
-            <Stack.Screen name="Attendance">
-                {(props) => <Attendance {...props} {...themeProps} />}
-            </Stack.Screen>
-
-            <Stack.Screen name="Details">
-                {(props) => <Details {...props} {...themeProps} />}
-            </Stack.Screen>
-
-            <Stack.Screen name="Faculty">
-                {(props) => <Faculty {...props} {...themeProps} />}
-            </Stack.Screen>
-
-            <Stack.Screen name="Predictor">
-                {(props) => <Predictor {...props} {...themeProps} />}
-            </Stack.Screen>
-
-            <Stack.Screen name="TimeTable">
-                {(props) => <Timetable {...props} {...themeProps} />}
-            </Stack.Screen>
-        </Stack.Navigator>
+                <Stack.Screen name="Attendance">
+                    {(props) => <Attendance {...props} {...themeProps} />}
+                </Stack.Screen>
+            
+                <Stack.Screen name="Details">
+                    {(props) => <Details {...props} {...themeProps} />}
+                </Stack.Screen>
+            
+                <Stack.Screen name="Faculty">
+                    {(props) => <Faculty {...props} {...themeProps} />}
+                </Stack.Screen>
+            
+                <Stack.Screen name="Predictor">
+                    {(props) => <Predictor {...props} {...themeProps} />}
+                </Stack.Screen>
+            
+                <Stack.Screen name="TimeTable">
+                    {(props) => <Timetable {...props} {...themeProps} />}
+                </Stack.Screen>
+            </Stack.Navigator>
     );
 }

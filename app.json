@@ -2,7 +2,7 @@
   "expo": {
     "name": "ArsdSaathi",
     "slug": "arsdsaathi",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "orientation": "portrait",
     "jsEngine": "hermes",
     "icon": "./assets/images/icon.png",
@@ -20,7 +20,19 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.keshav.arsdsaathi",
-      "versionCode": 5
+      "versionCode": 6,
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "arsdsaathi"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "output": "static",
@@ -31,7 +43,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/icon.png",
+          "image": "./assets/images/splash.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",

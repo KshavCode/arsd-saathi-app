@@ -1,12 +1,15 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Clipboard from 'expo-clipboard';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Linking from 'expo-linking';
 import LZString from 'lz-string';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, Share, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../constants/themeStyle';
+
+
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -21,8 +24,6 @@ const DEFAULT_TIMETABLE = { 0:[], 1: [], 2: [], 3: [], 4: [], 5: []};
 // --- DICTIONARY-BASED ULTRA SERIALIZER ---
 const serializeTimetable = (tt) => {
   const subjectDict = [];
-  
-  // Pass 1: Build dictionary of unique subjects
   for (let d = 0; d < 6; d++) {
     if (tt[d]) {
       tt[d].forEach(c => {
@@ -45,7 +46,6 @@ const serializeTimetable = (tt) => {
         const p = c.type === 'PR' ? 1 : 0;
         const dur = c.duration || 1;
         
-        // Drop trailing defaults
         if (dur === 1 && p === 0 && !r) return `${t}|${sIdx}`;
         if (dur === 1 && p === 0) return `${t}|${sIdx}|${r}`;
         if (dur === 1) return `${t}|${sIdx}|${r}|${p}`;
@@ -54,8 +54,6 @@ const serializeTimetable = (tt) => {
       days.push(`${d}:${classes}`);
     }
   }
-  
-  // Combine Dictionary and Schedule
   return subjectDict.join(',') + '~' + days.join('$');
 };
 
@@ -123,8 +121,12 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
   const [formType, setFormType] = useState('TH');
   const [formDuration, setFormDuration] = useState(1);
 
-  // Share States
+  // QR, Camera & Share States
   const [importCode, setImportCode] = useState('');
+  const [shareLink, setShareLink] = useState('');
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [permission, requestPermission] = useCameraPermissions();
 
   useEffect(() => {
     const initialize = async () => {
@@ -177,6 +179,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
       return match.FAC_NAME;
   };
 
+
   // --- SLOT LOGIC ---
   const handleOpenSlot = (slotTime, existingClass = null) => {
     setEditingSlot(slotTime);
@@ -215,7 +218,6 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
 
     updatedDay.push(newClass);
     updatedDay.sort((a, b) => TIME_SLOTS.indexOf(a.slot) - TIME_SLOTS.indexOf(b.slot));
-
     saveTimetable({ ...timetable, [selectedDay]: updatedDay });
     setShowSubjectModal(false);
   };
@@ -234,39 +236,55 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
       return "05:30 PM";
   };
 
-  // --- EXPORT/IMPORT LOGIC ---
-  const handleExportLink = async () => {
+  // --- UNIVERSAL QR & DEEP LINK LOGIC ---
+  const handleGenerateQR = async () => {
     try {
       const flatString = serializeTimetable(timetable);
       if (!flatString || !flatString.includes('~')) {
         Alert.alert("Error!", "Kindly create your timetable first.");
         return;
       }
-
       const tinyCode = LZString.compressToEncodedURIComponent(flatString);
       
-      Alert.alert("Copied To Clipboard!", "Your timetable code has been generated.");
-      await Clipboard.setStringAsync(tinyCode);
-      await Share.share({ 
-          message: tinyCode,
-          title: 'Timetable Import Link' 
-      });
+      // Generate the universal Deep Link
+      const link = Linking.createURL('timetable', {queryParams: {data: tinyCode}});
+      setShareLink(link);
+      setShowQRModal(true);
     } catch (error) {
       Alert.alert("Error", "Could not generate link.");
       console.log(error)
     }
   };
 
+  const startScanning = async () => {
+      if (!permission?.granted) {
+          const { granted } = await requestPermission();
+          if (!granted) {
+              Alert.alert("Permission Required", "Camera access is needed to scan QR codes.");
+              return;
+          }
+      }
+      setIsScanning(true);
+  };
+
+  const handleBarCodeScanned = ({ data }) => {
+      setIsScanning(false);
+      // Whether they scanned a URL or just the code, processImportData handles it
+      processImportData(data);
+  };
+
   const handleDeepLink = (url) => {
       const data = Linking.parse(url);
-      if (data.queryParams?.data) {
+      if (data.path === 'timetable' && data.queryParams?.data) {
           processImportData(data.queryParams.data);
+          setActiveTab('view');
       }
   };
 
   const processImportData = (dataString) => {
     try {
       let code = dataString;
+      // Extract data if it's a full URL
       if (dataString.includes('?data=')) {
           code = dataString.split('?data=')[1];
       }
@@ -275,14 +293,16 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
       if (!rawString) throw new Error("Decompression failed");
 
       const expandedData = deserializeTimetable(rawString);
+      
       saveTimetable({...DEFAULT_TIMETABLE, ...expandedData});
 
       setImportCode('');
+      setShowQRModal(false);
       Alert.alert("Success", "Timetable imported successfully!");
       setActiveTab('view');
       
     } catch (e) {
-      Alert.alert("Invalid Link", "The link or code you pasted is invalid or corrupted.");
+      Alert.alert("Invalid Link", "The scanned QR code or pasted link is invalid.");
     }
   };
 
@@ -298,10 +318,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
 
       if (existingClass) {
         const facultyName = getFacultyName(existingClass.subject);
-
         const endTimeStr = getEndTime(time, existingClass.duration);
-        const classTypeFull = existingClass.type === 'TH' ? 'Theory' : 'Practical';
-        const a11yLabel = `${time} to ${endTimeStr}. ${existingClass.subject}. Room ${existingClass.room || 'Not assigned'}. ${classTypeFull} class. ${facultyName ? `Taught by ${facultyName}` : ''}. ${isEditMode ? 'Double tap to edit this slot.' : ''}`;
 
         return (
           <TouchableOpacity
@@ -309,11 +326,9 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
             style={[styles.classCard, { backgroundColor: theme.card, borderLeftColor: theme.primary, borderLeftWidth: 4 }]}
             onPress={() => isEditMode && handleOpenSlot(time, existingClass)}
             disabled={!isEditMode}
-            accessible={true}
-            accessibilityRole="button"
-            accessibilityLabel={a11yLabel}
+            activeOpacity={0.7}
           >
-            <View style={styles.classContent} importantForAccessibility="no-hide-descendants">
+            <View style={styles.classContent}>
               <Text style={[styles.classTime, { color: theme.primary }]}>{time} - {endTimeStr}</Text>
               <Text style={[styles.classSubject, { color: theme.text }]}>{existingClass.subject}</Text>
               <View style={styles.classMetaRow}>
@@ -327,7 +342,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                 )}
               </View>
             </View>
-            {isEditMode && <Ionicons name="pencil" size={20} color={theme.textSecondary} importantForAccessibility="no" />}
+            {isEditMode && <Ionicons name="pencil" size={20} color={theme.textSecondary} />}
           </TouchableOpacity>
         );
       }
@@ -338,12 +353,10 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
             key={time}
             style={[styles.emptySlot, { borderColor: theme.borderColor, backgroundColor: 'transparent' }]}
             onPress={() => handleOpenSlot(time)}
-            accessible={true}
-            accessibilityRole="button"
-            accessibilityLabel={`Empty slot at ${time}. Double tap to add a class.`}
+            activeOpacity={0.5}
           >
-            <Text style={{ color: theme.textSecondary, fontWeight: '600' }} importantForAccessibility="no">{time}</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }} importantForAccessibility="no-hide-descendants">
+            <Text style={{ color: theme.textSecondary, fontWeight: '600' }}>{time}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
                 <Ionicons name="add-circle-outline" size={20} color={theme.primary} />
                 <Text style={{ color: theme.primary, fontWeight: '600' }}>Add Class</Text>
             </View>
@@ -356,7 +369,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
   if (loading) {
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center' }]}>
-            <ActivityIndicator size="large" color={theme.primary} accessibilityLabel="Loading timetable" />
+            <ActivityIndicator size="large" color={theme.primary} />
         </SafeAreaView>
     );
   }
@@ -366,39 +379,26 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
         <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
 
         {/* Header */}
-        <View style={styles.headerRow} accessible={false}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => navigation.goBack()}
-              accessibilityRole="button"
-              accessibilityLabel="Go Back"
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-                <Ionicons name="caret-back" size={27} color={theme.primary} importantForAccessibility="no" />
+        <View style={styles.headerRow}>
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Ionicons name="caret-back" size={27} color={theme.primary} />
             </TouchableOpacity>
-            <Text style={[styles.headerTitle, { color: theme.text }]} accessibilityRole="header" accessibilityLabel='Timetable'>TIMETABLE</Text>
-            <TouchableOpacity
-              style={[styles.themeButton, { backgroundColor: theme.card }]}
-              onPress={() => setIsDarkMode(!isDarkMode)}
-              accessibilityRole="button"
-              accessibilityLabel="Toggle Theme"
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-                <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} importantForAccessibility="no" />
+            <Text style={[styles.headerTitle, { color: theme.text }]}>TIMETABLE</Text>
+            <TouchableOpacity style={[styles.themeButton, { backgroundColor: theme.card }]} onPress={() => setIsDarkMode(!isDarkMode)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} />
             </TouchableOpacity>
         </View>
 
-        <View style={[styles.tabContainer, { backgroundColor: theme.card, marginTop: 10, borderColor:theme.secondary, borderWidth:.5 }]} accessible={true} accessibilityRole="tablist">
+        {/* Custom Tab Switcher */}
+        <View style={[styles.tabContainer, { backgroundColor: theme.card, marginTop: 10, borderColor:theme.secondary, borderWidth:.5 }]}>
             {['view', 'edit', 'share'].map((tab) => (
                 <TouchableOpacity
                   key={tab}
                   style={[styles.tabButton, activeTab === tab && [styles.tabActive, { backgroundColor: theme.primary }]]}
                   onPress={() => setActiveTab(tab)}
-                  accessibilityRole="tab"
-                  accessibilityState={{ selected: activeTab === tab }}
-                  accessibilityLabel={`${tab} tab`}
+                  activeOpacity={0.8}
                 >
-                    <Text style={[styles.tabText, { color: activeTab === tab ? '#FFF' : theme.textSecondary }]} importantForAccessibility="no">{tab.charAt(0).toUpperCase() + tab.slice(1)}</Text>
+                    <Text style={[styles.tabText, { color: activeTab === tab ? '#FFF' : theme.textSecondary }]}>{tab.charAt(0).toUpperCase() + tab.slice(1)}</Text>
                 </TouchableOpacity>
             ))}
         </View>
@@ -411,11 +411,9 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                   key={day}
                   style={[styles.dayPill, { backgroundColor: theme.card, borderColor:theme.primary, borderWidth:1 }, selectedDay === index && { backgroundColor: theme.primary }]}
                   onPress={() => setSelectedDay(index)}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: selectedDay === index }}
-                  accessibilityLabel={`${day}day`}
+                  activeOpacity={0.7}
                 >
-                    <Text style={[styles.dayText, { color: selectedDay === index ? '#FFF' : theme.textSecondary }]} importantForAccessibility="no">{day}</Text>
+                    <Text style={[styles.dayText, { color: selectedDay === index ? '#FFF' : theme.textSecondary }]}>{day}</Text>
                 </TouchableOpacity>
                 ))}
             </ScrollView>
@@ -427,8 +425,8 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
             {activeTab === 'view' && (
                 <View>
                   {timetable[selectedDay]?.length === 0 ? (
-                    <View style={[styles.emptyCard, { backgroundColor: theme.card }]} accessible={true} accessibilityLabel="No Classes Today!">
-                      <Text style={{ color: theme.text, fontSize: 16, fontWeight: '700' }} importantForAccessibility="no">No Classes Today!</Text>
+                    <View style={[styles.emptyCard, { backgroundColor: theme.card }]}>
+                      <Text style={{ color: theme.text, fontSize: 16, fontWeight: '700' }}>No Classes Today!</Text>
                     </View>
                   ) : (renderSlots(false))}
                 </View>
@@ -436,38 +434,46 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
 
             {activeTab === 'edit' && (
                 <View>
-                    <Text style={[styles.sectionLabel, { color: theme.textSecondary, marginBottom: 16 }]} accessibilityRole="header">Tap a slot to assign a subject</Text>
+                    <Text style={[styles.sectionLabel, { color: theme.textSecondary, marginBottom: 16 }]}>Tap a slot to assign a subject</Text>
                     {renderSlots(true)}
                 </View>
             )}
 
             {activeTab === 'share' && (
-                <View style={{ gap: 20, height:800 }}>
-                    {/* Export Card */}
+                <View style={{ gap: 20 }}>
+                    {/* Universal Export Card */}
                     <View style={[styles.formCard, { backgroundColor: theme.card }]}>
                         <View style={[styles.iconCircle, { backgroundColor: theme.iconBg }]}>
-                            <Ionicons name="share-social-outline" size={32} color={theme.primary} />
+                            <Ionicons name="qr-code-outline" size={32} color={theme.primary} />
                         </View>
-                        <Text style={[styles.shareTitle, { color: theme.text }]}>Share Timetable</Text>
-                        <Text style={[styles.shareDesc, { color: theme.textSecondary }]}>Generate a magic link to send your schedule directly to your classmates via WhatsApp.</Text>
+                        <Text style={[styles.shareTitle, { color: theme.text }]}>Export Timetable</Text>
+                        <Text style={[styles.shareDesc, { color: theme.textSecondary }]}>Let other ArsdSaathi users import your timetable.</Text>
 
-                        <TouchableOpacity
-                          style={[styles.primaryButton, { backgroundColor: theme.primary, width: '100%' }]}
-                          onPress={handleExportLink}
-                        >
-                            <Ionicons name="paper-plane-outline" size={18} color="#FFF" style={{ marginRight: 8 }} />
-                            <Text style={styles.primaryButtonText}>Share Link</Text>
+                        <View style={{ flexDirection: 'row', gap: 10, width: '100%' }}>
+                            <TouchableOpacity style={[styles.primaryButton, { backgroundColor: theme.primary, flex: 1 }]} onPress={handleGenerateQR} activeOpacity={0.8}>
+                                <Ionicons name="qr-code" size={18} color="#FFF" style={{ marginRight: 8 }} />
+                                <Text style={styles.primaryButtonText}>QR Code</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    {/* Camera Import Card */}
+                    <View style={[styles.formCard, { backgroundColor: theme.card }]}>
+                        <View style={[styles.iconCircle, { backgroundColor: theme.iconBg }]}>
+                            <Ionicons name="scan-outline" size={32} color={theme.primary} />
+                        </View>
+                        <Text style={[styles.shareTitle, { color: theme.text }]}>Scan QR Code</Text>
+                        <Text style={[styles.shareDesc, { color: theme.textSecondary }]}>Use your camera to scan an ArsdSaathi code.</Text>
+
+                        <TouchableOpacity style={[styles.primaryButton, { backgroundColor: theme.background, borderColor: theme.primary, borderWidth: 1, width: '100%' }]} onPress={startScanning} activeOpacity={0.8}>
+                            <Ionicons name="camera" size={18} color={theme.primary} style={{ marginRight: 8 }} />
+                            <Text style={[styles.primaryButtonText, { color: theme.primary }]}>Open Camera Scanner</Text>
                         </TouchableOpacity>
                     </View>
 
-                    {/* Import Card (Manual Fallback) */}
-                    <View style={[styles.formCard, { backgroundColor: theme.card }]}>
-                        <View style={[styles.iconCircle, { backgroundColor: theme.iconBg }]}>
-                            <Ionicons name="download-outline" size={32} color={theme.primary} />
-                        </View>
-                        <Text style={[styles.shareTitle, { color: theme.text }]}>Manual Import</Text>
-                        <Text style={[styles.shareDesc, { color: theme.textSecondary }]}>If the link didn&apos;t open automatically, just paste the URL or the code here.</Text>
-
+                    {/* Manual Link Fallback */}
+                    <View style={[styles.formCard, { backgroundColor: theme.card, marginTop: 10 }]}>
+                        <Text style={[styles.inputLabel, { color: theme.textSecondary, width: '100%' }]}>Or Paste Link / Code</Text>
                         <TextInput
                             style={[styles.inputField, { borderColor: theme.primary, color: theme.text, width: '100%', marginBottom: 16 }]}
                             placeholder="Paste link here..."
@@ -475,11 +481,11 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                             value={importCode}
                             onChangeText={setImportCode}
                         />
-
                         <TouchableOpacity
                             style={[styles.primaryButton, { backgroundColor: importCode ? theme.primary : theme.borderColor, width: '100%' }]}
                             onPress={() => processImportData(importCode)}
                             disabled={!importCode}
+                            activeOpacity={0.8}
                         >
                             <Text style={[styles.primaryButtonText, !importCode && { color: theme.textSecondary }]}>Import Data</Text>
                         </TouchableOpacity>
@@ -488,13 +494,64 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
             )}
         </ScrollView>
 
+        {/* --- QR DISPLAY MODAL --- */}
+        <Modal visible={showQRModal} transparent animationType="fade">
+            <View style={styles.modalBackdropCenter}>
+                <View style={[styles.qrModalContent, { backgroundColor: theme.card }]}>
+                    <View style={styles.modalHeaderRowCentered}>
+                       <Text style={[styles.shareTitle, { color: theme.text, margin: 0 }]}>Scan to Sync</Text>
+                       <TouchableOpacity onPress={() => setShowQRModal(false)}>
+                           <Ionicons name="close-circle" size={28} color={theme.textSecondary} />
+                       </TouchableOpacity>
+                    </View>
+                    
+                    <View style={{ padding: 15, backgroundColor: '#FFF', borderRadius: 15, marginBottom: 20 }}>
+                        {shareLink ? <QRCode value={shareLink} size={220} /> : null}
+                    </View>
+
+                    <Text style={[styles.shareDesc, { color: theme.textSecondary }]}>
+                        Scan with your phone&apos;s camera or the ArsdSaathi app.
+                    </Text>
+
+                    <TouchableOpacity
+                        style={[styles.primaryButton, { backgroundColor: theme.background, borderColor: theme.primary, borderWidth: 1, width: '100%', marginTop: 10 }]}
+                        onPress={async () => {
+                            await Share.share({ message: `Sync my ArsdSaathi timetable!\n\n${shareLink}` });
+                        }}
+                    >
+                        <Ionicons name="share-outline" size={18} color={theme.primary} style={{ marginRight: 8 }} />
+                        <Text style={[styles.primaryButtonText, { color: theme.primary }]}>Share Link Instead</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Modal>
+
+        {/* --- IN-APP CAMERA SCANNER MODAL --- */}
+        <Modal visible={isScanning} animationType="slide">
+            <View style={styles.cameraContainer}>
+                <CameraView
+                    style={StyleSheet.absoluteFillObject}
+                    facing="back"
+                    onBarcodeScanned={isScanning ? handleBarCodeScanned : undefined}
+                    barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
+                />
+                <View style={styles.scannerOverlay}>
+                    <Text style={styles.scannerText}>Scan Timetable QR</Text>
+                    <View style={styles.scannerFrame} />
+                    <TouchableOpacity style={styles.cancelScanButton} onPress={() => setIsScanning(false)}>
+                        <Text style={styles.cancelScanText}>Cancel Scan</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Modal>
+
         {/* --- SUBJECT EDIT MODAL --- */}
-        <Modal visible={showSubjectModal} transparent animationType="slide" accessibilityViewIsModal={true}>
+        <Modal visible={showSubjectModal} transparent animationType="slide">
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-                <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} accessibilityLabel="Close modal" accessibilityRole="button">
-                <View style={[styles.modalContent, { backgroundColor: theme.card }]} accessible={false}>
-                    <View style={styles.modalHeaderRow} accessible={true}>
-                        <Text style={[styles.modalHeader, { color: theme.text }]} accessibilityRole="header" accessibilityLabel={`Editing slot of ${editingSlot}`}>Slot: {editingSlot}</Text>
+                <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={() => setShowSubjectModal(false)}>
+                <View style={[styles.modalContent, { backgroundColor: theme.card }]} onStartShouldSetResponder={() => true}>
+                    <View style={styles.modalHeaderRow}>
+                        <Text style={[styles.modalHeader, { color: theme.text }]}>Slot: {editingSlot}</Text>
                         <TouchableOpacity onPress={() => setShowSubjectModal(false)} hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}>
                             <Ionicons name="close-circle" size={28} color={theme.error} />
                         </TouchableOpacity>
@@ -503,7 +560,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                     <ScrollView style={{ padding: 20, maxHeight: 500 }} showsVerticalScrollIndicator={false}>
 
                         <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>Select Subject</Text>
-                        <ScrollView horizontal showsHorizontalScrollIndicator={true} style={{ marginBottom: 20 }} accessible={false}>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
                             {availableSubjects.map((sub) => (
                                 <TouchableOpacity
                                     key={sub}
@@ -516,7 +573,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                         </ScrollView>
 
                         <View style={styles.pillContainerRow}>
-                            <View style={{flex:1, width:100}}>
+                            <View style={{flex:1, minWidth:100}}>
                                 <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>Room</Text>
                                 <TextInput
                                     style={[styles.inputField, { borderColor: theme.borderColor, color: theme.text, paddingVertical: 14 }]}
@@ -560,7 +617,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                           style={[styles.primaryButton, { backgroundColor: theme.primary, marginBottom: 12 }]}
                           onPress={handleSaveClass}
                         >
-                            <Text style={styles.primaryButtonText}>Save Class to {editingSlot}</Text>
+                            <Text style={styles.primaryButtonText}>Save Class</Text>
                         </TouchableOpacity>
 
                         {timetable[selectedDay]?.find(c => c.slot === editingSlot) && (
@@ -616,9 +673,14 @@ const styles = StyleSheet.create({
   shareDesc: { fontSize: 14, textAlign: 'center', lineHeight: 20, marginBottom: 20 },
 
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
+  modalBackdropCenter: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 },
   modalContent: { borderTopLeftRadius: 30, borderTopRightRadius: 30, overflow: 'hidden' },
+  qrModalContent: { padding: 30, borderRadius: 30, alignItems: 'center', width: '100%', maxWidth: 350 },
+  
   modalHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderColor: 'rgba(0,0,0,0.05)' },
+  modalHeaderRowCentered: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: 20 },
   modalHeader: { fontSize: 18, fontWeight: '800' },
+  
   inputLabel: { fontSize: 13, fontWeight: '700', textTransform: 'uppercase', marginBottom: 8, marginLeft: 4 },
   chip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, marginRight: 10 },
   inputField: { width: '100%', borderWidth: 1, borderRadius: 16, padding: 16, fontSize: 16, fontWeight: '600' },
@@ -627,6 +689,14 @@ const styles = StyleSheet.create({
   compactPill: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16, paddingVertical: 15, borderRadius: 16, borderWidth: 1 },
   compactPillText: { fontSize: 15, fontWeight: '800' },
 
-  primaryButton: { paddingVertical: 16, borderRadius: 16, alignItems: 'center', flexDirection: 'row', justifyContent: 'center' },
+  primaryButton: { paddingVertical: 16, borderRadius: 16, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', paddingHorizontal: 20 },
   primaryButtonText: { color: '#FFF', fontSize: 16, fontWeight: '800' },
+
+  // Camera Styles
+  cameraContainer: { flex: 1, backgroundColor: '#000' },
+  scannerOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
+  scannerText: { color: '#FFF', fontSize: 20, fontWeight: '700', marginBottom: 40, textAlign: 'center' },
+  scannerFrame: { width: 250, height: 250, borderWidth: 3, borderColor: '#FFF', borderRadius: 20, backgroundColor: 'transparent' },
+  cancelScanButton: { position: 'absolute', bottom: 50, backgroundColor: '#FFF', paddingVertical: 15, paddingHorizontal: 40, borderRadius: 30 },
+  cancelScanText: { color: '#000', fontSize: 16, fontWeight: '800' },
 });
