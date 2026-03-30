@@ -7,9 +7,8 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, Share, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { titleCase } from 'title-case';
 import { Colors } from '../constants/themeStyle';
-
-
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -176,9 +175,8 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
           );
           return looseMatch ? looseMatch.FAC_NAME : null;
       }
-      return match.FAC_NAME;
+      return titleCase(match.FAC_NAME.toLowerCase());
   };
-
 
   // --- SLOT LOGIC ---
   const handleOpenSlot = (slotTime, existingClass = null) => {
@@ -247,8 +245,9 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
       const tinyCode = LZString.compressToEncodedURIComponent(flatString);
       
       // Generate the universal Deep Link
-      const link = Linking.createURL('timetable', {queryParams: {data: tinyCode}});
+      const link = Linking.createURL(`timetable?data=${tinyCode}`);
       setShareLink(link);
+      
       setShowQRModal(true);
     } catch (error) {
       Alert.alert("Error", "Could not generate link.");
@@ -275,9 +274,8 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
 
   const handleDeepLink = (url) => {
       const data = Linking.parse(url);
-      if (data.path === 'timetable' && data.queryParams?.data) {
+      if (data.queryParams?.data) {
           processImportData(data.queryParams.data);
-          setActiveTab('view');
       }
   };
 
@@ -293,7 +291,6 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
       if (!rawString) throw new Error("Decompression failed");
 
       const expandedData = deserializeTimetable(rawString);
-      
       saveTimetable({...DEFAULT_TIMETABLE, ...expandedData});
 
       setImportCode('');
@@ -303,6 +300,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
       
     } catch (e) {
       Alert.alert("Invalid Link", "The scanned QR code or pasted link is invalid.");
+      console.log(e)
     }
   };
 
@@ -446,13 +444,13 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                         <View style={[styles.iconCircle, { backgroundColor: theme.iconBg }]}>
                             <Ionicons name="qr-code-outline" size={32} color={theme.primary} />
                         </View>
-                        <Text style={[styles.shareTitle, { color: theme.text }]}>Export Timetable</Text>
+                        <Text style={[styles.shareTitle, { color: theme.text }]}>Share Timetable</Text>
                         <Text style={[styles.shareDesc, { color: theme.textSecondary }]}>Let other ArsdSaathi users import your timetable.</Text>
 
                         <View style={{ flexDirection: 'row', gap: 10, width: '100%' }}>
                             <TouchableOpacity style={[styles.primaryButton, { backgroundColor: theme.primary, flex: 1 }]} onPress={handleGenerateQR} activeOpacity={0.8}>
-                                <Ionicons name="qr-code" size={18} color="#FFF" style={{ marginRight: 8 }} />
-                                <Text style={styles.primaryButtonText}>QR Code</Text>
+                                <Ionicons name="share-outline" size={18} color="#FFF" style={{ marginRight: 8 }} />
+                                <Text style={styles.primaryButtonText}>Export</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -462,12 +460,12 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                         <View style={[styles.iconCircle, { backgroundColor: theme.iconBg }]}>
                             <Ionicons name="scan-outline" size={32} color={theme.primary} />
                         </View>
-                        <Text style={[styles.shareTitle, { color: theme.text }]}>Scan QR Code</Text>
+                        <Text style={[styles.shareTitle, { color: theme.text }]}>Import Timetable</Text>
                         <Text style={[styles.shareDesc, { color: theme.textSecondary }]}>Use your camera to scan an ArsdSaathi code.</Text>
 
                         <TouchableOpacity style={[styles.primaryButton, { backgroundColor: theme.background, borderColor: theme.primary, borderWidth: 1, width: '100%' }]} onPress={startScanning} activeOpacity={0.8}>
                             <Ionicons name="camera" size={18} color={theme.primary} style={{ marginRight: 8 }} />
-                            <Text style={[styles.primaryButtonText, { color: theme.primary }]}>Open Camera Scanner</Text>
+                            <Text style={[styles.primaryButtonText, { color: theme.primary }]}>Open Scanner</Text>
                         </TouchableOpacity>
                     </View>
 
