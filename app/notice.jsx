@@ -1,29 +1,45 @@
 import { Colors } from '@/constants/themeStyle';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useEffect, useRef, useState } from 'react';
-import {
-    ActivityIndicator,
-    FlatList,
-    LayoutAnimation,
-    Linking,
-    Platform,
-    RefreshControl,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    UIManager,
-    View
-} from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, FlatList, Linking, Platform, RefreshControl, StatusBar, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 
+// Enable LayoutAnimation for Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-export default function Notices({ navigation, isDarkMode }) {
+const NoticeCard = React.memo(({ item, theme }) => (
+  <TouchableOpacity 
+    style={[styles.card, { backgroundColor: theme.card, borderColor: theme.borderColor }]}
+    onPress={() => Linking.openURL(item.url)}
+    activeOpacity={0.7}
+    accessibilityRole="link"
+    accessibilityLabel={`Notice from ${item.date}: ${item.title}`}
+    accessibilityHint="Double tap to view this notice in your browser"
+  >
+    <View style={styles.cardHeader} importantForAccessibility="no-hide-descendants">
+      <View style={[styles.dateBadge, { backgroundColor: theme.primary + '15' }]}>
+        <Ionicons name="calendar-outline" size={12} color={theme.primary} style={{ marginRight: 4 }} />
+        <Text style={[styles.dateText, { color: theme.primary }]}>{item.date}</Text>
+      </View>
+    </View>
+    
+    <View style={styles.cardBody} importantForAccessibility="no-hide-descendants">
+      <Text style={[styles.title, { color: theme.text }]} numberOfLines={3}>
+        {item.title}
+      </Text>
+      <View style={[styles.downloadIcon, { backgroundColor: theme.iconBg }]}>
+        <Ionicons name="open-outline" size={18} color={theme.primary} />
+      </View>
+    </View>
+  </TouchableOpacity>
+));
+NoticeCard.displayName = 'NoticeCard';
+
+export default function Notices({ navigation, isDarkMode, setIsDarkMode }) {
   const theme = {
     background: isDarkMode ? Colors.dark.background : Colors.light.background,
     card: isDarkMode ? Colors.dark.card : Colors.light.card, 
@@ -42,7 +58,6 @@ export default function Notices({ navigation, isDarkMode }) {
   const [hasMore, setHasMore] = useState(true);
   const [webViewKey, setWebViewKey] = useState(0); 
 
-  // 1. Load Cache
   useEffect(() => {
     const loadCache = async () => {
       try {
@@ -80,7 +95,6 @@ export default function Notices({ navigation, isDarkMode }) {
             const url = linkCol.href;
             const date = dateCol.innerText.trim();
             
-            // Stop parsing if we hit the previous year
             if (date && date.includes(prevYear)) {
               hitOldNotice = true;
               break; 
@@ -88,7 +102,7 @@ export default function Notices({ navigation, isDarkMode }) {
 
             if (title && url) {
               data.push({
-                id: title, // Using title as unique ID
+                id: title,
                 title: title,
                 url: url,
                 date: date || "New"
@@ -96,12 +110,10 @@ export default function Notices({ navigation, isDarkMode }) {
             }
           }
           
-          // Check if "Next" button exists and is NOT disabled
           const nextBtn = document.querySelector('.dt-paging-button.next');
           const isNextDisabled = nextBtn ? (nextBtn.classList.contains('disabled') || nextBtn.getAttribute('aria-disabled') === 'true') : true;
           const canFetchMore = !isNextDisabled && !hitOldNotice;
 
-          // Send data and pagination status back to React Native
           window.ReactNativeWebView.postMessage(JSON.stringify({
             type: 'SCRAPE_RESULT',
             data: data,
@@ -112,21 +124,18 @@ export default function Notices({ navigation, isDarkMode }) {
         }
       }
 
-      // Initial scrape (delay slightly to let DataTables render)
       setTimeout(scrapeCurrentPage, 800);
 
-      // Listen for "Load More" commands from React Native
       document.addEventListener('message', function(event) {
         if (event.data === 'FETCH_NEXT') {
           const nextBtn = document.querySelector('.dt-paging-button.next');
           if (nextBtn) {
-            nextBtn.click(); // Simulate user clicking next page
-            setTimeout(scrapeCurrentPage, 800); // Wait for DataTables to swap the rows
+            nextBtn.click();
+            setTimeout(scrapeCurrentPage, 800); 
           }
         }
       });
       
-      // Fallback listener for iOS
       window.addEventListener('message', function(event) {
         if (event.data === 'FETCH_NEXT') {
           const nextBtn = document.querySelector('.dt-paging-button.next');
@@ -139,7 +148,6 @@ export default function Notices({ navigation, isDarkMode }) {
     })();
   `;
 
-  // 3. Handle Data Streams from WebView
   const handleMessage = async (event) => {
     try {
       const parsedMessage = JSON.parse(event.nativeEvent.data);
@@ -152,7 +160,6 @@ export default function Notices({ navigation, isDarkMode }) {
 
         if (newData.length > 0) {
           setNotices(prevNotices => {
-            // Filter out duplicates (in case of overlap or fast scrolling)
             const existingIds = new Set(prevNotices.map(n => n.id));
             const uniqueNewData = newData.filter(n => !existingIds.has(n.id));
             
@@ -160,12 +167,8 @@ export default function Notices({ navigation, isDarkMode }) {
               ? newData 
               : [...prevNotices, ...uniqueNewData];
 
-            // Cache ONLY the top 20 to keep AsyncStorage light
             AsyncStorage.setItem('SAVED_NOTICES', JSON.stringify(combinedNotices.slice(0, 20)));
-            
-            if (uniqueNewData.length > 0 && !isFetchingMore) {
-               LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-            }
+
             return combinedNotices;
           });
         }
@@ -179,49 +182,69 @@ export default function Notices({ navigation, isDarkMode }) {
     }
   };
 
-  // 4. Trigger Next Page Scrape
-  const handleLoadMore = () => {
+  const handleLoadMore = useCallback(() => {
     if (!hasMore || isFetchingMore || loading) return;
     
     setIsFetchingMore(true);
-    // Send command to the injected JS to click the next button
     if (webViewRef.current) {
       webViewRef.current.postMessage('FETCH_NEXT');
     }
-  };
+  }, [hasMore, isFetchingMore, loading]);
 
-  const onRefresh = () => {
+  const onRefresh = useCallback(() => {
     setIsRefreshing(true);
     setHasMore(true);
-    setWebViewKey(prev => prev + 1); // Remounts WebView for a fresh start
-  };
+    setWebViewKey(prev => prev + 1); 
+  }, []);
+
+  
+  const renderItem = useCallback(({ item }) => (
+    <NoticeCard item={item} theme={theme} />
+  ), [theme.background]);
+
+  const keyExtractor = useCallback((item, index) => item.id + index, []);
+
+  // 🟢 OPTIMIZATION 3: Memoize Footer Component
+  const renderFooter = useCallback(() => {
+    if (!isFetchingMore) return null;
+    return (
+      <View style={{ paddingVertical: 20, alignItems: 'center' }}>
+        <ActivityIndicator size="small" color={theme.primary} accessibilityLabel="Loading older notices" />
+      </View>
+    );
+  }, [isFetchingMore, theme.primary]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
 
-      {/* --- Header --- */}
-      <View style={styles.headerRow}>
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={() => navigation?.goBack()} 
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-        >
-          <Ionicons name="caret-back" size={27} color={theme.primary} importantForAccessibility="no" />
-        </TouchableOpacity>
-        
-        <Text 
-          style={[styles.headerTitle, { color: theme.text }]}
-          accessibilityRole="header"
-        >
-          NOTICE BOARD
-        </Text>
-        <View style={{ width: 40 }} importantForAccessibility="no" /> 
-      </View>
+      <View style={styles.headerRow} accessible={false}>
+                      <TouchableOpacity
+                          style={styles.backButton}
+                          onPress={() => (navigation?.goBack ? navigation.goBack() : console.log('Back'))}
+                          accessibilityRole="button"
+                          accessibilityLabel="Go Back"
+                          accessibilityHint="Returns to the previous screen"
+                          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      >
+                          <Ionicons name="caret-back" size={24} color={theme.primary} importantForAccessibility="no" />
+                      </TouchableOpacity>
+      
+                      <Text style={[styles.headerTitle, { color: theme.text }]} accessibilityRole="header">NOTICE BOARD</Text>
+      
+                      <TouchableOpacity
+                          style={[styles.themeButton, { backgroundColor: theme.card }]}
+                          onPress={() => setIsDarkMode(!isDarkMode)}
+                          accessibilityRole="button"
+                          accessibilityLabel="Toggle Theme"
+                          accessibilityHint={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+                          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      >
+                           <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} importantForAccessibility="no" />
+                      </TouchableOpacity>
+                  </View>
+      
 
-      {/* --- Hidden Scraper --- */}
       <View style={{ height: 0, width: 0, opacity: 0 }} importantForAccessibility="no-hide-descendants">
         <WebView
           ref={webViewRef}
@@ -233,7 +256,6 @@ export default function Notices({ navigation, isDarkMode }) {
         />
       </View>
 
-      {/* --- Main Content --- */}
       {loading && notices.length === 0 ? (
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color={theme.primary} accessibilityLabel="Loading notices" />
@@ -242,11 +264,19 @@ export default function Notices({ navigation, isDarkMode }) {
       ) : (
         <FlatList
           data={notices}
-          keyExtractor={(item, index) => item.id + index} 
+          keyExtractor={keyExtractor} 
           contentContainerStyle={styles.listContainer}
-          showsVerticalScrollIndicator={false}
+          showsVerticalScrollIndicator={true}
+          
+          // 🟢 OPTIMIZATION 4: Performance Props
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={11} // Lowers memory footprint
+          removeClippedSubviews={Platform.OS === 'android'} // Destroys views off-screen on Android
+          
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.5}
+          
           refreshControl={
             <RefreshControl 
               refreshing={isRefreshing} 
@@ -261,39 +291,8 @@ export default function Notices({ navigation, isDarkMode }) {
               <Text style={[styles.emptyText, { color: theme.textSecondary }]}>No recent notices found.</Text>
             </View>
           }
-          ListFooterComponent={
-            isFetchingMore ? (
-              <View style={{ paddingVertical: 20, alignItems: 'center' }}>
-                <ActivityIndicator size="small" color={theme.primary} accessibilityLabel="Loading older notices" />
-              </View>
-            ) : null
-          }
-          renderItem={({ item }) => (
-            <TouchableOpacity 
-              style={[styles.card, { backgroundColor: theme.card, borderColor: theme.borderColor }]}
-              onPress={() => Linking.openURL(item.url)}
-              activeOpacity={0.7}
-              accessibilityRole="link"
-              accessibilityLabel={`Notice from ${item.date}: ${item.title}`}
-              accessibilityHint="Double tap to view this notice in your browser"
-            >
-              <View style={styles.cardHeader} importantForAccessibility="no-hide-descendants">
-                <View style={[styles.dateBadge, { backgroundColor: theme.primary + '15' }]}>
-                  <Ionicons name="calendar-outline" size={12} color={theme.primary} style={{ marginRight: 4 }} />
-                  <Text style={[styles.dateText, { color: theme.primary }]}>{item.date}</Text>
-                </View>
-              </View>
-              
-              <View style={styles.cardBody} importantForAccessibility="no-hide-descendants">
-                <Text style={[styles.title, { color: theme.text }]} numberOfLines={3}>
-                  {item.title}
-                </Text>
-                <View style={[styles.downloadIcon, { backgroundColor: theme.iconBg }]}>
-                  <Ionicons name="open-outline" size={18} color={theme.primary} />
-                </View>
-              </View>
-            </TouchableOpacity>
-          )}
+          ListFooterComponent={renderFooter}
+          renderItem={renderItem}
         />
       )}
     </SafeAreaView>
@@ -315,5 +314,6 @@ const styles = StyleSheet.create({
   dateText: { fontSize: 11, fontWeight: '800' },
   cardBody: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16 },
   title: { flex: 1, fontSize: 15, fontWeight: '700', lineHeight: 22 },
-  downloadIcon: { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center' }
+  downloadIcon: { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
+  themeButton: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, elevation: 3 },
 });
