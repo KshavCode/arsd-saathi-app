@@ -10,6 +10,7 @@ import Details from './basic';
 import Faculty from './faculty';
 import Home from './home';
 import Login from './index';
+import Notice from './notice';
 import Predictor from './predictor';
 import Timetable from './timetable';
 
@@ -100,6 +101,10 @@ export default function Stack1() {
             
                 <Stack.Screen name="Faculty">
                     {(props) => <Faculty {...props} {...themeProps} />}
+                </Stack.Screen>
+
+                <Stack.Screen name="Notice">
+                    {(props) => <Notice {...props} {...themeProps} />}
                 </Stack.Screen>
             
                 <Stack.Screen name="Predictor">

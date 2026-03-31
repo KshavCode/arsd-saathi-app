@@ -536,6 +536,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
             <GridActionButton title="Predictor" icon="color-wand" onPress={() => navigation.navigate("Predictor")} theme={theme} />
             <GridActionButton title="Timetable" icon="calendar" onPress={() => navigation.navigate("TimeTable")} theme={theme} />
             <GridActionButton title="Faculty" icon="people" onPress={() => navigation.navigate("Faculty")} theme={theme} />
+            <GridActionButton title="Notices" icon="newspaper" onPress={() => navigation.navigate("Notice")} theme={theme} />
             <GridActionButton title="Logout" icon="log-out" onPress={handleLogout} isDestructive={true} theme={theme} accessibilityHint="Opens confirmation dialog to securely log out"/>
         </View>
 

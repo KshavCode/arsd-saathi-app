@@ -1,9 +1,9 @@
 # ArsdSaathi v1.4.0 is now available!
 
 ## 💫 What's New?
-- **Notice Retrieval**: Never miss announcements now! One button and get the notice right to your phone!
-- **Shareable Timetable**: Still stuck with sharing codes? Experience easy exporting via QR Codes!
-- **Custom Label**: Test on next week's GE class? Edit the timetabale and put a label right up there now!
+- **Notice Retrieval**: Never miss announcements now! One button and get the notice right to your phone! 
+- **Shareable Timetable**: Still stuck with sharing codes? Experience easy exporting via QR Codes! ✅
+- **Custom Label**: Test on next week's GE class? Edit the timetabale and put a label right up there now! ✅
 - **Notification System**: ArsdSaathi now sends you a reminder, 10 minutes prior to your next class with that custom label! Turn the feature on now!
 
 
