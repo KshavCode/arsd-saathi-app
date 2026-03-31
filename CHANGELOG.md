@@ -1,15 +1,14 @@
 # ArsdSaathi v1.4.0 is now available!
 
 ## 💫 What's New?
-- **Optimized User Interface**: Modified the application layout to facilitate a "minimal action" workflow.
-- **Timetable Management**: Introduced a shareable, customizable and flexible timetable system which allow users to manually append GE, SEC, and VAC, along with their semester subjects. Reflects the next class in the dashboard as well!
-- **Accessibility**: Every functional element has been optimized for Screen Readers and assistive technologies.
-- **Additional Links**: More helpful links are added in order to help students access various resources in one click.
+- **Notice Retrieval**: Never miss announcements now! One button and get the notice right to your phone!
+- **Shareable Timetable**: Still stuck with sharing codes? Experience easy exporting via QR Codes!
+- **Custom Label**: Test on next week's GE class? Edit the timetabale and put a label right up there now!
+- **Notification System**: ArsdSaathi now sends you a reminder, 10 minutes prior to your next class with that custom label! Turn the feature on now!
+
 
 ## 🔍 Fixes
-- **Attendance Predictor**: Predictive class increments are now capped at a maximum of 15 sessions to maintain data integrity and practical use cases. Moreover, displays potential attendance marks awarded for percentage based on range.
-- **Home Layout**: Transitioned the Home Layout to a high-efficiency grid system, reducing visual clutter and improving the display of information.
-- **Log Out Confirmation**: A standardized dialogue system now prevents accidental session termination, requiring explicit user verification!
+- **Minor Spelling errors**: Making the information accurate and up to date.
 
 
 ## 📦 How to Install
@@ -21,7 +20,7 @@
 ## 🔒 Security & Verification
 To verify the integrity of this APK, you can compare the SHA-256 checksum:
 ```bash
-65df8a465e11c27fe5dd07def927bee9945d4663f6246f986154e341ff594e44
+code_here
 ```
 
 🚩 Issues
