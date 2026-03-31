@@ -119,6 +119,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
   const [formRoom, setFormRoom] = useState('');
   const [formType, setFormType] = useState('TH');
   const [formDuration, setFormDuration] = useState(1);
+  const [formLabel, setFormLabel] = useState('');
 
   // QR, Camera & Share States
   const [importCode, setImportCode] = useState('');
@@ -186,8 +187,9 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
       setFormRoom(existingClass.room);
       setFormType(existingClass.type);
       setFormDuration(existingClass.duration || 1);
+      setFormLabel(existingClass.label);
     } else {
-      setFormSubject(''); setFormRoom(''); setFormType('TH'); setFormDuration(1);
+      setFormSubject(''); setFormRoom(''); setFormType('TH'); setFormDuration(1); setFormLabel('');
     }
     setShowSubjectModal(true);
   };
@@ -202,6 +204,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
       room: formRoom,
       type: formType,
       duration: formDuration,
+      label: formLabel
     };
 
     let updatedDay = timetable[selectedDay].filter(item => item.slot !== editingSlot);
@@ -336,6 +339,12 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                    <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}>
                        <Ionicons name="person" size={12} color={theme.textSecondary} />
                        <Text style={[styles.metaText, { color: theme.textSecondary }]} numberOfLines={1}>{facultyName}</Text>
+                   </View>
+                )}
+                {existingClass.label && (
+                   <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}>
+                       <Ionicons name="document" size={12} color={theme.textSecondary} />
+                       <Text style={[styles.metaText, { color: theme.textSecondary }]} numberOfLines={1}>{existingClass.label}</Text>
                    </View>
                 )}
               </View>
@@ -609,7 +618,18 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                                     <Ionicons name="swap-horizontal" size={14} color={theme.textSecondary} style={{marginLeft: 4}} />
                                 </TouchableOpacity>
                             </View>
+
+                            <View style={{flex:1, minWidth:100}}>
+                                <TextInput
+                                    style={[styles.inputField, { borderColor: theme.borderColor, color: theme.text, paddingVertical: 10 }]}
+                                    placeholder="Label (Optional)"
+                                    placeholderTextColor={theme.textSecondary}
+                                    value={formLabel}
+                                    onChangeText={setFormLabel}
+                                />
+                            </View>
                         </View>
+
 
                         <TouchableOpacity
                           style={[styles.primaryButton, { backgroundColor: theme.primary, marginBottom: 12 }]}
@@ -670,9 +690,9 @@ const styles = StyleSheet.create({
   shareTitle: { fontSize: 20, fontWeight: '800', marginBottom: 8 },
   shareDesc: { fontSize: 14, textAlign: 'center', lineHeight: 20, marginBottom: 20 },
 
-  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
+  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems:'center' },
   modalBackdropCenter: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 },
-  modalContent: { borderTopLeftRadius: 30, borderTopRightRadius: 30, overflow: 'hidden' },
+  modalContent: { borderRadius: 30, overflow: 'hidden', width:'95%' },
   qrModalContent: { padding: 30, borderRadius: 30, alignItems: 'center', width: '100%', maxWidth: 350 },
   
   modalHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderColor: 'rgba(0,0,0,0.05)' },

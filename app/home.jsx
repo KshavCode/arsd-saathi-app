@@ -2,7 +2,6 @@ import { FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, LIBRARY_U
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckBox from 'expo-checkbox';
-import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -75,17 +74,17 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
   useEffect(() => {
     const checkForUpdates = async () => {
       try {
-        const currentVersion = Constants.expoConfig.version;
-        const response = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest');
-        if (!response.ok) return;
-        const data = await response.json();
-        const latestVersion = data.tag_name.replace('v', '');
+        // const currentVersion = Constants.expoConfig.version;
+        // const response = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest');
+        // if (!response.ok) return;
+        // const data = await response.json();
+        // const latestVersion = data.tag_name.replace('v', '');
 
-        if (latestVersion !== currentVersion) {
-            const downloadUrl = data.assets?.[0]?.browser_download_url || data.html_url;
-            setUpdateInfo({ version: latestVersion, url: downloadUrl });
-            setShowUpdateModal(true);
-        }
+        // if (latestVersion !== currentVersion) {
+        //     const downloadUrl = data.assets?.[0]?.browser_download_url || data.html_url;
+        //     setUpdateInfo({ version: latestVersion, url: downloadUrl });
+        //     setShowUpdateModal(true);
+        // }
       } catch (error) {
         console.log("Auto-update check failed:", error); 
       }
@@ -496,33 +495,37 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
 
             {/* --- Upcoming Class Row --- */}
             {nextClassInfo && (
-                <TouchableOpacity onPress={()=>navigation.navigate('TimeTable')}>
-                    <View style={[styles.heroDivider, { backgroundColor: theme.separator }]} />
+              <TouchableOpacity onPress={()=>navigation.navigate('TimeTable')}>
+                <View style={[styles.heroDivider, { backgroundColor: theme.separator }]} />
                     <View style={styles.nextClassRow} accessible={true} accessibilityLabel={`Up Next ${nextClassInfo.dayName} at ${nextClassInfo.slot}. Subject: ${nextClassInfo.subject}. Room ${nextClassInfo.room || 'Not Assigned'}. ${nextClassInfo.duration} Hour ${nextClassInfo.type} class.`}>
-                        <View style={styles.nextClassHeader} importantForAccessibility="no-hide-descendants">
-                            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                                <Ionicons name="alarm-outline" size={16} color={theme.success} />
-                                <Text style={[styles.nextClassTitle, { color: theme.success }]}>Next Class - {nextClassInfo.dayName}</Text>
-                            </View>
-                            <Text style={[styles.nextClassTime, { color: theme.primary }]}>{nextClassInfo.slot}</Text>
+                      <View style={styles.nextClassHeader} importantForAccessibility="no-hide-descendants">
+                        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                          <Ionicons name="alarm-outline" size={16} color={theme.success} />
+                          <Text style={[styles.nextClassTitle, { color: theme.success }]}>Next Class - {nextClassInfo.dayName}</Text>
                         </View>
+                        <Text style={[styles.nextClassTime, { color: theme.primary }]}>{nextClassInfo.slot}</Text>
+                      </View>
                         
-                        <Text style={[styles.nextClassSubject, { color: theme.text }]} numberOfLines={1} importantForAccessibility="no">
-                            {nextClassInfo.subject}
-                        </Text>
-                        
-                        <View style={styles.nextClassMetaRow} importantForAccessibility="no-hide-descendants">
-                            <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}>
-                                <Ionicons name="location" size={12} color={theme.textSecondary} />
-                                <Text style={[styles.metaText, { color: theme.textSecondary }]}>Room {nextClassInfo.room || 'N/A'}</Text>
-                            </View>
-                            <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}>
-                                <Ionicons name="time" size={12} color={theme.textSecondary} />
-                                <Text style={[styles.metaText, { color: theme.textSecondary }]}>{nextClassInfo.duration} Hr {nextClassInfo.type}</Text>
-                            </View>
+                      <Text style={[styles.nextClassSubject, { color: theme.text }]} numberOfLines={1}  importantForAccessibility="no">{nextClassInfo.subject}</Text>
+
+                      <View style={styles.nextClassMetaRow} importantForAccessibility="no-hide-descendants">
+                        <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}>
+                          <Ionicons name="location" size={12} color={theme.textSecondary} />
+                          <Text style={[styles.metaText, { color: theme.textSecondary }]}>Room {nextClassInfo.room || 'N/A'}</Text>
                         </View>
-                    </View>
-                </TouchableOpacity>
+                        <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}>
+                          <Ionicons name="time" size={12} color={theme.textSecondary} />
+                          <Text style={[styles.metaText, { color: theme.textSecondary }]}>{nextClassInfo.duration} Hr {nextClassInfo.type}</Text>
+                        </View>
+                      </View>
+                      { nextClassInfo.label && 
+                        <View style={[styles.metaBadge, { backgroundColor: theme.iconBg, marginTop: 5 }]}>
+                          <Ionicons name="document" size={12} color={theme.textSecondary} />
+                          <Text style={[styles.metaText, { color: theme.textSecondary }]} numberOfLines={1}>{nextClassInfo.label}</Text>
+                        </View>
+                      }
+                  </View>
+              </TouchableOpacity>
             )}
         </View>
 
@@ -623,7 +626,7 @@ const styles = StyleSheet.create({
     themeButton: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 3 },
     
     // Dashboard
-    heroContainer: { borderRadius: 24, padding: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 12, elevation: 4, marginBottom: 25, borderWidth: 1 },
+    heroContainer: { borderRadius: 24, padding: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 12, elevation: 4, marginBottom: 25, borderWidth: 1, overflow:'hidden' },
     heroMainRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     heroIconBox: { width: 56, height: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginRight: 16 },
     heroTextContent: { flex: 1, justifyContent: 'center' },
