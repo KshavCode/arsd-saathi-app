@@ -90,7 +90,8 @@ function StackContent() {
                 initialRouteName={initialRoute}
                 screenOptions={{ 
                     headerShown: false,
-                    contentStyle: currentBackgroundColor
+                    animation: 'slide_from_right',
+                    detachPreviousScreen: false,
                 }}
             >
                 <Stack.Screen name="Login" component={Login} />
