@@ -2,7 +2,7 @@ import { Colors } from '@/constants/themeStyle';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createStackNavigator } from '@react-navigation/stack';
 import * as NavigationBar from 'expo-navigation-bar';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, View } from 'react-native';
 
 import Attendance from './attendance';
@@ -14,16 +14,26 @@ import Notice from './notice';
 import Predictor from './predictor';
 import Timetable from './timetable';
 
+import { ThemeContext, ThemeProvider } from '@/context/ThemeContext';
+
 const Stack = createStackNavigator();
 
 const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
 const TWO_DAYS = 2 * 24 * 60 * 60 * 1000;
 
 export default function Stack1() {
-    const [isDarkMode, setIsDarkMode] = useState(false);
+  return (
+    <ThemeProvider>
+      <StackContent />
+    </ThemeProvider>
+  );
+}
+
+function StackContent() {
     const [isAppReady, setIsAppReady] = useState(false);
     const [initialRoute, setInitialRoute] = useState('Login');
     const [homeParams, setHomeParams] = useState({ requiresSync: false });
+    const { isDarkMode } = useContext(ThemeContext)
 
     useEffect(() => {
         const verifySession = async () => {
@@ -32,9 +42,6 @@ export default function Stack1() {
                 const credentialsStr = await AsyncStorage.getItem('USER_CREDENTIALS');
                 const loginTimestampStr = await AsyncStorage.getItem('LOGIN_TIMESTAMP');
                 const dataTimestampStr = await AsyncStorage.getItem('DATA_TIMESTAMP');
-                const savedTheme = await AsyncStorage.getItem('DARK_THEME');
-
-                if (savedTheme !== null) setIsDarkMode(JSON.parse(savedTheme));
 
                 if (!credentialsStr || !loginTimestampStr) {
                     setInitialRoute('Login');
@@ -51,6 +58,7 @@ export default function Stack1() {
                 }
             } catch (error) {
                 setInitialRoute('Login'); 
+                console.log(error)
             } finally {
                 setIsAppReady(true);
             }
@@ -67,7 +75,6 @@ export default function Stack1() {
     }, [isDarkMode]);
 
     const currentBackgroundColor = isDarkMode ? Colors.dark.background : Colors.light.background;
-    const themeProps = { isDarkMode, setIsDarkMode };
 
     if (!isAppReady) {
         return (
@@ -78,42 +85,30 @@ export default function Stack1() {
     }
 
     return (
+        <ThemeProvider>
             <Stack.Navigator 
                 initialRouteName={initialRoute}
                 screenOptions={{ 
                     headerShown: false,
-                    cardStyle: { backgroundColor: currentBackgroundColor } 
+                    contentStyle: currentBackgroundColor
                 }}
             >
                 <Stack.Screen name="Login" component={Login} />
                 
-                <Stack.Screen name="Home" initialParams={homeParams}>
-                    {(props) => <Home {...props} {...themeProps} />}
-                </Stack.Screen>
+                <Stack.Screen name="Home" component={Home} initialParams={homeParams} />
             
-                <Stack.Screen name="Attendance">
-                    {(props) => <Attendance {...props} {...themeProps} />}
-                </Stack.Screen>
+                <Stack.Screen name="Attendance" component={Attendance} initialParams={homeParams} />
             
-                <Stack.Screen name="Details">
-                    {(props) => <Details {...props} {...themeProps} />}
-                </Stack.Screen>
+                <Stack.Screen name="Details" component={Details} initialParams={homeParams} />
             
-                <Stack.Screen name="Faculty">
-                    {(props) => <Faculty {...props} {...themeProps} />}
-                </Stack.Screen>
+                <Stack.Screen name="Faculty" component={Faculty} initialParams={homeParams} />
 
-                <Stack.Screen name="Notice">
-                    {(props) => <Notice {...props} {...themeProps} />}
-                </Stack.Screen>
+                <Stack.Screen name="Notice" component={Notice} initialParams={homeParams} />
             
-                <Stack.Screen name="Predictor">
-                    {(props) => <Predictor {...props} {...themeProps} />}
-                </Stack.Screen>
+                <Stack.Screen name="Predictor" component={Predictor} initialParams={homeParams} />
             
-                <Stack.Screen name="TimeTable">
-                    {(props) => <Timetable {...props} {...themeProps} />}
-                </Stack.Screen>
+                <Stack.Screen name="Timetable" component={Timetable} initialParams={homeParams} />
             </Stack.Navigator>
+        </ThemeProvider>
     );
 }

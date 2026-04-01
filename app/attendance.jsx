@@ -1,23 +1,12 @@
-import { Colors } from '@/constants/themeStyle';
+import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Modal, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode }) {
-    const theme = {
-        background: isDarkMode ? Colors.dark.background : Colors.light.background,
-        card: isDarkMode ? Colors.dark.card : Colors.light.card,
-        text: isDarkMode ? Colors.dark.text : Colors.light.text,
-        textSecondary: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
-        primary: isDarkMode ? Colors.dark.primary : Colors.light.primary,
-        secondary: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
-        error: isDarkMode ? Colors.dark.error : Colors.light.error,
-        iconBg: isDarkMode ? Colors.dark.iconBg : Colors.light.iconBg,
-        borderColor: isDarkMode ? Colors.dark.separator : Colors.light.separator,
-    };
-
+export default function AttendanceTab({ navigation }) {
+    const {theme, isDarkMode, toggleTheme} = useTheme()
     const [fullData, setFullData] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -152,7 +141,7 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
 
                 <TouchableOpacity
                     style={[styles.themeButton, { backgroundColor: theme.card }]}
-                    onPress={() => setIsDarkMode(!isDarkMode)}
+                    onPress={toggleTheme}
                     accessibilityRole="button"
                     accessibilityLabel="Toggle Theme"
                     accessibilityHint={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
@@ -176,7 +165,7 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
                              <Ionicons name="calendar-outline" size={48} color={theme.primary} style={{ opacity: 0.8 }} />
                         </View>
                         <Text style={[styles.emptyTitle, { color: theme.text }]}>No Record Found</Text>
-                        <Text style={[styles.emptySub, { color: theme.textSecondary }]}>
+                        <Text style={[styles.emptySub, { color: theme.secondary }]}>
                             Attendance data is empty, kindly verify it on portal in case of an error.
                         </Text>
                     </View>
@@ -186,7 +175,7 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
                     /* DATA VIEW */
                     <>
                         <View style={styles.controlsRow}>
-                            <Text style={[styles.selectLabel, { color: theme.textSecondary }]}>Select Subject:</Text>
+                            <Text style={[styles.selectLabel, { color: theme.secondary }]}>Select Subject:</Text>
                             <TouchableOpacity
                                 style={[styles.dropdown, { backgroundColor: theme.card, borderColor: theme.secondary }]}
                                 onPress={() => setShowDropdown(true)}
@@ -198,7 +187,7 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
                                 <Text style={[styles.dropdownText, { color: theme.text }]} numberOfLines={1} importantForAccessibility="no">
                                     {selectedSubject}
                                 </Text>
-                                <Ionicons name={'chevron-down'} size={18} color={theme.textSecondary} importantForAccessibility="no" />
+                                <Ionicons name={'chevron-down'} size={18} color={theme.secondary} importantForAccessibility="no" />
                             </TouchableOpacity>
 
                             <Modal
@@ -230,7 +219,7 @@ export default function AttendanceTab({ navigation, isDarkMode, setIsDarkMode })
                                                     accessibilityLabel={sub}
                                                     accessibilityState={{ selected: selectedSubject === sub }}
                                                 >
-                                                    <Text style={[styles.dropdownItemText, { color: theme.textSecondary }, selectedSubject === sub && { color: theme.primary, fontWeight: '700' }]} importantForAccessibility="no">
+                                                    <Text style={[styles.dropdownItemText, { color: theme.secondary }, selectedSubject === sub && { color: theme.primary, fontWeight: '700' }]} importantForAccessibility="no">
                                                         {sub}
                                                     </Text>
                                                     {selectedSubject === sub && <Ionicons name="checkmark" size={16} color={theme.primary} importantForAccessibility="no" />}

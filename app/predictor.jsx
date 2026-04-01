@@ -1,29 +1,12 @@
+import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Modal, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors } from '../constants/themeStyle';
 
-export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMode }) {
-  const theme = {
-    background: isDarkMode ? Colors.dark.background : Colors.light.background,
-    card: isDarkMode ? Colors.dark.card : Colors.light.card, 
-    text: isDarkMode ? Colors.dark.text : Colors.light.text,
-    textSecondary: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
-    primary: isDarkMode ? Colors.dark.primary : Colors.light.primary,
-    secondary: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
-    error: isDarkMode ? Colors.dark.error : Colors.light.error,
-    success: isDarkMode ? (Colors.dark.success) : (Colors.light.success),
-    iconBg: isDarkMode ? Colors.dark.iconBg : Colors.light.iconBg,
-    iconPlaceholder: isDarkMode ? Colors.dark.iconPlaceholder : Colors.light.iconPlaceholder,
-    destructiveBg: isDarkMode ? Colors.dark.destructiveBg : Colors.light.destructiveBg,
-    destructiveBorder: isDarkMode ? Colors.dark.destructiveBorder : Colors.light.destructiveBorder,
-    separator: isDarkMode ? Colors.dark.separator : Colors.light.separator,
-    borderColor: isDarkMode ? Colors.dark.borderColor : Colors.light.borderColor,
-    footer: isDarkMode ? Colors.dark.footer : Colors.light.footer,
-  };
-
+export default function PredictTab({ navigation }) {
+  const {theme, isDarkMode, toggleTheme} = useTheme()
   const [fullData, setFullData] = useState(null);
   const [loading, setLoading] = useState(true);
   
@@ -176,7 +159,7 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
         
         <TouchableOpacity 
           style={[styles.themeButton, { backgroundColor: theme.card }]} 
-          onPress={() => setIsDarkMode(!isDarkMode)}
+          onPress={toggleTheme}
           accessibilityRole="button"
           accessibilityLabel="Toggle Theme"
           accessibilityHint={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
@@ -189,7 +172,7 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         
         {/* Step 1: Selection Controls */}
-        <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>1. Select Subject</Text>
+        <Text style={[styles.sectionLabel, { color: theme.secondary }]}>1. Select Subject</Text>
         <View style={{ zIndex: 10, marginBottom: 20 }}>
             <TouchableOpacity 
                 style={[styles.dropdown, { backgroundColor: theme.card, borderColor: theme.secondary }]} 
@@ -202,7 +185,7 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
                 <Text style={[styles.dropdownText, { color: theme.text }]} numberOfLines={1} importantForAccessibility="no">
                     {selectedSubject || "No Subjects Found"}
                 </Text>
-                <Ionicons name={'chevron-down'} size={18} color={theme.textSecondary} importantForAccessibility="no" />
+                <Ionicons name={'chevron-down'} size={18} color={theme.secondary} importantForAccessibility="no" />
             </TouchableOpacity>
 
             <Modal 
@@ -228,7 +211,7 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
                                     accessibilityLabel={sub}
                                     accessibilityState={{ selected: selectedSubject === sub }}
                                 >
-                                    <Text style={[styles.dropdownItemText, { color: theme.textSecondary }, selectedSubject === sub && { color: theme.primary, fontWeight: '700' }]} importantForAccessibility="no">
+                                    <Text style={[styles.dropdownItemText, { color: theme.secondary }, selectedSubject === sub && { color: theme.primary, fontWeight: '700' }]} importantForAccessibility="no">
                                         {sub}
                                     </Text>
                                     {selectedSubject === sub && <Ionicons name="checkmark" size={16} color={theme.primary} importantForAccessibility="no" />}
@@ -264,15 +247,15 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
 
         {currentStats.held === 0 ? (
             <View style={[styles.emptyCard, { backgroundColor: theme.card }]} accessible={true} accessibilityLabel="No data found for this selection. Try switching between Theory and Practical.">
-                <Ionicons name="information-circle-outline" size={32} color={theme.textSecondary} style={{marginBottom: 10}} importantForAccessibility="no" />
+                <Ionicons name="information-circle-outline" size={32} color={theme.secondary} style={{marginBottom: 10}} importantForAccessibility="no" />
                 <Text style={{color: theme.text, textAlign: 'center', fontWeight: '500'}} importantForAccessibility="no">No data found for this selection.</Text>
-                <Text style={{color: theme.textSecondary, textAlign: 'center', fontSize: 13, marginTop: 5}} importantForAccessibility="no">Try switching between Theory and Practical.</Text>
+                <Text style={{color: theme.secondary, textAlign: 'center', fontSize: 13, marginTop: 5}} importantForAccessibility="no">Try switching between Theory and Practical.</Text>
             </View>
         ) : (
             <>
 
                 {/* Step 2: Current Status */}
-                <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>2. CURRENT STATS</Text>
+                <Text style={[styles.sectionLabel, { color: theme.secondary }]}>2. CURRENT STATS</Text>
 
                 {/* Step 3: Calculation */}
                 <View 
@@ -282,14 +265,14 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
                 >
                     <View style={styles.statusCol} importantForAccessibility="no-hide-descendants">
                         <Text style={[styles.statusVal, { color: theme.text }]}>{currentStats.attended}/{currentStats.held}</Text>
-                        <Text style={[styles.statusLabel, { color: theme.textSecondary }]}>Classes Attended</Text>
+                        <Text style={[styles.statusLabel, { color: theme.secondary }]}>Classes Attended</Text>
                     </View>
                     <View style={[styles.statusDivider, { backgroundColor: theme.borderColor }]} />
                     <View style={styles.statusCol} importantForAccessibility="no-hide-descendants">
                         <Text style={[styles.statusVal, { color: Number(currentStats.percentage) < 67 ? theme.error : theme.success }]}>
                             {currentStats.percentage}%
                         </Text>
-                        <Text style={[styles.statusLabel, { color: theme.textSecondary }]}>Current Total</Text>
+                        <Text style={[styles.statusLabel, { color: theme.secondary }]}>Current Total</Text>
                     </View>
                 </View>
 
@@ -302,7 +285,7 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
                   <Text style={ { color: theme.primary, padding:16, paddingTop:0, fontSize:13 }} importantForAccessibility="no">Reminder: A 2-hour class gives you 2 points worth of attendance!</Text>
                 </View>
 
-                <Text style={[styles.sectionLabel, { color: theme.textSecondary, marginTop: 20 }]}>3. Plan Future Classes</Text>
+                <Text style={[styles.sectionLabel, { color: theme.secondary, marginTop: 20 }]}>3. Plan Future Classes</Text>
                 
                 <View style={styles.controlsGrid}>
                     {/* Attend Control */}
@@ -375,13 +358,13 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
 
         {/* MARKS INFO */}
         <View style={{padding:10}}>
-          <Text style={[styles.infoText, { color: theme.textSecondary, fontSize:18, marginTop:10, textAlign:'justify' }]} accessibilityRole="header" accessibilityLabel="Marks Reward System">MARKS REWARD SYSTEM</Text>
-          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]} accessibilityLabel="85 and above % of attendance gives you 6 marks">85% &lt; x = 6 marks</Text>
-          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]} accessibilityLabel="Between 80 and 85% of attendance gives you 4.8 marks">80% &lt; x &lt; 85%  = 4.8 marks</Text>
-          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]} accessibilityLabel="Between 75 and 80% of attendance gives you 3.6 marks">75% &lt; x &lt; 80%  = 3.6 marks</Text>
-          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]} accessibilityLabel="Between 70 and 75% of attendance gives you 2.4 marks">70% &lt; x &lt; 75%  = 2.4 marks</Text>
-          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify'}]} accessibilityLabel="Between 67 and 70% of attendance gives you 1.2 marks">67% &lt; x &lt; 70%  = 1.2 marks</Text>
-          <Text style={[styles.infoText, { color: theme.textSecondary, textAlign:'justify', fontStyle:'italic'}]} accessibilityLabel="No marks are awarded to attendance below 67%">No marks are awarded to attendance below 67%</Text>
+          <Text style={[styles.infoText, { color: theme.secondary, fontSize:18, marginTop:10, textAlign:'justify' }]} accessibilityRole="header" accessibilityLabel="Marks Reward System">MARKS REWARD SYSTEM</Text>
+          <Text style={[styles.infoText, { color: theme.secondary, textAlign:'justify'}]} accessibilityLabel="85 and above % of attendance gives you 6 marks">85% &lt; x = 6 marks</Text>
+          <Text style={[styles.infoText, { color: theme.secondary, textAlign:'justify'}]} accessibilityLabel="Between 80 and 85% of attendance gives you 4.8 marks">80% &lt; x &lt; 85%  = 4.8 marks</Text>
+          <Text style={[styles.infoText, { color: theme.secondary, textAlign:'justify'}]} accessibilityLabel="Between 75 and 80% of attendance gives you 3.6 marks">75% &lt; x &lt; 80%  = 3.6 marks</Text>
+          <Text style={[styles.infoText, { color: theme.secondary, textAlign:'justify'}]} accessibilityLabel="Between 70 and 75% of attendance gives you 2.4 marks">70% &lt; x &lt; 75%  = 2.4 marks</Text>
+          <Text style={[styles.infoText, { color: theme.secondary, textAlign:'justify'}]} accessibilityLabel="Between 67 and 70% of attendance gives you 1.2 marks">67% &lt; x &lt; 70%  = 1.2 marks</Text>
+          <Text style={[styles.infoText, { color: theme.secondary, textAlign:'justify', fontStyle:'italic'}]} accessibilityLabel="No marks are awarded to attendance below 67%">No marks are awarded to attendance below 67%</Text>
         </View>
 
         {/* INSTRUCTIONS */}
@@ -389,11 +372,11 @@ export default function PredictTab({ route, navigation, setIsDarkMode, isDarkMod
             style={{padding:10}} 
             accessible={true}
         >
-          <Text style={[styles.infoText, { color: theme.textSecondary, fontSize:18, marginTop:10 }]}>HOW IT WORKS?</Text>
-          <Text style={[styles.infoText, { color: theme.textSecondary, fontWeight:"normal", textAlign:'justify'}]}>1. The formula assumes that the next class would be of one hour and will be held with 100% surity.</Text>
-          <Text style={[styles.infoText, { color: theme.textSecondary, fontWeight:"normal", textAlign:'justify'}]}>2. It uses the student&apos;s current attendance status for each month and sums them up.</Text>
-          <Text style={[styles.infoText, { color: theme.textSecondary, fontWeight:"normal", textAlign:'justify'}]}>3. The minimum requirement of 67% of attendance for each subject is used to compare and print the final result.</Text>
-          <Text style={[styles.infoText, { color: theme.textSecondary, fontWeight:"normal", textAlign:'justify'}]}>4. Both practical and theory classes are calculated independently.</Text>
+          <Text style={[styles.infoText, { color: theme.secondary, fontSize:18, marginTop:10 }]}>HOW IT WORKS?</Text>
+          <Text style={[styles.infoText, { color: theme.secondary, fontWeight:"normal", textAlign:'justify'}]}>1. The formula assumes that the next class would be of one hour and will be held with 100% surity.</Text>
+          <Text style={[styles.infoText, { color: theme.secondary, fontWeight:"normal", textAlign:'justify'}]}>2. It uses the student&apos;s current attendance status for each month and sums them up.</Text>
+          <Text style={[styles.infoText, { color: theme.secondary, fontWeight:"normal", textAlign:'justify'}]}>3. The minimum requirement of 67% of attendance for each subject is used to compare and print the final result.</Text>
+          <Text style={[styles.infoText, { color: theme.secondary, fontWeight:"normal", textAlign:'justify'}]}>4. Both practical and theory classes are calculated independently.</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

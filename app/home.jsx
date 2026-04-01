@@ -1,4 +1,5 @@
 import { FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, LIBRARY_URL, PRIVACY_URL, SAMARTH_URL, SHIVAM_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
+import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckBox from 'expo-checkbox';
@@ -7,7 +8,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { titleCase } from 'title-case';
-import { Colors } from '../constants/themeStyle';
 import ArsdScraper from '../services/ArsdScraper';
 
 const handleFeedback = () => {
@@ -39,24 +39,8 @@ const GridActionButton = ({ title, icon, onPress, theme, isDestructive, accessib
 );
 
 // --- Main Screen ---
-export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }) {
-  const theme = {
-    background: isDarkMode ? Colors.dark.background : Colors.light.background,
-    card: isDarkMode ? Colors.dark.card : Colors.light.card, 
-    text: isDarkMode ? Colors.dark.text : Colors.light.text,
-    textSecondary: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
-    primary: isDarkMode ? Colors.dark.primary : Colors.light.primary,
-    secondary: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
-    error: isDarkMode ? Colors.dark.error : Colors.light.error,
-    success: isDarkMode ? Colors.dark.success : Colors.light.success,
-    iconBg: isDarkMode ? Colors.dark.iconBg : Colors.light.iconBg,
-    iconPlaceholder: isDarkMode ? Colors.light.iconPlaceholder : Colors.dark.iconPlaceholder,
-    destructiveBg: isDarkMode ? Colors.dark.destructiveBg : Colors.light.destructiveBg,
-    destructiveBorder: isDarkMode ? Colors.dark.destructiveBorder : Colors.light.destructiveBorder,
-    separator: isDarkMode ? Colors.dark.separator : Colors.light.separator,
-    footer: isDarkMode ? Colors.dark.footer : Colors.light.footer,
-    modalOverlay: 'rgba(0, 0, 0, 0.6)'
-  };
+export default function HomeTab({ route, navigation }) {
+  const {theme, isDarkMode, toggleTheme} = useTheme()
 
   const [userData, setUserData] = useState({ name: "Loading...", rollNo: "...", enrollmentNumber: "..." });
   const [savedCredentials, setSavedCredentials] = useState(null);
@@ -249,7 +233,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
 
   const executeLogout = async () => {
       try {
-          const keysToRemove = ['USER_CREDENTIALS', 'BASIC_DETAILS', 'ATTENDANCE_DATA', 'FACULTY_DATA', 'MENTOR_DATA', 'LOGIN_TIMESTAMP', 'DATA_TIMESTAMP'];
+          const keysToRemove = ['SAVED_NOTICES', 'USER_CREDENTIALS', 'BASIC_DETAILS', 'ATTENDANCE_DATA', 'FACULTY_DATA', 'MENTOR_DATA', 'LOGIN_TIMESTAMP', 'DATA_TIMESTAMP'];
           
           if (deleteTimetable) {
               keysToRemove.push('TIMETABLE_DATA');
@@ -263,11 +247,6 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
       }
   };
 
-  const handleTheme = async () => {
-    const nextMode = !isDarkMode;
-    setIsDarkMode(nextMode); 
-    await AsyncStorage.setItem('DARK_THEME', JSON.stringify(nextMode));
-  };
 
   const handleShare = async () => {
     try {
@@ -307,7 +286,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
 
             {/* Modal Text */}
             <Text style={[styles.modalTitle, { color: theme.text }]} accessibilityRole="header">Update Available!</Text>
-            <Text style={[styles.modalText, { color: theme.textSecondary }]}>
+            <Text style={[styles.modalText, { color: theme.secondary }]}>
               Version {updateInfo.version} is ready. We&apos;ve crushed some bugs and added improvements to keep your app running smoothly.
             </Text>
 
@@ -342,7 +321,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
                 accessibilityLabel="Not Now"
                 accessibilityHint="Dismiss this dialog and remind again when you open the app next time"
               >
-                <Text style={{ color: theme.textSecondary, fontSize: 13, fontWeight: '500' }} importantForAccessibility="no">Not Now</Text>
+                <Text style={{ color: theme.secondary, fontSize: 13, fontWeight: '500' }} importantForAccessibility="no">Not Now</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -381,7 +360,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
                activeOpacity={1}
             >
               <CheckBox value={deleteTimetable} onValueChange={setDeleteTimetable} color={deleteTimetable ? theme.primary : undefined} />
-              <Text style={[styles.modalText, { color: theme.textSecondary, marginBottom: 0 }]} importantForAccessibility="no">Delete my Timetable</Text>
+              <Text style={[styles.modalText, { color: theme.secondary, marginBottom: 0 }]} importantForAccessibility="no">Delete my Timetable</Text>
             </TouchableOpacity>
 
             {/* Modal Action Buttons */}
@@ -418,7 +397,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
         {/* Header Section */}
         <View style={styles.header}>
           <View style={{flex: 1}} accessible={true} accessibilityRole="header">
-            <Text style={[styles.greeting, { color: theme.textSecondary }]}>Welcome back,</Text>
+            <Text style={[styles.greeting, { color: theme.secondary }]}>Welcome back,</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <TouchableOpacity 
                 onPress={()=>navigation.navigate("Details")} 
@@ -452,7 +431,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
             </TouchableOpacity>
             <TouchableOpacity 
               style={[styles.themeButton, { backgroundColor: theme.card }]} 
-              onPress={handleTheme}
+              onPress={toggleTheme}
               accessibilityRole="button"
               accessibilityLabel="Toggle Theme"
               accessibilityHint={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
@@ -473,7 +452,7 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
                 </View>
                 <View style={styles.heroTextContent} importantForAccessibility="no-hide-descendants">
                     <Text style={[styles.heroValue, { color: theme.text }]}>{userData.percent_attendance}%</Text>
-                    <Text style={[styles.heroLabel, { color: theme.textSecondary }]}>Theory Attendance</Text>
+                    <Text style={[styles.heroLabel, { color: theme.secondary }]}>Theory Attendance</Text>
                 </View>
                 {isAttendanceLow && <Ionicons name="alert-circle" size={28} color={theme.error} importantForAccessibility="no" />}
             </View>
@@ -488,14 +467,14 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
             <View style={styles.mentorRow} accessible={true} accessibilityLabel={`Assigned Mentor: ${userData.mentor_name}`}>
                  <Ionicons name="person-outline" size={18} color={theme.primary} importantForAccessibility="no" />
                  <View style={{marginLeft: 12, flex: 1}} importantForAccessibility="no-hide-descendants">
-                     <Text style={[styles.mentorLabel, { color: theme.textSecondary }]}>Assigned Mentor</Text>
+                     <Text style={[styles.mentorLabel, { color: theme.secondary }]}>Assigned Mentor</Text>
                      <Text style={[styles.mentorName, { color: theme.text }]} numberOfLines={2}>{userData.mentor_name}</Text>
                  </View>
             </View>
 
             {/* --- Upcoming Class Row --- */}
             {nextClassInfo && (
-              <TouchableOpacity onPress={()=>navigation.navigate('TimeTable')}>
+              <TouchableOpacity onPress={()=>navigation.navigate('Timetable')}>
                 <View style={[styles.heroDivider, { backgroundColor: theme.separator }]} />
                     <View style={styles.nextClassRow} accessible={true} accessibilityLabel={`Up Next ${nextClassInfo.dayName} at ${nextClassInfo.slot}. Subject: ${nextClassInfo.subject}. Room ${nextClassInfo.room || 'Not Assigned'}. ${nextClassInfo.duration} Hour ${nextClassInfo.type} class.`}>
                       <View style={styles.nextClassHeader} importantForAccessibility="no-hide-descendants">
@@ -510,18 +489,18 @@ export default function HomeTab({ route, navigation, setIsDarkMode, isDarkMode }
 
                       <View style={styles.nextClassMetaRow} importantForAccessibility="no-hide-descendants">
                         <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}>
-                          <Ionicons name="location" size={12} color={theme.textSecondary} />
-                          <Text style={[styles.metaText, { color: theme.textSecondary }]}>Room {nextClassInfo.room || 'N/A'}</Text>
+                          <Ionicons name="location" size={12} color={theme.secondary} />
+                          <Text style={[styles.metaText, { color: theme.secondary }]}>Room {nextClassInfo.room || 'N/A'}</Text>
                         </View>
                         <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}>
-                          <Ionicons name="time" size={12} color={theme.textSecondary} />
-                          <Text style={[styles.metaText, { color: theme.textSecondary }]}>{nextClassInfo.duration} Hr {nextClassInfo.type}</Text>
+                          <Ionicons name="time" size={12} color={theme.secondary} />
+                          <Text style={[styles.metaText, { color: theme.secondary }]}>{nextClassInfo.duration} Hr {nextClassInfo.type}</Text>
                         </View>
                       </View>
                       { nextClassInfo.label && 
                         <View style={[styles.metaBadge, { backgroundColor: theme.iconBg, marginTop: 5 }]}>
-                          <Ionicons name="document" size={12} color={theme.textSecondary} />
-                          <Text style={[styles.metaText, { color: theme.textSecondary }]} numberOfLines={1}>{nextClassInfo.label}</Text>
+                          <Ionicons name="document" size={12} color={theme.secondary} />
+                          <Text style={[styles.metaText, { color: theme.secondary }]} numberOfLines={1}>{nextClassInfo.label}</Text>
                         </View>
                       }
                   </View>

@@ -1,13 +1,13 @@
+import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import * as Animatable from 'react-native-animatable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { titleCase } from 'title-case';
-import { Colors } from '../constants/themeStyle';
 
-
-const FacultyCard = ({ data, theme }) => {
+const FacultyCard = ({ data, theme, delay }) => {
     const facultyName = data.FAC_NAME || "Unknown Faculty";
     const paperName = data.PAPER_NAME || data.Subject || "N/A";
     const section = data["PAPER SECTION"] || data["Section"];
@@ -15,11 +15,15 @@ const FacultyCard = ({ data, theme }) => {
     const accessibilityString = `Faculty Name: ${facultyName}. Teaching Subject: ${paperName}. ${section ? `Section: ${section}.` : 'N/A'}`;
 
     return (
-        <View 
+        <Animatable.View 
             style={[styles.facultyCard, { backgroundColor: theme.card, borderColor: theme.primary + '40' }]}
             accessible={true}
             accessibilityRole="text"
             accessibilityLabel={accessibilityString}
+            animation='fadeInLeft'
+            delay={delay}
+            duration={300}
+            useNativeDriver={true}
         >
             {/* --- Header: Teacher Identity --- */}
             <View style={styles.cardHeader} importantForAccessibility="no-hide-descendants">
@@ -27,7 +31,7 @@ const FacultyCard = ({ data, theme }) => {
                     <Text style={[styles.teacherName, { color: theme.text }]}>
                         {titleCase(facultyName.toLowerCase())}
                     </Text>
-                    <Text style={[styles.teacherCode, { color: theme.textSecondary }]}>
+                    <Text style={[styles.teacherCode, { color: theme.secondary }]}>
                         {data.FAC_CODE ? `Faculty Code: ${data.FAC_CODE}` : "No Code"}
                     </Text>
                 </View>
@@ -37,7 +41,7 @@ const FacultyCard = ({ data, theme }) => {
             
             {/* Subject Details --- */}
             <View style={styles.cardBody} importantForAccessibility="no-hide-descendants">
-                <Text style={[styles.label, { color: theme.textSecondary }]}>Teaching Subject</Text>
+                <Text style={[styles.label, { color: theme.secondary }]}>Teaching Subject</Text>
                 <Text style={[styles.paperName, { color: theme.text }]}>
                     {paperName}
                 </Text>
@@ -59,22 +63,12 @@ const FacultyCard = ({ data, theme }) => {
                     )}
                 </View>
             </View>
-        </View>
+        </Animatable.View>
     );
 };
 
-export default function FacultyTab({ navigation, isDarkMode, setIsDarkMode }) {
-    
-    const theme = {
-        background: isDarkMode ? Colors.dark.background : Colors.light.background,
-        card: isDarkMode ? Colors.dark.card : Colors.light.card,
-        text: isDarkMode ? Colors.dark.text : Colors.light.text,
-        textSecondary: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
-        primary: isDarkMode ? Colors.dark.primary : Colors.light.primary,
-        iconBg: isDarkMode ? Colors.dark.iconBg : Colors.light.iconBg,
-        borderColor: isDarkMode ? Colors.dark.borderColor : Colors.light.borderColor,
-    };
-
+export default function FacultyTab({ navigation }) {
+    const {theme, isDarkMode, toggleTheme} = useTheme()
     const [facultyList, setFacultyList] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -115,7 +109,7 @@ export default function FacultyTab({ navigation, isDarkMode, setIsDarkMode }) {
                 
                 <TouchableOpacity 
                     style={[styles.themeButton, { backgroundColor: theme.card }]} 
-                    onPress={() => setIsDarkMode(!isDarkMode)}
+                    onPress={toggleTheme}
                     accessibilityRole="button"
                     accessibilityLabel="Toggle Theme"
                     accessibilityHint={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
@@ -129,16 +123,17 @@ export default function FacultyTab({ navigation, isDarkMode, setIsDarkMode }) {
                 <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 50 }} accessibilityLabel="Loading faculty data" />
             ) : facultyList.length === 0 ? (
                  <View style={styles.centerContainer} accessible={true}>
-                    <Ionicons name="people-outline" size={48} color={theme.textSecondary} style={{ marginBottom: 10, opacity: 0.5 }} importantForAccessibility="no" />
-                    <Text style={{ color: theme.textSecondary }}>No faculty details found.</Text>
+                    <Ionicons name="people-outline" size={48} color={theme.secondary} style={{ marginBottom: 10, opacity: 0.5 }} importantForAccessibility="no" />
+                    <Text style={{ color: theme.secondary }}>No faculty details found.</Text>
                 </View>
             ) : (
                 <FlatList 
                     data={facultyList}
                     keyExtractor={(item, index) => index.toString()}
-                    renderItem={({ item }) => <FacultyCard data={item} theme={theme} />}
+                    renderItem={({ index, item }) => <FacultyCard data={item} theme={theme} delay={index*100}/>}
                     contentContainerStyle={{ paddingBottom: 20 }}
                     showsVerticalScrollIndicator={false}
+                    
                 />
             )}
         </SafeAreaView>

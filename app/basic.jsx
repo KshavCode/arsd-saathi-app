@@ -1,9 +1,10 @@
-import { Colors } from '@/constants/themeStyle';
+import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
 
 const DetailRow = ({ label, value, icon, theme, isLast }) => (
     <View
@@ -16,22 +17,14 @@ const DetailRow = ({ label, value, icon, theme, isLast }) => (
             <Ionicons name={icon} size={20} color={theme.primary} />
         </View>
         <View style={styles.detailTextContainer} importantForAccessibility="no-hide-descendants">
-            <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>{label}</Text>
+            <Text style={[styles.detailLabel, { color: theme.secondary }]}>{label}</Text>
             <Text style={[styles.detailValue, { color: theme.text }]}>{value || "N/A"}</Text>
         </View>
     </View>
 );
 
-export default function DetailsTab({ navigation, isDarkMode, setIsDarkMode }) {
-    const theme = {
-        background: isDarkMode ? Colors.dark.background : Colors.light.background,
-        card: isDarkMode ? Colors.dark.card : Colors.light.card,
-        text: isDarkMode ? Colors.dark.text : Colors.light.text,
-        textSecondary: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
-        primary: isDarkMode ? Colors.dark.primary : Colors.light.primary,
-        iconBg: isDarkMode ? Colors.dark.iconBg : Colors.light.iconBg,
-        borderColor: isDarkMode ? Colors.dark.borderColor : Colors.light.borderColor,
-    };
+export default function DetailsTab({ navigation }) {
+    const {theme, isDarkMode, toggleTheme} = useTheme()
 
     const [profileData, setProfileData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -98,7 +91,7 @@ export default function DetailsTab({ navigation, isDarkMode, setIsDarkMode }) {
 
                 <TouchableOpacity
                     style={[styles.themeButton, { backgroundColor: theme.card }]}
-                    onPress={() => setIsDarkMode(!isDarkMode)}
+                    onPress={toggleTheme}
                     accessibilityRole="button"
                     accessibilityLabel="Toggle Theme"
                     accessibilityHint={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
@@ -124,8 +117,8 @@ export default function DetailsTab({ navigation, isDarkMode, setIsDarkMode }) {
                             />
                         )) : (
                             <View style={{ padding: 40, alignItems: 'center' }} accessible={true} accessibilityLabel="Warning: No details found.">
-                                <Ionicons name="alert-circle-outline" size={40} color={theme.textSecondary} importantForAccessibility="no" />
-                                <Text style={{ color: theme.textSecondary, marginTop: 10 }} importantForAccessibility="no">No details found.</Text>
+                                <Ionicons name="alert-circle-outline" size={40} color={theme.secondary} importantForAccessibility="no" />
+                                <Text style={{ color: theme.secondary, marginTop: 10 }} importantForAccessibility="no">No details found.</Text>
                             </View>
                         )}
                     </View>

@@ -1,3 +1,4 @@
+import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -8,7 +9,7 @@ import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, Scroll
 import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { titleCase } from 'title-case';
-import { Colors } from '../constants/themeStyle';
+
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -86,21 +87,8 @@ const deserializeTimetable = (str) => {
 };
 // -----------------------------------------
 
-export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode }) {
-  const theme = {
-    background: isDarkMode ? Colors.dark.background : Colors.light.background,
-    card: isDarkMode ? Colors.dark.card : Colors.light.card,
-    text: isDarkMode ? Colors.dark.text : Colors.light.text,
-    textSecondary: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
-    primary: isDarkMode ? Colors.dark.primary : Colors.light.primary,
-    secondary: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
-    error: isDarkMode ? Colors.dark.error : Colors.light.error,
-    success: isDarkMode ? Colors.dark.success : Colors.light.success,
-    iconBg: isDarkMode ? Colors.dark.iconBg : Colors.light.iconBg,
-    borderColor: isDarkMode ? Colors.dark.separator : Colors.light.separator,
-    destructiveBg: isDarkMode ? Colors.dark.destructiveBg : Colors.light.destructiveBg,
-    destructiveBorder: isDarkMode ? Colors.dark.destructiveBorder : Colors.light.destructiveBorder,
-  };
+export default function Timetable({ route, navigation }) {
+  const {theme, isDarkMode, toggleTheme} = useTheme()
 
   let day = new Date().getDay()-1;
 
@@ -333,23 +321,23 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
               <Text style={[styles.classTime, { color: theme.primary }]}>{time} - {endTimeStr}</Text>
               <Text style={[styles.classSubject, { color: theme.text }]}>{existingClass.subject}</Text>
               <View style={styles.classMetaRow}>
-                <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}><Ionicons name="location" size={12} color={theme.textSecondary} /><Text style={[styles.metaText, { color: theme.textSecondary }]}>Room {existingClass.room || 'N/A'}</Text></View>
-                <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}><Ionicons name="book" size={12} color={theme.textSecondary} /><Text style={[styles.metaText, { color: theme.textSecondary }]}>{existingClass.type}</Text></View>
+                <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}><Ionicons name="location" size={12} color={theme.secondary} /><Text style={[styles.metaText, { color: theme.secondary }]}>Room {existingClass.room || 'N/A'}</Text></View>
+                <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}><Ionicons name="book" size={12} color={theme.secondary} /><Text style={[styles.metaText, { color: theme.secondary }]}>{existingClass.type}</Text></View>
                 {facultyName && (
                    <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}>
-                       <Ionicons name="person" size={12} color={theme.textSecondary} />
-                       <Text style={[styles.metaText, { color: theme.textSecondary }]} numberOfLines={1}>{facultyName}</Text>
+                       <Ionicons name="person" size={12} color={theme.secondary} />
+                       <Text style={[styles.metaText, { color: theme.secondary }]} numberOfLines={1}>{facultyName}</Text>
                    </View>
                 )}
                 {existingClass.label && (
                    <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}>
-                       <Ionicons name="document" size={12} color={theme.textSecondary} />
-                       <Text style={[styles.metaText, { color: theme.textSecondary }]} numberOfLines={1}>{existingClass.label}</Text>
+                       <Ionicons name="document" size={12} color={theme.secondary} />
+                       <Text style={[styles.metaText, { color: theme.secondary }]} numberOfLines={1}>{existingClass.label}</Text>
                    </View>
                 )}
               </View>
             </View>
-            {isEditMode && <Ionicons name="pencil" size={20} color={theme.textSecondary} />}
+            {isEditMode && <Ionicons name="pencil" size={20} color={theme.secondary} />}
           </TouchableOpacity>
         );
       }
@@ -362,7 +350,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
             onPress={() => handleOpenSlot(time)}
             activeOpacity={0.5}
           >
-            <Text style={{ color: theme.textSecondary, fontWeight: '600' }}>{time}</Text>
+            <Text style={{ color: theme.secondary, fontWeight: '600' }}>{time}</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
                 <Ionicons name="add-circle-outline" size={20} color={theme.primary} />
                 <Text style={{ color: theme.primary, fontWeight: '600' }}>Add Class</Text>
@@ -391,7 +379,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                 <Ionicons name="caret-back" size={27} color={theme.primary} />
             </TouchableOpacity>
             <Text style={[styles.headerTitle, { color: theme.text }]}>TIMETABLE</Text>
-            <TouchableOpacity style={[styles.themeButton, { backgroundColor: theme.card }]} onPress={() => setIsDarkMode(!isDarkMode)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <TouchableOpacity style={[styles.themeButton, { backgroundColor: theme.card }]} onPress={toggleTheme} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                 <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} />
             </TouchableOpacity>
         </View>
@@ -405,7 +393,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                   onPress={() => setActiveTab(tab)}
                   activeOpacity={0.8}
                 >
-                    <Text style={[styles.tabText, { color: activeTab === tab ? '#FFF' : theme.textSecondary }]}>{tab.charAt(0).toUpperCase() + tab.slice(1)}</Text>
+                    <Text style={[styles.tabText, { color: activeTab === tab ? '#FFF' : theme.secondary }]}>{tab.charAt(0).toUpperCase() + tab.slice(1)}</Text>
                 </TouchableOpacity>
             ))}
         </View>
@@ -420,7 +408,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                   onPress={() => setSelectedDay(index)}
                   activeOpacity={0.7}
                 >
-                    <Text style={[styles.dayText, { color: selectedDay === index ? '#FFF' : theme.textSecondary }]}>{day}</Text>
+                    <Text style={[styles.dayText, { color: selectedDay === index ? '#FFF' : theme.secondary }]}>{day}</Text>
                 </TouchableOpacity>
                 ))}
             </ScrollView>
@@ -441,7 +429,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
 
             {activeTab === 'edit' && (
                 <View>
-                    <Text style={[styles.sectionLabel, { color: theme.textSecondary, marginBottom: 16 }]}>Tap a slot to assign a subject</Text>
+                    <Text style={[styles.sectionLabel, { color: theme.secondary, marginBottom: 16 }]}>Tap a slot to assign a subject</Text>
                     {renderSlots(true)}
                 </View>
             )}
@@ -454,7 +442,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                             <Ionicons name="qr-code-outline" size={32} color={theme.primary} />
                         </View>
                         <Text style={[styles.shareTitle, { color: theme.text }]}>Share Timetable</Text>
-                        <Text style={[styles.shareDesc, { color: theme.textSecondary }]}>Let other ArsdSaathi users import your timetable.</Text>
+                        <Text style={[styles.shareDesc, { color: theme.secondary }]}>Let other ArsdSaathi users import your timetable.</Text>
 
                         <View style={{ flexDirection: 'row', gap: 10, width: '100%' }}>
                             <TouchableOpacity style={[styles.primaryButton, { backgroundColor: theme.primary, flex: 1 }]} onPress={handleGenerateQR} activeOpacity={0.8}>
@@ -470,7 +458,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                             <Ionicons name="scan-outline" size={32} color={theme.primary} />
                         </View>
                         <Text style={[styles.shareTitle, { color: theme.text }]}>Import Timetable</Text>
-                        <Text style={[styles.shareDesc, { color: theme.textSecondary }]}>Use your camera to scan an ArsdSaathi code.</Text>
+                        <Text style={[styles.shareDesc, { color: theme.secondary }]}>Use your camera to scan an ArsdSaathi code.</Text>
 
                         <TouchableOpacity style={[styles.primaryButton, { backgroundColor: theme.background, borderColor: theme.primary, borderWidth: 1, width: '100%' }]} onPress={startScanning} activeOpacity={0.8}>
                             <Ionicons name="camera" size={18} color={theme.primary} style={{ marginRight: 8 }} />
@@ -480,11 +468,11 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
 
                     {/* Manual Link Fallback */}
                     <View style={[styles.formCard, { backgroundColor: theme.card, marginTop: 10 }]}>
-                        <Text style={[styles.inputLabel, { color: theme.textSecondary, width: '100%' }]}>Or Paste Link / Code</Text>
+                        <Text style={[styles.inputLabel, { color: theme.secondary, width: '100%' }]}>Or Paste Link / Code</Text>
                         <TextInput
                             style={[styles.inputField, { borderColor: theme.primary, color: theme.text, width: '100%', marginBottom: 16 }]}
                             placeholder="Paste link here..."
-                            placeholderTextColor={theme.textSecondary}
+                            placeholderTextColor={theme.secondary}
                             value={importCode}
                             onChangeText={setImportCode}
                         />
@@ -494,7 +482,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                             disabled={!importCode}
                             activeOpacity={0.8}
                         >
-                            <Text style={[styles.primaryButtonText, !importCode && { color: theme.textSecondary }]}>Import Data</Text>
+                            <Text style={[styles.primaryButtonText, !importCode && { color: theme.secondary }]}>Import Data</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -508,7 +496,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                     <View style={styles.modalHeaderRowCentered}>
                        <Text style={[styles.shareTitle, { color: theme.text, margin: 0 }]}>Scan to Sync</Text>
                        <TouchableOpacity onPress={() => setShowQRModal(false)}>
-                           <Ionicons name="close-circle" size={28} color={theme.textSecondary} />
+                           <Ionicons name="close-circle" size={28} color={theme.secondary} />
                        </TouchableOpacity>
                     </View>
                     
@@ -516,7 +504,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                         {shareLink ? <QRCode value={shareLink} size={220} /> : null}
                     </View>
 
-                    <Text style={[styles.shareDesc, { color: theme.textSecondary }]}>
+                    <Text style={[styles.shareDesc, { color: theme.secondary }]}>
                         Scan with your phone&apos;s camera or the ArsdSaathi app.
                     </Text>
 
@@ -566,7 +554,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
 
                     <ScrollView style={{ padding: 20, maxHeight: 500 }} showsVerticalScrollIndicator={false}>
 
-                        <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>Select Subject</Text>
+                        <Text style={[styles.inputLabel, { color: theme.secondary }]}>Select Subject</Text>
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
                             {availableSubjects.map((sub) => (
                                 <TouchableOpacity
@@ -581,29 +569,29 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
 
                         <View style={styles.pillContainerRow}>
                             <View style={{flex:1, minWidth:100}}>
-                                <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>Room</Text>
+                                <Text style={[styles.inputLabel, { color: theme.secondary }]}>Room</Text>
                                 <TextInput
                                     style={[styles.inputField, { borderColor: theme.borderColor, color: theme.text, paddingVertical: 14 }]}
                                     placeholder="e.g. 35"
-                                    placeholderTextColor={theme.textSecondary}
+                                    placeholderTextColor={theme.secondary}
                                     value={formRoom}
                                     onChangeText={setFormRoom}
                                 />
                             </View>
 
                             <View>
-                                <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>Type</Text>
+                                <Text style={[styles.inputLabel, { color: theme.secondary }]}>Type</Text>
                                 <TouchableOpacity
                                     style={[styles.compactPill, { borderColor: theme.borderColor, backgroundColor: theme.primary + '20' }]}
                                     onPress={() => setFormType(formType === 'TH' ? 'PR' : 'TH')}
                                 >
                                     <Text style={[styles.compactPillText, { color: theme.primary }]}>{formType}</Text>
-                                    <Ionicons name="swap-horizontal" size={14} color={formType === 'TH' ? theme.textSecondary : theme.primary} style={{marginLeft: 4}}/>
+                                    <Ionicons name="swap-horizontal" size={14} color={formType === 'TH' ? theme.secondary : theme.primary} style={{marginLeft: 4}}/>
                                 </TouchableOpacity>
                             </View>
 
                             <View>
-                                <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>Hrs</Text>
+                                <Text style={[styles.inputLabel, { color: theme.secondary }]}>Hrs</Text>
                                 <TouchableOpacity
                                     style={[styles.compactPill, { borderColor: theme.borderColor, backgroundColor: theme.iconBg }]}
                                     onPress={() => {
@@ -614,8 +602,8 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                                         } else setFormDuration(1);
                                     }}
                                 >
-                                    <Text style={[styles.compactPillText, { color: theme.textSecondary }]}>{formDuration}h</Text>
-                                    <Ionicons name="swap-horizontal" size={14} color={theme.textSecondary} style={{marginLeft: 4}} />
+                                    <Text style={[styles.compactPillText, { color: theme.secondary }]}>{formDuration}h</Text>
+                                    <Ionicons name="swap-horizontal" size={14} color={theme.secondary} style={{marginLeft: 4}} />
                                 </TouchableOpacity>
                             </View>
 
@@ -623,7 +611,7 @@ export default function Timetable({ route, navigation, setIsDarkMode, isDarkMode
                                 <TextInput
                                     style={[styles.inputField, { borderColor: theme.borderColor, color: theme.text, paddingVertical: 10 }]}
                                     placeholder="Label (Optional)"
-                                    placeholderTextColor={theme.textSecondary}
+                                    placeholderTextColor={theme.secondary}
                                     value={formLabel}
                                     onChangeText={setFormLabel}
                                 />

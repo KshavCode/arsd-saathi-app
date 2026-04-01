@@ -1,4 +1,4 @@
-import { Colors } from '@/constants/themeStyle';
+import { useTheme } from '@/hooks/useTheme';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -39,17 +39,8 @@ const NoticeCard = React.memo(({ item, theme }) => (
 ));
 NoticeCard.displayName = 'NoticeCard';
 
-export default function Notices({ navigation, isDarkMode, setIsDarkMode }) {
-  const theme = {
-    background: isDarkMode ? Colors.dark.background : Colors.light.background,
-    card: isDarkMode ? Colors.dark.card : Colors.light.card, 
-    text: isDarkMode ? Colors.dark.text : Colors.light.text,
-    textSecondary: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
-    primary: isDarkMode ? Colors.dark.primary : Colors.light.primary,
-    borderColor: isDarkMode ? Colors.dark.separator : Colors.light.separator,
-    iconBg: isDarkMode ? Colors.dark.iconBg : Colors.light.iconBg,
-  };
-
+export default function Notices({ navigation}) {
+  const {theme, isDarkMode, toggleTheme} = useTheme()
   const webViewRef = useRef(null);
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -234,7 +225,7 @@ export default function Notices({ navigation, isDarkMode, setIsDarkMode }) {
       
                       <TouchableOpacity
                           style={[styles.themeButton, { backgroundColor: theme.card }]}
-                          onPress={() => setIsDarkMode(!isDarkMode)}
+                          onPress={toggleTheme}
                           accessibilityRole="button"
                           accessibilityLabel="Toggle Theme"
                           accessibilityHint={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
@@ -259,7 +250,7 @@ export default function Notices({ navigation, isDarkMode, setIsDarkMode }) {
       {loading && notices.length === 0 ? (
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color={theme.primary} accessibilityLabel="Loading notices" />
-          <Text style={[styles.loadingText, { color: theme.textSecondary }]}>Fetching latest notices...</Text>
+          <Text style={[styles.loadingText, { color: theme.secondary }]}>Fetching latest notices...</Text>
         </View>
       ) : (
         <FlatList
@@ -288,7 +279,7 @@ export default function Notices({ navigation, isDarkMode, setIsDarkMode }) {
           ListEmptyComponent={
             <View style={styles.centerContainer}>
               <Ionicons name="document-text-outline" size={60} color={theme.borderColor} importantForAccessibility="no" />
-              <Text style={[styles.emptyText, { color: theme.textSecondary }]}>No recent notices found.</Text>
+              <Text style={[styles.emptyText, { color: theme.secondary }]}>No recent notices found.</Text>
             </View>
           }
           ListFooterComponent={renderFooter}
