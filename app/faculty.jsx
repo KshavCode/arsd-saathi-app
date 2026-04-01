@@ -22,7 +22,7 @@ const FacultyCard = ({ data, theme, delay }) => {
             accessibilityLabel={accessibilityString}
             animation='fadeInLeft'
             delay={delay}
-            duration={300}
+            duration={500}
             useNativeDriver={true}
         >
             {/* --- Header: Teacher Identity --- */}
@@ -130,7 +130,7 @@ export default function FacultyTab({ navigation }) {
                 <FlatList 
                     data={facultyList}
                     keyExtractor={(item, index) => index.toString()}
-                    renderItem={({ index, item }) => <FacultyCard data={item} theme={theme} delay={index*100}/>}
+                    renderItem={({ index, item }) => <FacultyCard data={item} theme={theme} delay={index*150}/>}
                     contentContainerStyle={{ paddingBottom: 20 }}
                     showsVerticalScrollIndicator={false}
                     

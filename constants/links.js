@@ -21,3 +21,5 @@ export const HANDBOOK_URL = 'https://arsdcollege.ac.in/wp-content/uploads/2024/0
 export const LIBRARY_URL = 'https://library.arsdcollege.ac.in/';
 
 export const SAMARTH_URL = 'https://slc.uod.ac.in/';
+
+export const NOTICES_URL = 'https://arsdcollege.ac.in/announcement-2/'

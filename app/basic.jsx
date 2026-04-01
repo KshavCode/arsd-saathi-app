@@ -3,15 +3,20 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import * as Animatable from 'react-native-animatable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 
-const DetailRow = ({ label, value, icon, theme, isLast }) => (
-    <View
+const DetailRow = ({ label, value, icon, theme, isLast, delay }) => (
+    <Animatable.View
       style={[styles.detailRow, !isLast && { borderBottomColor: theme.borderColor, borderBottomWidth: 1 }]}
       accessible={true}
       accessibilityRole="text"
       accessibilityLabel={`${label}: ${value || "Not available"}`}
+      animation="zoomIn"
+      duration={500}
+      delay={delay}
+      useNativeDriver
     >
         <View style={[styles.iconBox, { backgroundColor: theme.iconBg }]} importantForAccessibility="no-hide-descendants">
             <Ionicons name={icon} size={20} color={theme.primary} />
@@ -20,7 +25,7 @@ const DetailRow = ({ label, value, icon, theme, isLast }) => (
             <Text style={[styles.detailLabel, { color: theme.secondary }]}>{label}</Text>
             <Text style={[styles.detailValue, { color: theme.text }]}>{value || "N/A"}</Text>
         </View>
-    </View>
+    </Animatable.View>
 );
 
 export default function DetailsTab({ navigation }) {
@@ -114,6 +119,7 @@ export default function DetailsTab({ navigation }) {
                                 icon={field.icon}
                                 theme={theme}
                                 isLast={index === displayFields.length - 1}
+                                delay = {index*50}
                             />
                         )) : (
                             <View style={{ padding: 40, alignItems: 'center' }} accessible={true} accessibilityLabel="Warning: No details found.">

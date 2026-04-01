@@ -1,41 +1,46 @@
+import { NOTICES_URL } from '@/constants/links';
 import { useTheme } from '@/hooks/useTheme';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, Linking, Platform, RefreshControl, StatusBar, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native';
+import { ActivityIndicator, FlatList, Linking, Platform, RefreshControl, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import * as Animatable from 'react-native-animatable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 
-// Enable LayoutAnimation for Android
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
-const NoticeCard = React.memo(({ item, theme }) => (
-  <TouchableOpacity 
-    style={[styles.card, { backgroundColor: theme.card, borderColor: theme.borderColor }]}
-    onPress={() => Linking.openURL(item.url)}
-    activeOpacity={0.7}
-    accessibilityRole="link"
-    accessibilityLabel={`Notice from ${item.date}: ${item.title}`}
-    accessibilityHint="Double tap to view this notice in your browser"
+const NoticeCard = React.memo(({ item, theme, delay }) => (
+  <Animatable.View
+    animation='zoomIn'
+    duration={500}
+    delay={delay}
+    useNativeDriver
   >
-    <View style={styles.cardHeader} importantForAccessibility="no-hide-descendants">
-      <View style={[styles.dateBadge, { backgroundColor: theme.primary + '15' }]}>
-        <Ionicons name="calendar-outline" size={12} color={theme.primary} style={{ marginRight: 4 }} />
-        <Text style={[styles.dateText, { color: theme.primary }]}>{item.date}</Text>
+    <TouchableOpacity 
+      style={[styles.card, { backgroundColor: theme.card, borderColor: theme.borderColor }]}
+      onPress={() => Linking.openURL(item.url)}
+      activeOpacity={0.7}
+      accessibilityRole="link"
+      accessibilityLabel={`Notice from ${item.date}: ${item.title}`}
+      accessibilityHint="Double tap to view this notice in your browser"
+    >
+      <View style={styles.cardHeader} importantForAccessibility="no-hide-descendants">
+        <View style={[styles.dateBadge, { backgroundColor: theme.primary + '15' }]}>
+          <Ionicons name="calendar-outline" size={12} color={theme.primary} style={{ marginRight: 4 }} />
+          <Text style={[styles.dateText, { color: theme.primary }]}>{item.date}</Text>
+        </View>
       </View>
-    </View>
-    
-    <View style={styles.cardBody} importantForAccessibility="no-hide-descendants">
-      <Text style={[styles.title, { color: theme.text }]} numberOfLines={3}>
-        {item.title}
-      </Text>
-      <View style={[styles.downloadIcon, { backgroundColor: theme.iconBg }]}>
-        <Ionicons name="open-outline" size={18} color={theme.primary} />
+
+      <View style={styles.cardBody} importantForAccessibility="no-hide-descendants">
+        <Text style={[styles.title, { color: theme.text }]} numberOfLines={3}>
+          {item.title}
+        </Text>
+        <View style={[styles.downloadIcon, { backgroundColor: theme.iconBg }]}>
+          <Ionicons name="open-outline" size={18} color={theme.primary} />
+        </View>
       </View>
-    </View>
-  </TouchableOpacity>
+    </TouchableOpacity>
+  </Animatable.View>
 ));
 NoticeCard.displayName = 'NoticeCard';
 
@@ -158,7 +163,7 @@ export default function Notices({ navigation}) {
               ? newData 
               : [...prevNotices, ...uniqueNewData];
 
-            AsyncStorage.setItem('SAVED_NOTICES', JSON.stringify(combinedNotices.slice(0, 20)));
+            AsyncStorage.setItem('SAVED_NOTICES', JSON.stringify(combinedNotices.slice(0, 10)));
 
             return combinedNotices;
           });
@@ -189,15 +194,21 @@ export default function Notices({ navigation}) {
   }, []);
 
   
-  const renderItem = useCallback(({ item }) => (
-    <NoticeCard item={item} theme={theme} />
+  const renderItem = useCallback(({ index, item }) => (
+    <NoticeCard item={item} theme={theme} delay={index*100} />
   ), [theme.background]);
 
   const keyExtractor = useCallback((item, index) => item.id + index, []);
 
   // 🟢 OPTIMIZATION 3: Memoize Footer Component
   const renderFooter = useCallback(() => {
-    if (!isFetchingMore) return null;
+    if (!isFetchingMore) {
+      return (
+        <TouchableOpacity onPress={()=>Linking.openURL(NOTICES_URL)} accessibilityRole="link" accessibilityHint="Redirects to the main developer's website" hitSlop={{top: 10, bottom: 10, left: 10, right: 10}} style={{alignItems:'center', justifyContent:'center', gap:4, marginTop: 20}}>
+          <Text style={{ color: theme.footer, fontWeight: 'bold', fontSize:15 }} importantForAccessibility="no">...see more on the website</Text>
+        </TouchableOpacity>
+      )
+    };
     return (
       <View style={{ paddingVertical: 20, alignItems: 'center' }}>
         <ActivityIndicator size="small" color={theme.primary} accessibilityLabel="Loading older notices" />
@@ -210,37 +221,35 @@ export default function Notices({ navigation}) {
       <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
 
       <View style={styles.headerRow} accessible={false}>
-                      <TouchableOpacity
-                          style={styles.backButton}
-                          onPress={() => (navigation?.goBack ? navigation.goBack() : console.log('Back'))}
-                          accessibilityRole="button"
-                          accessibilityLabel="Go Back"
-                          accessibilityHint="Returns to the previous screen"
-                          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                      >
-                          <Ionicons name="caret-back" size={24} color={theme.primary} importantForAccessibility="no" />
-                      </TouchableOpacity>
-      
-                      <Text style={[styles.headerTitle, { color: theme.text }]} accessibilityRole="header">NOTICE BOARD</Text>
-      
-                      <TouchableOpacity
-                          style={[styles.themeButton, { backgroundColor: theme.card }]}
-                          onPress={toggleTheme}
-                          accessibilityRole="button"
-                          accessibilityLabel="Toggle Theme"
-                          accessibilityHint={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-                          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                      >
-                           <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} importantForAccessibility="no" />
-                      </TouchableOpacity>
-                  </View>
+        <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => (navigation?.goBack ? navigation.goBack() : console.log('Back'))}
+            accessibilityRole="button"
+            accessibilityLabel="Go Back"
+            accessibilityHint="Returns to the previous screen"
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+            <Ionicons name="caret-back" size={24} color={theme.primary} importantForAccessibility="no" />
+        </TouchableOpacity>
+        <Text style={[styles.headerTitle, { color: theme.text }]} accessibilityRole="header">NOTICE BOARD</Text>
+        <TouchableOpacity
+            style={[styles.themeButton, { backgroundColor: theme.card }]}
+            onPress={toggleTheme}
+            accessibilityRole="button"
+            accessibilityLabel="Toggle Theme"
+            accessibilityHint={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} importantForAccessibility="no" />
+        </TouchableOpacity>
+      </View>
       
 
       <View style={{ height: 0, width: 0, opacity: 0 }} importantForAccessibility="no-hide-descendants">
         <WebView
           ref={webViewRef}
           key={webViewKey}
-          source={{ uri: 'https://arsdcollege.ac.in/announcement-2/' }}
+          source={{ uri: NOTICES_URL }}
           injectedJavaScript={scrapeJS}
           onMessage={handleMessage}
           javaScriptEnabled={true}
@@ -258,15 +267,13 @@ export default function Notices({ navigation}) {
           keyExtractor={keyExtractor} 
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={true}
-          
-          // 🟢 OPTIMIZATION 4: Performance Props
           initialNumToRender={10}
           maxToRenderPerBatch={10}
-          windowSize={11} // Lowers memory footprint
-          removeClippedSubviews={Platform.OS === 'android'} // Destroys views off-screen on Android
+          windowSize={11} 
+          removeClippedSubviews={Platform.OS === 'android'} 
           
           onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.5}
+          onEndReachedThreshold={.5}
           
           refreshControl={
             <RefreshControl 
@@ -279,7 +286,7 @@ export default function Notices({ navigation}) {
           ListEmptyComponent={
             <View style={styles.centerContainer}>
               <Ionicons name="document-text-outline" size={60} color={theme.borderColor} importantForAccessibility="no" />
-              <Text style={[styles.emptyText, { color: theme.secondary }]}>No recent notices found.</Text>
+              <Text style={[styles.emptyText, { color: theme.secondary }]}>No recent notices found. Try checking the website?</Text>
             </View>
           }
           ListFooterComponent={renderFooter}
