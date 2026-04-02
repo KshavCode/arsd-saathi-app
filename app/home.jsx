@@ -290,7 +290,7 @@ export default function HomeTab({ route, navigation }) {
               {Object.keys(Colors).map((name) => (
                 <TouchableOpacity
                   key={name}
-                  style={styles.dropdownItem}
+                  style={[styles.dropdownItem, {backgroundColor: themeName === name ? theme.iconBg+'70' : theme.background}]}
                   onPress={() => {
                     setThemeName(name);
                     setShowThemeModal(false);
@@ -471,7 +471,7 @@ export default function HomeTab({ route, navigation }) {
               accessibilityHint="Share the download link for ArsdSaathi with friends"
               hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
             >
-               <Ionicons name='share-social' size={20} color={theme.primary} importantForAccessibility="no" />
+               <Ionicons name='share-social' size={25} color={theme.primary} importantForAccessibility="no" />
             </TouchableOpacity>
             <TouchableOpacity 
               style={[styles.themeButton, { backgroundColor: theme.card }]} 
@@ -480,7 +480,7 @@ export default function HomeTab({ route, navigation }) {
               accessibilityLabel="Toggle Theme"
               hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
             >
-               <Ionicons name='color-palette' size={20} color={theme.primary} importantForAccessibility="no" />
+               <Ionicons name='color-palette' size={25} color={theme.primary} importantForAccessibility="no" />
             </TouchableOpacity>
           </View>
         </View>
@@ -694,6 +694,6 @@ const styles = StyleSheet.create({
     modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center', padding: 20 },
     modalListContainer: { width: '100%', borderRadius: 16, borderWidth: 1, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 10, elevation: 10 },
     modalListHeader: { fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase', padding: 16 },
-    dropdownItem: { paddingVertical: 16, paddingHorizontal: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 0.5 },
+    dropdownItem: { paddingVertical: 16, paddingHorizontal: 20, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap:5 },
     dropdownItemText: { fontSize: 15 },
 });
