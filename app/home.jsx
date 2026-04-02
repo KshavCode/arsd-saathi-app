@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckBox from 'expo-checkbox';
 import * as Linking from 'expo-linking';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Modal, ScrollView, Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { titleCase } from 'title-case';
 import ArsdScraper from '../services/ArsdScraper';
@@ -41,7 +41,7 @@ const GridActionButton = ({ title, icon, onPress, theme, isDestructive, accessib
 
 // --- Main Screen ---
 export default function HomeTab({ route, navigation }) {
-  const {theme, themeName, setThemeName} = useTheme()
+  const {theme, themeName, setThemeName, isDark} = useTheme()
 
   const [userData, setUserData] = useState({ name: "Loading...", rollNo: "...", enrollmentNumber: "..." });
   const [savedCredentials, setSavedCredentials] = useState(null);
@@ -77,6 +77,8 @@ export default function HomeTab({ route, navigation }) {
     };
     checkForUpdates();
   }, []); 
+
+
 
   // Converts "10:30 AM" to 630 (minutes since midnight)
   const parseTimeToMinutes = (timeStr) => {
@@ -266,7 +268,10 @@ export default function HomeTab({ route, navigation }) {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      
+      <StatusBar
+        barStyle={isDark ? 'light-content' : 'dark-content'}
+        backgroundColor={theme.background}
+      />
       {/* THEME SELECTION MODAL */}
       <Modal 
         visible={showThemeModal} 
@@ -280,7 +285,7 @@ export default function HomeTab({ route, navigation }) {
           onPressOut={() => setShowThemeModal(false)}
         >
           <View style={[styles.modalListContainer, { backgroundColor: theme.background }]}>
-            <Text style={[styles.modalListHeader, { color: theme.text }]}>Select Theme: </Text>
+            <Text style={[styles.modalListHeader, { color: theme.text, backgroundColor: theme.iconBg }]}>Select Theme: </Text>
             <ScrollView style={{ maxHeight: 350 }}>
               {Object.keys(Colors).map((name) => (
                 <TouchableOpacity
@@ -292,7 +297,7 @@ export default function HomeTab({ route, navigation }) {
                   }}
                 >
                   <Text
-                    style={{ color: themeName === name ? theme.primary : theme.text, fontWeight: themeName === name ? '700' : '500'}}>{name}</Text>
+                    style={{ color: themeName === name ? theme.primary : theme.text, fontWeight: themeName === name ? '800' : '500'}}>{name}</Text>
                   
                   {themeName === name && (
                     <Ionicons name="checkmark" size={16} color={theme.primary} />
@@ -481,7 +486,7 @@ export default function HomeTab({ route, navigation }) {
         </View>
 
         {/* Dashboard */}
-        <View style={[styles.heroContainer, { backgroundColor: theme.card, borderColor: theme.borderColor }]}>
+        <View style={[styles.heroContainer, { backgroundColor: theme.card, borderColor: theme.primary }]}>
             
             {/* Top Row - Attendance */}
             <View style={styles.heroMainRow} accessible={true} accessibilityLabel={`Theory Attendance: ${userData.percent_attendance}%`}>
