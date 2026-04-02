@@ -4,7 +4,7 @@ import { createContext, useEffect, useState } from 'react';
 export const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  const [themeName, setTheme] = useState('pinkish');
+  const [themeName, setTheme] = useState('Default');
 
   useEffect(() => {
     const load = async () => {

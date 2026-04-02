@@ -1,4 +1,5 @@
 import { FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, LIBRARY_URL, PRIVACY_URL, SAMARTH_URL, SHIVAM_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
+import { Colors } from '@/constants/themeStyle';
 import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -53,6 +54,7 @@ export default function HomeTab({ route, navigation }) {
   const [updateInfo, setUpdateInfo] = useState({ version: '', url: '' });
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [deleteTimetable, setDeleteTimetable] = useState(false);
+  const [showThemeModal, setShowThemeModal] = useState(false);
 
   // --- AUTOMATIC UPDATE CHECK ---
   useEffect(() => {
@@ -265,6 +267,44 @@ export default function HomeTab({ route, navigation }) {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       
+      {/* THEME SELECTION MODAL */}
+      <Modal 
+        visible={showThemeModal} 
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowThemeModal(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalBackdrop} 
+          activeOpacity={1} 
+          onPressOut={() => setShowThemeModal(false)}
+        >
+          <View style={[styles.modalListContainer, { backgroundColor: theme.background }]}>
+            <Text style={[styles.modalListHeader, { color: theme.text }]}>Select Theme: </Text>
+            <ScrollView style={{ maxHeight: 350 }}>
+              {Object.keys(Colors).map((name) => (
+                <TouchableOpacity
+                  key={name}
+                  style={styles.dropdownItem}
+                  onPress={() => {
+                    setThemeName(name);
+                    setShowThemeModal(false);
+                  }}
+                >
+                  <Text
+                    style={{ color: themeName === name ? theme.primary : theme.text, fontWeight: themeName === name ? '700' : '500'}}>{name}</Text>
+                  
+                  {themeName === name && (
+                    <Ionicons name="checkmark" size={16} color={theme.primary} />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
       {/* --- UPDATE MODAL --- */}
       <Modal
         animationType="fade"
@@ -430,7 +470,7 @@ export default function HomeTab({ route, navigation }) {
             </TouchableOpacity>
             <TouchableOpacity 
               style={[styles.themeButton, { backgroundColor: theme.card }]} 
-              onPress={()=>setThemeName('pinkish')}
+              onPress={()=>setShowThemeModal(true)}
               accessibilityRole="button"
               accessibilityLabel="Toggle Theme"
               hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
@@ -642,4 +682,13 @@ const styles = StyleSheet.create({
     footerDivider: { height: 1, width: '100%', marginVertical: 16 },
     footerLegal: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 12 },
     footerLegalText: { fontSize: 11, fontWeight: '500' },
+
+    // Modal Dropdown
+    dropdown: { paddingVertical: 14, paddingHorizontal: 16, borderWidth: 1, borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    dropdownText: { fontSize: 15, fontWeight: '600', flex: 1 },
+    modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+    modalListContainer: { width: '100%', borderRadius: 16, borderWidth: 1, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 10, elevation: 10 },
+    modalListHeader: { fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase', padding: 16 },
+    dropdownItem: { paddingVertical: 16, paddingHorizontal: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 0.5 },
+    dropdownItemText: { fontSize: 15 },
 });
