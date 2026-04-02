@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckBox from 'expo-checkbox';
 import * as Linking from 'expo-linking';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Modal, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, ScrollView, Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { titleCase } from 'title-case';
 import ArsdScraper from '../services/ArsdScraper';
@@ -31,8 +31,8 @@ const GridActionButton = ({ title, icon, onPress, theme, isDestructive, accessib
     accessibilityLabel={title}
     accessibilityHint={accessibilityHint || `Maps to ${title}`}
   >
-    <View style={[styles.gridActionIconCtx, { backgroundColor: isDestructive ? 'transparent' : theme.iconBg }]} importantForAccessibility="no-hide-descendants">
-      <Ionicons name={icon} color={isDestructive ? theme.error : theme.primary} size={24} />
+    <View style={[styles.gridActionIconCtx, { backgroundColor: 'transparent'  }]} importantForAccessibility="no-hide-descendants">
+      <Ionicons name={icon} color={isDestructive ? theme.error : theme.primary} size={35} />
     </View>
     <Text style={[styles.gridActionText, { color: isDestructive ? theme.error : theme.text }]} importantForAccessibility="no">{title}</Text>
   </TouchableOpacity>
@@ -40,7 +40,7 @@ const GridActionButton = ({ title, icon, onPress, theme, isDestructive, accessib
 
 // --- Main Screen ---
 export default function HomeTab({ route, navigation }) {
-  const {theme, isDarkMode, toggleTheme} = useTheme()
+  const {theme, themeName, setThemeName} = useTheme()
 
   const [userData, setUserData] = useState({ name: "Loading...", rollNo: "...", enrollmentNumber: "..." });
   const [savedCredentials, setSavedCredentials] = useState(null);
@@ -264,7 +264,6 @@ export default function HomeTab({ route, navigation }) {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
       
       {/* --- UPDATE MODAL --- */}
       <Modal
@@ -280,7 +279,7 @@ export default function HomeTab({ route, navigation }) {
           <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
 
             {/* Modal Header Icon */}
-            <View style={[styles.modalIconContainer, { backgroundColor: theme.iconBg }]} importantForAccessibility="no-hide-descendants">
+            <View style={[styles.modalIconContainer, { backgroundColor: theme.background + '70' }]} importantForAccessibility="no-hide-descendants">
               <Ionicons name="rocket" size={36} color={theme.primary} />
             </View>
 
@@ -331,7 +330,7 @@ export default function HomeTab({ route, navigation }) {
       {/* --- LOGOUT MODAL --- */}
       <Modal
         animationType="fade"
-        transparent={true}
+        transparent={false}
         visible={showLogoutModal}
         onRequestClose={() => setShowLogoutModal(false)}
         statusBarTranslucent={true}
@@ -431,13 +430,12 @@ export default function HomeTab({ route, navigation }) {
             </TouchableOpacity>
             <TouchableOpacity 
               style={[styles.themeButton, { backgroundColor: theme.card }]} 
-              onPress={toggleTheme}
+              onPress={()=>setThemeName('pinkish')}
               accessibilityRole="button"
               accessibilityLabel="Toggle Theme"
-              accessibilityHint={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
               hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
             >
-               <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} importantForAccessibility="no" />
+               <Ionicons name='color-palette' size={20} color={theme.primary} importantForAccessibility="no" />
             </TouchableOpacity>
           </View>
         </View>
@@ -488,17 +486,17 @@ export default function HomeTab({ route, navigation }) {
                       <Text style={[styles.nextClassSubject, { color: theme.text }]} numberOfLines={1}  importantForAccessibility="no">{nextClassInfo.subject}</Text>
 
                       <View style={styles.nextClassMetaRow} importantForAccessibility="no-hide-descendants">
-                        <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}>
+                        <View style={[styles.metaBadge, { backgroundColor: theme.background + '70' }]}>
                           <Ionicons name="location" size={12} color={theme.secondary} />
                           <Text style={[styles.metaText, { color: theme.secondary }]}>Room {nextClassInfo.room || 'N/A'}</Text>
                         </View>
-                        <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}>
+                        <View style={[styles.metaBadge, { backgroundColor: theme.background + '70' }]}>
                           <Ionicons name="time" size={12} color={theme.secondary} />
                           <Text style={[styles.metaText, { color: theme.secondary }]}>{nextClassInfo.duration} Hr {nextClassInfo.type}</Text>
                         </View>
                       </View>
                       { nextClassInfo.label && 
-                        <View style={[styles.metaBadge, { backgroundColor: theme.iconBg, marginTop: 5 }]}>
+                        <View style={[styles.metaBadge, { backgroundColor: theme.background + '70', marginTop: 5 }]}>
                           <Ionicons name="document" size={12} color={theme.secondary} />
                           <Text style={[styles.metaText, { color: theme.secondary }]} numberOfLines={1}>{nextClassInfo.label}</Text>
                         </View>
@@ -566,13 +564,13 @@ export default function HomeTab({ route, navigation }) {
         <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, marginTop:20}} accessible={true} accessibilityLabel="Developed by Keshav Pal">
           <Text style={{ color: theme.secondary, fontSize:15}} importantForAccessibility="no">Developed by</Text>
           <TouchableOpacity onPress={()=>Linking.openURL(KESHAV_URL)} accessibilityRole="link" accessibilityHint="Redirects to the main developer's website" hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
-              <Text style={{ color: theme.footer, fontWeight: 'bold', fontSize:15 }} importantForAccessibility="no">Keshav Pal</Text>
+              <Text style={{ color: theme.primary, fontWeight: 'bold', fontSize:15 }} importantForAccessibility="no">Keshav Pal</Text>
           </TouchableOpacity>
         </View>
         <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4}} accessible={true} accessibilityLabel="Developed with Shivam Yadav">
           <Text style={{ color: theme.secondary, fontSize:13}} importantForAccessibility="no">with</Text>
           <TouchableOpacity onPress={()=>Linking.openURL(SHIVAM_URL)} accessibilityRole="link" accessibilityHint="Redirects to the developer's github profile" hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
-              <Text style={{ color: theme.footer, fontWeight: 'bold', fontSize:13 }} importantForAccessibility="no">Shivam Yadav</Text>
+              <Text style={{ color: theme.primary, fontWeight: 'bold', fontSize:13 }} importantForAccessibility="no">Shivam Yadav</Text>
           </TouchableOpacity>
         </View>
 
@@ -633,7 +631,7 @@ const styles = StyleSheet.create({
     sectionHeader: { fontSize: 18, fontWeight: '800', marginBottom: 16, letterSpacing: -0.5 },
     actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' },
     gridActionCard: { width: '48%', padding: 10, borderRadius: 20, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
-    gridActionIconCtx: { width: 48, height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+    gridActionIconCtx: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
     gridActionText: { fontSize: 14, fontWeight: '700', textAlign: 'center' },
 
     // Footer Block

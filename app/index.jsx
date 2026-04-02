@@ -68,7 +68,7 @@ export default function Login({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <StatusBar barStyle="light-content" />
+            <StatusBar barStyle="pinkish-content" />
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -82,7 +82,7 @@ export default function Login({ navigation }) {
                     bounces={false}
                 >
                     <LinearGradient
-                        colors={[Colors.light.text, Colors.light.primary]}
+                        colors={[Colors.pinkish.text, Colors.pinkish.primary]}
                         style={[styles.headerBackground, { height: height * 0.40 }]}
                         importantForAccessibility="no-hide-descendants"
                     >
@@ -153,7 +153,7 @@ export default function Login({ navigation }) {
                                         accessibilityHint="Check this to agree to the terms and privacy policy"
                                         hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
                                     >
-                                        <Ionicons name={consentGiven ? "checkbox" : "square-outline"} size={22} color={consentGiven ? Colors.light.primary : "#9CA3AF"} importantForAccessibility="no" />
+                                        <Ionicons name={consentGiven ? "checkbox" : "square-outline"} size={22} color={consentGiven ? Colors.pinkish.primary : "#9CA3AF"} importantForAccessibility="no" />
                                     </TouchableOpacity>
                                     <Text style={styles.consentText} accessibilityLabel="I agree to the Terms and Privacy Policy regarding my data.">
                                         I agree to the <Text style={styles.linkText} onPress={() => Linking.openURL(TERMS_URL)} accessibilityRole="link" accessibilityLabel="Terms and Conditions">Terms</Text> and <Text style={styles.linkText} onPress={() => Linking.openURL(PRIVACY_URL)} accessibilityRole="link" accessibilityLabel="Privacy Policy">Privacy Policy</Text> regarding my data.
@@ -164,7 +164,7 @@ export default function Login({ navigation }) {
                             <View style={styles.actionArea}>
                                 {isScraping ? (
                                     <View style={styles.loadingState} accessible={true} accessibilityLabel={`Loading. ${progressMsg}`}>
-                                        <ActivityIndicator size="large" color={Colors.light.primary} />
+                                        <ActivityIndicator size="large" color={Colors.pinkish.primary} />
                                         <Text style={styles.loadingText} importantForAccessibility="no">{progressMsg}</Text>
                                         <ArsdScraper credentials={{ name: fullName, rollNo: roll, dob: dob }} onProgress={setProgressMsg} onFinish={handleCompletion} onError={handleError} />
                                     </View>
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     consentText: { flex: 1, fontSize: 12, color: '#4B5563', lineHeight: 18 },
     linkText: { color: '#4F46E5', fontWeight: '700', textDecorationLine: 'underline' },
     actionArea: { marginTop: 15, minHeight: 60, justifyContent: 'center' },
-    loginButton: { backgroundColor: Colors.light.primary, flexDirection: "row", alignItems: "center", justifyContent: "center", height: 50, borderRadius: 12, elevation: 4 },
+    loginButton: { backgroundColor: Colors.pinkish.primary, flexDirection: "row", alignItems: "center", justifyContent: "center", height: 50, borderRadius: 12, elevation: 4 },
     disabledButton: { backgroundColor: "#a5a5a5", elevation: 0 },
     loginButtonText: { color: "#FFF", fontSize: 16, fontWeight: "600", marginRight: 8 },
     loadingState: { alignItems: "center", gap: 8 },

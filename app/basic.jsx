@@ -2,14 +2,14 @@ import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 const DetailRow = ({ label, value, icon, theme, isLast, delay }) => (
     <Animatable.View
-      style={[styles.detailRow, !isLast && { borderBottomColor: theme.borderColor, borderBottomWidth: 1 }]}
+      style={[styles.detailRow, !isLast && { borderBottomColor: theme.background, borderBottomWidth: 1 }]}
       accessible={true}
       accessibilityRole="text"
       accessibilityLabel={`${label}: ${value || "Not available"}`}
@@ -18,7 +18,7 @@ const DetailRow = ({ label, value, icon, theme, isLast, delay }) => (
       delay={delay}
       useNativeDriver
     >
-        <View style={[styles.iconBox, { backgroundColor: theme.iconBg }]} importantForAccessibility="no-hide-descendants">
+        <View style={[styles.iconBox, { backgroundColor: theme.background + '70' }]} importantForAccessibility="no-hide-descendants">
             <Ionicons name={icon} size={20} color={theme.primary} />
         </View>
         <View style={styles.detailTextContainer} importantForAccessibility="no-hide-descendants">
@@ -29,7 +29,7 @@ const DetailRow = ({ label, value, icon, theme, isLast, delay }) => (
 );
 
 export default function DetailsTab({ navigation }) {
-    const {theme, isDarkMode, toggleTheme} = useTheme()
+    const {theme, themeName, setThemeName} = useTheme()
 
     const [profileData, setProfileData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -79,7 +79,6 @@ export default function DetailsTab({ navigation }) {
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-            <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
             <View style={styles.headerRow} accessible={false}>
                 <TouchableOpacity
                     style={styles.backButton}
@@ -93,24 +92,13 @@ export default function DetailsTab({ navigation }) {
                 </TouchableOpacity>
 
                 <Text style={[styles.headerTitle, { color: theme.text }]} accessibilityRole="header">PERSONAL DETAILS</Text>
-
-                <TouchableOpacity
-                    style={[styles.themeButton, { backgroundColor: theme.card }]}
-                    onPress={toggleTheme}
-                    accessibilityRole="button"
-                    accessibilityLabel="Toggle Theme"
-                    accessibilityHint={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                     <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} importantForAccessibility="no" />
-                </TouchableOpacity>
             </View>
 
             <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }} showsVerticalScrollIndicator={false}>
                 {loading ? (
                     <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 50 }} accessibilityLabel="Loading personal details" />
                 ) : (
-                    <View style={[styles.cardContainer, { backgroundColor: theme.card, borderColor: theme.borderColor }]}>
+                    <View style={[styles.cardContainer, { backgroundColor: theme.card, borderColor: theme.background }]}>
                         {profileData ? displayFields.map((field, index) => (
                             <DetailRow
                                 key={field.key}
@@ -136,7 +124,7 @@ export default function DetailsTab({ navigation }) {
 
 const styles = StyleSheet.create({
     container: { flex: 1, paddingHorizontal: 16, paddingTop: 10 },
-    headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
+    headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
     backButton: { width: 40, height: 40, alignItems: 'flex-start', justifyContent: 'center' },
     headerTitle: { fontSize: 18, fontWeight: '700', letterSpacing: 0.5 },
     themeButton: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },

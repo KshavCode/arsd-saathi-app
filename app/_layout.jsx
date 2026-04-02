@@ -68,18 +68,18 @@ function StackContent() {
 
     useEffect(() => {
         if (Platform.OS === 'android') {
-            const color = isDarkMode ? Colors.dark.background : Colors.light.background;
+            const color = isDarkMode ? Colors.dark.background : Colors.pinkish.background;
             NavigationBar.setBackgroundColorAsync(color);
             NavigationBar.setButtonStyleAsync(isDarkMode ? 'light' : 'dark');
         }
     }, [isDarkMode]);
 
-    const currentBackgroundColor = isDarkMode ? Colors.dark.background : Colors.light.background;
+    const currentBackgroundColor = isDarkMode ? Colors.dark.background : Colors.pinkish.background;
 
     if (!isAppReady) {
         return (
             <View style={{ flex: 1, backgroundColor: currentBackgroundColor, justifyContent: 'center', alignItems: 'center' }}>
-                <ActivityIndicator size="large" color={isDarkMode ? Colors.dark.primary : Colors.light.primary} />
+                <ActivityIndicator size="large" color={isDarkMode ? Colors.dark.primary : Colors.pinkish.primary} />
             </View>
         );
     }

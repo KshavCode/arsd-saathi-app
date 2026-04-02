@@ -5,7 +5,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Linking from 'expo-linking';
 import LZString from 'lz-string';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, Share, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, Share, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { titleCase } from 'title-case';
@@ -88,7 +88,7 @@ const deserializeTimetable = (str) => {
 // -----------------------------------------
 
 export default function Timetable({ route, navigation }) {
-  const {theme, isDarkMode, toggleTheme} = useTheme()
+  const {theme, themeName, setThemeName} = useTheme()
 
   let day = new Date().getDay()-1;
 
@@ -321,16 +321,16 @@ export default function Timetable({ route, navigation }) {
               <Text style={[styles.classTime, { color: theme.primary }]}>{time} - {endTimeStr}</Text>
               <Text style={[styles.classSubject, { color: theme.text }]}>{existingClass.subject}</Text>
               <View style={styles.classMetaRow}>
-                <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}><Ionicons name="location" size={12} color={theme.secondary} /><Text style={[styles.metaText, { color: theme.secondary }]}>Room {existingClass.room || 'N/A'}</Text></View>
-                <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}><Ionicons name="book" size={12} color={theme.secondary} /><Text style={[styles.metaText, { color: theme.secondary }]}>{existingClass.type}</Text></View>
+                <View style={[styles.metaBadge, { backgroundColor: theme.background + '70' }]}><Ionicons name="location" size={12} color={theme.secondary} /><Text style={[styles.metaText, { color: theme.secondary }]}>Room {existingClass.room || 'N/A'}</Text></View>
+                <View style={[styles.metaBadge, { backgroundColor: theme.background + '70' }]}><Ionicons name="book" size={12} color={theme.secondary} /><Text style={[styles.metaText, { color: theme.secondary }]}>{existingClass.type}</Text></View>
                 {facultyName && (
-                   <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}>
+                   <View style={[styles.metaBadge, { backgroundColor: theme.background + '70' }]}>
                        <Ionicons name="person" size={12} color={theme.secondary} />
                        <Text style={[styles.metaText, { color: theme.secondary }]} numberOfLines={1}>{facultyName}</Text>
                    </View>
                 )}
                 {existingClass.label && (
-                   <View style={[styles.metaBadge, { backgroundColor: theme.iconBg }]}>
+                   <View style={[styles.metaBadge, { backgroundColor: theme.background + '70' }]}>
                        <Ionicons name="document" size={12} color={theme.secondary} />
                        <Text style={[styles.metaText, { color: theme.secondary }]} numberOfLines={1}>{existingClass.label}</Text>
                    </View>
@@ -346,7 +346,7 @@ export default function Timetable({ route, navigation }) {
         return (
           <TouchableOpacity
             key={time}
-            style={[styles.emptySlot, { borderColor: theme.borderColor, backgroundColor: 'transparent' }]}
+            style={[styles.emptySlot, { borderColor: theme.secondary, backgroundColor: 'transparent' }]}
             onPress={() => handleOpenSlot(time)}
             activeOpacity={0.5}
           >
@@ -371,17 +371,12 @@ export default function Timetable({ route, navigation }) {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-        <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
-
         {/* Header */}
         <View style={styles.headerRow}>
             <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                 <Ionicons name="caret-back" size={27} color={theme.primary} />
             </TouchableOpacity>
             <Text style={[styles.headerTitle, { color: theme.text }]}>TIMETABLE</Text>
-            <TouchableOpacity style={[styles.themeButton, { backgroundColor: theme.card }]} onPress={toggleTheme} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} />
-            </TouchableOpacity>
         </View>
 
         {/* Custom Tab Switcher */}
@@ -438,7 +433,7 @@ export default function Timetable({ route, navigation }) {
                 <View style={{ gap: 20 }}>
                     {/* Universal Export Card */}
                     <View style={[styles.formCard, { backgroundColor: theme.card }]}>
-                        <View style={[styles.iconCircle, { backgroundColor: theme.iconBg }]}>
+                        <View style={[styles.iconCircle, { backgroundColor: theme.background + '70' }]}>
                             <Ionicons name="qr-code-outline" size={32} color={theme.primary} />
                         </View>
                         <Text style={[styles.shareTitle, { color: theme.text }]}>Share Timetable</Text>
@@ -454,7 +449,7 @@ export default function Timetable({ route, navigation }) {
 
                     {/* Camera Import Card */}
                     <View style={[styles.formCard, { backgroundColor: theme.card }]}>
-                        <View style={[styles.iconCircle, { backgroundColor: theme.iconBg }]}>
+                        <View style={[styles.iconCircle, { backgroundColor: theme.background + '70' }]}>
                             <Ionicons name="scan-outline" size={32} color={theme.primary} />
                         </View>
                         <Text style={[styles.shareTitle, { color: theme.text }]}>Import Timetable</Text>
@@ -477,12 +472,12 @@ export default function Timetable({ route, navigation }) {
                             onChangeText={setImportCode}
                         />
                         <TouchableOpacity
-                            style={[styles.primaryButton, { backgroundColor: importCode ? theme.primary : theme.borderColor, width: '100%' }]}
+                            style={[styles.primaryButton, { backgroundColor: importCode ? theme.primary : theme.primary, width: '100%' }]}
                             onPress={() => processImportData(importCode)}
                             disabled={!importCode}
                             activeOpacity={0.8}
                         >
-                            <Text style={[styles.primaryButtonText, !importCode && { color: theme.secondary }]}>Import Data</Text>
+                            <Text style={[styles.primaryButtonText, !importCode && { color: theme.background }]}>Import Data</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -559,10 +554,10 @@ export default function Timetable({ route, navigation }) {
                             {availableSubjects.map((sub) => (
                                 <TouchableOpacity
                                     key={sub}
-                                    style={[styles.chip, { backgroundColor: formSubject === sub ? theme.primary : theme.iconBg }]}
+                                    style={[styles.chip, { backgroundColor: theme.background}]}
                                     onPress={() => setFormSubject(sub)}
                                 >
-                                    <Text style={{ color: formSubject === sub ? '#FFF' : theme.text, fontWeight: '600' }}>{sub}</Text>
+                                    <Text style={{ color: formSubject === sub ? '#FFF' : theme.primary, fontWeight: '600' }}>{sub}</Text>
                                 </TouchableOpacity>
                             ))}
                         </ScrollView>
@@ -571,7 +566,7 @@ export default function Timetable({ route, navigation }) {
                             <View style={{flex:1, minWidth:100}}>
                                 <Text style={[styles.inputLabel, { color: theme.secondary }]}>Room</Text>
                                 <TextInput
-                                    style={[styles.inputField, { borderColor: theme.borderColor, color: theme.text, paddingVertical: 14 }]}
+                                    style={[styles.inputField, { borderColor: theme.secondary, color: theme.text, paddingVertical: 14 }]}
                                     placeholder="e.g. 35"
                                     placeholderTextColor={theme.secondary}
                                     value={formRoom}
@@ -582,7 +577,7 @@ export default function Timetable({ route, navigation }) {
                             <View>
                                 <Text style={[styles.inputLabel, { color: theme.secondary }]}>Type</Text>
                                 <TouchableOpacity
-                                    style={[styles.compactPill, { borderColor: theme.borderColor, backgroundColor: theme.primary + '20' }]}
+                                    style={[styles.compactPill, { borderColor: theme.secondary, backgroundColor: theme.primary + '20' }]}
                                     onPress={() => setFormType(formType === 'TH' ? 'PR' : 'TH')}
                                 >
                                     <Text style={[styles.compactPillText, { color: theme.primary }]}>{formType}</Text>
@@ -593,7 +588,7 @@ export default function Timetable({ route, navigation }) {
                             <View>
                                 <Text style={[styles.inputLabel, { color: theme.secondary }]}>Hrs</Text>
                                 <TouchableOpacity
-                                    style={[styles.compactPill, { borderColor: theme.borderColor, backgroundColor: theme.iconBg }]}
+                                    style={[styles.compactPill, { borderColor: theme.secondary, backgroundColor: theme.background + '70' }]}
                                     onPress={() => {
                                         if (formDuration === 1) {
                                             if (TIME_SLOTS.indexOf(editingSlot) === TIME_SLOTS.length - 1) {
@@ -609,7 +604,7 @@ export default function Timetable({ route, navigation }) {
 
                             <View style={{flex:1, minWidth:100}}>
                                 <TextInput
-                                    style={[styles.inputField, { borderColor: theme.borderColor, color: theme.text, paddingVertical: 10 }]}
+                                    style={[styles.inputField, { borderColor: theme.secondary, color: theme.text, paddingVertical: 10 }]}
                                     placeholder="Label (Optional)"
                                     placeholderTextColor={theme.secondary}
                                     value={formLabel}
@@ -647,7 +642,7 @@ export default function Timetable({ route, navigation }) {
 // --- Styles ---
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 10 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10 },
   backButton: { width: 40, height: 40, justifyContent: 'center' },
   headerTitle: { fontSize: 18, fontWeight: '800', letterSpacing: 1 },
   themeButton: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, elevation: 3 },

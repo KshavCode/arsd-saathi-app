@@ -2,11 +2,11 @@ import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Modal, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function AttendanceTab({ navigation }) {
-    const {theme, isDarkMode, toggleTheme} = useTheme()
+    const {theme, themeName, setThemeName} = useTheme()
     const [fullData, setFullData] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -122,7 +122,6 @@ export default function AttendanceTab({ navigation }) {
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-            <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
 
             {/* Header */}
             <View style={styles.headerRow} accessible={false}>
@@ -136,19 +135,8 @@ export default function AttendanceTab({ navigation }) {
                 >
                     <Ionicons name="caret-back" size={27} color={theme.primary} importantForAccessibility="no" />
                 </TouchableOpacity>
-
                 <Text style={[styles.headerTitle, { color: theme.text }]} accessibilityRole="header">ATTENDANCE</Text>
 
-                <TouchableOpacity
-                    style={[styles.themeButton, { backgroundColor: theme.card }]}
-                    onPress={toggleTheme}
-                    accessibilityRole="button"
-                    accessibilityLabel="Toggle Theme"
-                    accessibilityHint={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                     <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} importantForAccessibility="no" />
-                </TouchableOpacity>
             </View>
 
             <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }} showsVerticalScrollIndicator={false}>
@@ -204,13 +192,13 @@ export default function AttendanceTab({ navigation }) {
                                     accessibilityLabel="Close subject list"
                                     accessibilityRole="button"
                                 >
-                                    <View style={[styles.modalListContainer, { backgroundColor: theme.card, borderColor: theme.borderColor }]}>
+                                    <View style={[styles.modalListContainer, { backgroundColor: theme.card, borderColor: theme.secondary }]}>
                                         <Text style={[styles.modalListHeader, { color: theme.text, backgroundColor: theme.iconBg, borderBottomWidth: .5, borderColor:theme.primary}]} accessibilityRole="header">Select a Subject</Text>
                                         <ScrollView style={{maxHeight: 350}} showsVerticalScrollIndicator={true}>
                                             {subjects.map((sub) => (
                                                 <TouchableOpacity
                                                     key={sub}
-                                                    style={[styles.dropdownItem, { borderBottomColor: theme.borderColor }]}
+                                                    style={[styles.dropdownItem, { borderBottomColor: theme.secondary }]}
                                                     onPress={() => {
                                                         setSelectedSubject(sub);
                                                         setShowDropdown(false);
@@ -232,7 +220,7 @@ export default function AttendanceTab({ navigation }) {
                         </View>
 
                         {/* Table */}
-                        <View style={[styles.tableContainer, { borderColor: theme.borderColor }]} accessibilityLabel={`Attendance records for ${selectedSubject}`}>
+                        <View style={[styles.tableContainer, { borderColor: theme.secondary }]} accessibilityLabel={`Attendance records for ${selectedSubject}`}>
                             {grid.map((row, rIdx) => {
                                 const isHeaderRow = rIdx === 0;
                                 const rowAccessibilityLabel = getRowAccessibilityLabel(row, isHeaderRow);
@@ -250,7 +238,7 @@ export default function AttendanceTab({ navigation }) {
                                             return (
                                                 <View
                                                     key={`cell-${rIdx}-${cIdx}`}
-                                                    style={[ styles.tableCell,  { borderColor: theme.borderColor }, isHeaderRow && { backgroundColor: theme.primary + '20' }, cIdx === COLS - 1 && styles.tableCellLast ]}
+                                                    style={[ styles.tableCell,  { borderColor: theme.secondary }, isHeaderRow && { backgroundColor: theme.primary + '20' }, cIdx === COLS - 1 && styles.tableCellLast ]}
                                                     importantForAccessibility={isHeaderRow ? "yes" : "no-hide-descendants"} // Hide individual cells
                                                 >
                                                     <Text style={[ styles.cellText,  { color: theme.text }, isHeaderRow && { color: theme.text, fontWeight: '700', fontSize: 10 },  isRowHeader && { fontWeight: '600' } ]}
@@ -294,7 +282,7 @@ export default function AttendanceTab({ navigation }) {
 
 const styles = StyleSheet.create({
     container: { flex: 1, paddingHorizontal: 16, paddingTop: 10 },
-    headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
+    headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
     backButton: { width: 40, height: 40, alignItems: 'flex-start', justifyContent: 'center' },
     headerTitle: { fontSize: 18, fontWeight: '700', letterSpacing: 0.5 },
     themeButton: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },

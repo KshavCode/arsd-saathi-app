@@ -3,7 +3,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, Linking, Platform, RefreshControl, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Linking, Platform, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
@@ -17,7 +17,7 @@ const NoticeCard = React.memo(({ item, theme, delay }) => (
     useNativeDriver
   >
     <TouchableOpacity 
-      style={[styles.card, { backgroundColor: theme.card, borderColor: theme.borderColor }]}
+      style={[styles.card, { backgroundColor: theme.card, borderColor: theme.primary }]}
       onPress={() => Linking.openURL(item.url)}
       activeOpacity={0.7}
       accessibilityRole="link"
@@ -45,7 +45,7 @@ const NoticeCard = React.memo(({ item, theme, delay }) => (
 NoticeCard.displayName = 'NoticeCard';
 
 export default function Notices({ navigation}) {
-  const {theme, isDarkMode, toggleTheme} = useTheme()
+  const {theme, themeName, setThemeName} = useTheme()
   const webViewRef = useRef(null);
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -218,8 +218,6 @@ export default function Notices({ navigation}) {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
-
       <View style={styles.headerRow} accessible={false}>
         <TouchableOpacity
             style={styles.backButton}
@@ -232,16 +230,6 @@ export default function Notices({ navigation}) {
             <Ionicons name="caret-back" size={24} color={theme.primary} importantForAccessibility="no" />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: theme.text }]} accessibilityRole="header">NOTICE BOARD</Text>
-        <TouchableOpacity
-            style={[styles.themeButton, { backgroundColor: theme.card }]}
-            onPress={toggleTheme}
-            accessibilityRole="button"
-            accessibilityLabel="Toggle Theme"
-            accessibilityHint={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} importantForAccessibility="no" />
-        </TouchableOpacity>
       </View>
       
 
@@ -285,7 +273,7 @@ export default function Notices({ navigation}) {
           }
           ListEmptyComponent={
             <View style={styles.centerContainer}>
-              <Ionicons name="document-text-outline" size={60} color={theme.borderColor} importantForAccessibility="no" />
+              <Ionicons name="document-text-outline" size={60} color={theme.primary} importantForAccessibility="no" />
               <Text style={[styles.emptyText, { color: theme.secondary }]}>No recent notices found. Try checking the website?</Text>
             </View>
           }
@@ -299,7 +287,7 @@ export default function Notices({ navigation}) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.05)' },
+  headerRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.05)' },
   backButton: { width: 40, height: 40, justifyContent: 'center' },
   headerTitle: { fontSize: 18, fontWeight: '800', letterSpacing: 1 },
   listContainer: { padding: 16, paddingBottom: 40 },

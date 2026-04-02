@@ -4,26 +4,25 @@ import { createContext, useEffect, useState } from 'react';
 export const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [themeName, setTheme] = useState('pinkish');
 
   useEffect(() => {
     const load = async () => {
-      const saved = await AsyncStorage.getItem('DARK_THEME');
+      const saved = await AsyncStorage.getItem('THEME');
       if (saved !== null) {
-        setIsDarkMode(JSON.parse(saved));
+        setThemeName(JSON.parse(saved));
       }
     };
     load();
   }, []);
 
-  const toggleTheme = async () => {
-    const next = !isDarkMode;
-    setIsDarkMode(next);
-    await AsyncStorage.setItem('DARK_THEME', JSON.stringify(next));
+  const setThemeName = async (newTheme) => {
+    setTheme(newTheme);
+    await AsyncStorage.setItem('THEME', JSON.stringify(newTheme));
   };
 
   return (
-    <ThemeContext.Provider value={{ isDarkMode, toggleTheme }}>
+    <ThemeContext.Provider value={{ themeName, setThemeName}}>
       {children}
     </ThemeContext.Provider>
   );

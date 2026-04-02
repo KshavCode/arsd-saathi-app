@@ -3,13 +3,11 @@ import { ThemeContext } from '@/context/ThemeContext';
 import { useContext } from 'react';
 
 export const useTheme = () => {
-  const { isDarkMode, toggleTheme } = useContext(ThemeContext);
-
-  const theme = isDarkMode ? Colors.dark : Colors.light;
-
+  const { themeName, setThemeName } = useContext(ThemeContext);
+  const theme = Colors[themeName] || Colors["pinkish"]
   return {
     theme,
-    isDarkMode,
-    toggleTheme
+    themeName,
+    setThemeName
   };
 };

@@ -2,11 +2,11 @@ import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Modal, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PredictTab({ navigation }) {
-  const {theme, isDarkMode, toggleTheme} = useTheme()
+  const {theme, themeName, setThemeName} = useTheme()
   const [fullData, setFullData] = useState(null);
   const [loading, setLoading] = useState(true);
   
@@ -140,7 +140,6 @@ export default function PredictTab({ navigation }) {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
 
       {/* Header */}
       <View style={styles.headerRow} accessible={false}>
@@ -156,17 +155,6 @@ export default function PredictTab({ navigation }) {
         </TouchableOpacity>
         
         <Text style={[styles.headerTitle, { color: theme.text }]} accessibilityRole="header">PREDICTOR</Text>
-        
-        <TouchableOpacity 
-          style={[styles.themeButton, { backgroundColor: theme.card }]} 
-          onPress={toggleTheme}
-          accessibilityRole="button"
-          accessibilityLabel="Toggle Theme"
-          accessibilityHint={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-             <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} importantForAccessibility="no" />
-        </TouchableOpacity>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
@@ -196,13 +184,13 @@ export default function PredictTab({ navigation }) {
               accessibilityViewIsModal={true}
             >
                 <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPressOut={() => setShowDropdown(false)} accessibilityLabel="Close subject list" accessibilityRole="button">
-                    <View style={[styles.modalListContainer, { backgroundColor: theme.card, borderColor: theme.borderColor }]}>
+                    <View style={[styles.modalListContainer, { backgroundColor: theme.background, borderColor: theme.secondary }]}>
                         <Text style={[styles.modalListHeader, { color: theme.text, backgroundColor: theme.iconBg, borderBottomWidth: .5, borderColor:theme.primary}]} accessibilityRole="header">Select a Subject</Text>
                         <ScrollView style={{maxHeight: 350}} showsVerticalScrollIndicator={true}>
                             {subjects.map((sub) => (
                                 <TouchableOpacity 
                                     key={sub} 
-                                    style={[styles.dropdownItem, { borderBottomColor: theme.borderColor }]} 
+                                    style={[styles.dropdownItem, { borderBottomColor: theme.secondary }]} 
                                     onPress={() => {
                                         setSelectedSubject(sub);
                                         setShowDropdown(false);
@@ -267,7 +255,7 @@ export default function PredictTab({ navigation }) {
                         <Text style={[styles.statusVal, { color: theme.text }]}>{currentStats.attended}/{currentStats.held}</Text>
                         <Text style={[styles.statusLabel, { color: theme.secondary }]}>Classes Attended</Text>
                     </View>
-                    <View style={[styles.statusDivider, { backgroundColor: theme.borderColor }]} />
+                    <View style={[styles.statusDivider, { backgroundColor: theme.secondary }]} />
                     <View style={styles.statusCol} importantForAccessibility="no-hide-descendants">
                         <Text style={[styles.statusVal, { color: Number(currentStats.percentage) < 67 ? theme.error : theme.success }]}>
                             {currentStats.percentage}%
@@ -387,7 +375,7 @@ export default function PredictTab({ navigation }) {
 
 const styles = StyleSheet.create({
     container: { flex: 1, paddingHorizontal: 16, paddingTop: 10 },
-    headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
+    headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
     backButton: { width: 40, height: 40, alignItems: 'flex-start', justifyContent: 'center' },
     headerTitle: { fontSize: 18, fontWeight: '700', letterSpacing: 0.5 },
     themeButton: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },

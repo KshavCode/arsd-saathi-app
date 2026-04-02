@@ -2,7 +2,7 @@ import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { titleCase } from 'title-case';
@@ -47,14 +47,14 @@ const FacultyCard = ({ data, theme, delay }) => {
                 </Text>
 
                 <View style={styles.badgesRow}>
-                    <View style={[styles.badge, { backgroundColor: theme.iconBg }]}>
+                    <View style={[styles.badge, { backgroundColor: theme.background+'70' }]}>
                         <Ionicons name="document-text-outline" size={12} color={theme.primary} style={{ marginRight: 4 }} />
                         <Text style={[styles.badgeText, { color: theme.primary }]}>
                             {data["Paper Code"] || data.PAPER_ID || "No ID"}
                         </Text>
                     </View>
                     {section && (
-                        <View style={[styles.badge, { backgroundColor: theme.iconBg }]}>
+                        <View style={[styles.badge, { backgroundColor: theme.background+'70' }]}>
                             <Ionicons name="people-outline" size={12} color={theme.primary} style={{ marginRight: 4 }} />
                             <Text style={[styles.badgeText, { color: theme.primary }]}>
                                 Sec: {section}
@@ -68,7 +68,7 @@ const FacultyCard = ({ data, theme, delay }) => {
 };
 
 export default function FacultyTab({ navigation }) {
-    const {theme, isDarkMode, toggleTheme} = useTheme()
+    const {theme, themeName, setThemeName} = useTheme()
     const [facultyList, setFacultyList] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -91,8 +91,6 @@ export default function FacultyTab({ navigation }) {
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-            <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={theme.background} />
-
             <View style={styles.headerRow} accessible={false}>
                 <TouchableOpacity
                     style={styles.backButton}
@@ -104,19 +102,7 @@ export default function FacultyTab({ navigation }) {
                 >
                     <Ionicons name="caret-back" size={24} color={theme.primary} importantForAccessibility="no" />
                 </TouchableOpacity>
-                
                 <Text style={[styles.headerTitle, { color: theme.text }]} accessibilityRole="header" accessibilityLabel='Faculty Details'>FACULTY DETAILS</Text>
-                
-                <TouchableOpacity 
-                    style={[styles.themeButton, { backgroundColor: theme.card }]} 
-                    onPress={toggleTheme}
-                    accessibilityRole="button"
-                    accessibilityLabel="Toggle Theme"
-                    accessibilityHint={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                        <Ionicons name={isDarkMode ? "sunny" : "moon"} size={20} color={isDarkMode ? "#FBBF24" : theme.primary} importantForAccessibility="no" />
-                </TouchableOpacity>
             </View>
 
             {loading ? (
@@ -142,7 +128,7 @@ export default function FacultyTab({ navigation }) {
 
 const styles = StyleSheet.create({
     container: { flex: 1, paddingHorizontal: 16, paddingTop: 10 },
-    headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
+    headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
     backButton: { width: 40, height: 40, alignItems: 'flex-start', justifyContent: 'center' },
     headerTitle: { fontSize: 18, fontWeight: '700', letterSpacing: 0.5 },
     themeButton: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
