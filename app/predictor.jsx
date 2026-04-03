@@ -14,7 +14,7 @@ export default function PredictTab({ navigation }) {
   // Selection State
   const [subjects, setSubjects] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState('');
-  const [selectedType, setSelectedType] = useState('theory'); // 'theory' or 'practical'
+  const [selectedType, setSelectedType] = useState('TH');
   
   // Predictor Inputs
   const [attendCount, setAttendCount] = useState(0);
@@ -32,7 +32,7 @@ export default function PredictTab({ navigation }) {
           const data = JSON.parse(rawData);
           setFullData(data);
 
-          // Extract Unique Subjects from BOTH theory and practical
+          // Extract Unique Subjects from both theory and practical
           const theorySubjects = data.theory ? Object.keys(data.theory) : [];
           const tutorialSubjects = data.practical ? Object.keys(data.practical) : (data.tutorial ? Object.keys(data.tutorial) : []);
           
@@ -72,7 +72,7 @@ export default function PredictTab({ navigation }) {
   const currentStats = useMemo(() => {
       if (!fullData || !selectedSubject) return { attended: 0, held: 0, percentage: 0 };
 
-      const targetObject = selectedType === 'theory' ? fullData.theory : (fullData.practical || fullData.tutorial);
+      const targetObject = selectedType === 'TH' ? fullData.theory : (fullData.practical || fullData.tutorial);
       const rows = targetObject?.[selectedSubject] || [];
 
       let attended = 0;
@@ -147,20 +147,31 @@ export default function PredictTab({ navigation }) {
         
         {/* Step 1: Selection Controls */}
         <Text style={[styles.sectionLabel, { color: theme.secondary }]}>1. Select Subject</Text>
-        <View style={{ zIndex: 10, marginBottom: 20 }}>
-            <TouchableOpacity 
-                style={[styles.dropdown, { backgroundColor: theme.card, borderColor: theme.secondary }]} 
-                onPress={() => setShowDropdown(true)}
-                activeOpacity={0.8}
-                accessibilityRole="button"
-                accessibilityLabel={`Selected subject: ${selectedSubject || "None"}. Open subject list.`}
-                accessibilityHint="Opens a modal to select a different subject"
+        <View style={styles.pillContainerRow}>
+            <View style={{flex:1, minWidth:100}}>
+                <TouchableOpacity 
+                    style={[styles.dropdown, { backgroundColor: theme.card, borderColor: theme.secondary }]} 
+                    onPress={() => setShowDropdown(true)}
+                    activeOpacity={0.8}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Selected subject: ${selectedSubject || "None"}. Open subject list.`}
+                    accessibilityHint="Opens a modal to select a different subject"
+                >
+                    <Text style={[styles.dropdownText, { color: theme.text }]} numberOfLines={1} importantForAccessibility="no">
+                        {selectedSubject || "No Subjects Found"}
+                    </Text>
+                    <Ionicons name={'chevron-down'} size={18} color={theme.secondary} importantForAccessibility="no" />
+                </TouchableOpacity>
+            </View>
+            <View>
+            <TouchableOpacity
+                style={[styles.compactPill, { borderColor: theme.secondary, backgroundColor: theme.primary + '20' }]}
+                onPress={() => setSelectedType(selectedType === 'TH' ? 'PR' : 'TH')}
             >
-                <Text style={[styles.dropdownText, { color: theme.text }]} numberOfLines={1} importantForAccessibility="no">
-                    {selectedSubject || "No Subjects Found"}
-                </Text>
-                <Ionicons name={'chevron-down'} size={18} color={theme.secondary} importantForAccessibility="no" />
+                <Text style={[styles.compactPillText, { color: theme.primary }]}>{selectedType}</Text>
+                <Ionicons name="swap-horizontal" size={14} color={selectedType === 'TH' ? theme.secondary : theme.primary} style={{marginLeft: 4}}/>
             </TouchableOpacity>
+        </View>
 
             <Modal 
               visible={showDropdown} 
@@ -195,28 +206,6 @@ export default function PredictTab({ navigation }) {
                     </View>
                 </TouchableOpacity>
             </Modal>
-        </View>
-
-        {/* Toggle Theory/Practical */}
-        <View style={[styles.toggleContainer, { backgroundColor: theme.card, borderColor:theme.primary, borderWidth:.5 }]} accessible={true} accessibilityRole="radiogroup">
-            <TouchableOpacity 
-                style={[styles.toggleButton, selectedType === 'theory' && [styles.toggleActive, { backgroundColor: theme.primary }]]}
-                onPress={() => setSelectedType('theory')}
-                accessibilityRole="radio"
-                accessibilityState={{ checked: selectedType === 'theory' }}
-                accessibilityLabel="Theory Classes"
-            >
-                <Text style={[styles.toggleText, { color: selectedType === 'theory' ? '#fff' : theme.primary }]} importantForAccessibility="no">Theory</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-                style={[styles.toggleButton, selectedType === 'practical' && [styles.toggleActive, { backgroundColor: theme.primary }]]}
-                onPress={() => setSelectedType('practical')}
-                accessibilityRole="radio"
-                accessibilityState={{ checked: selectedType === 'practical' }}
-                accessibilityLabel="Practical Classes"
-            >
-                <Text style={[styles.toggleText, { color: selectedType === 'practical' ? '#fff' : theme.primary }]} importantForAccessibility="no">Practical</Text>
-            </TouchableOpacity>
         </View>
 
         {currentStats.held === 0 ? (
@@ -365,7 +354,10 @@ const styles = StyleSheet.create({
     infoText: { fontSize: 14, fontWeight: '700', letterSpacing: 0.5, marginBottom: 5, textAlign: 'center' },
     
     // Modal Dropdown
-    dropdown: { paddingVertical: 14, paddingHorizontal: 16, borderWidth: 1, borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    pillContainerRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
+    dropdown: { paddingVertical: 17, paddingHorizontal: 16, borderWidth: 1, borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width:'100%' },
+    compactPill: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12, paddingVertical: 15, borderRadius: 10, borderWidth: 1, flex:1 },
+    compactPillText: { fontSize: 17, fontWeight: '800' }, 
     dropdownText: { fontSize: 15, fontWeight: '600', flex: 1 },
     modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center', padding: 20 },
     modalListContainer: { width: '100%', borderRadius: 16, borderWidth: 1, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 10, elevation: 10 },
@@ -381,14 +373,14 @@ const styles = StyleSheet.create({
 
     // Status Card
     emptyCard: { padding: 30, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginTop: 20 },
-    statusCard: { flexDirection: 'row', borderRadius: 16, padding: 20, marginBottom: 15, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 3 },
+    statusCard: { flexDirection: 'row', padding: 15, paddingBottom:0, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 3 },
     statusCol: { flex: 1, alignItems: 'center', justifyContent: 'center' },
     statusDivider: { width: 1, height: '80%', alignSelf: 'center' },
     statusVal: { fontSize: 26, fontWeight: 'bold', marginBottom: 4 },
     statusLabel: { fontSize: 12, fontWeight: '500' },
 
     // Insight Box
-    insightBox: { flexDirection: 'row', padding: 16, borderRadius: 12, alignItems: 'center', marginBottom: 10, gap: 10 },
+    insightBox: { flexDirection: 'row', padding: 16, alignItems: 'center', marginBottom: 10, gap: 10 },
     insightText: { flex: 1, fontSize: 15, fontWeight: '600', lineHeight: 20 },
 
     // Controls
