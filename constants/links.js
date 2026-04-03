@@ -23,3 +23,5 @@ export const LIBRARY_URL = 'https://library.arsdcollege.ac.in/';
 export const SAMARTH_URL = 'https://slc.uod.ac.in/';
 
 export const NOTICES_URL = 'https://arsdcollege.ac.in/announcement-2/'
+
+export const APP_LINK = "https://github.com/KshavCode/arsd-saathi-app/releases/latest"

@@ -10,6 +10,7 @@ import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, Scroll
 import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { titleCase } from 'title-case';
+// import * as Animatable from 'react-native-animatable'
 
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -227,7 +228,7 @@ export default function Timetable({ route, navigation }) {
   };
 
   // --- UNIVERSAL QR & DEEP LINK LOGIC ---
-  const handleGenerateQR = async () => {
+  const handleExport = async () => {
     try {
       const flatString = serializeTimetable(timetable);
       if (!flatString || !flatString.includes('~')) {
@@ -426,7 +427,7 @@ export default function Timetable({ route, navigation }) {
 
             {activeTab === 'share' && (
                 <View style={{ gap: 20 }}>
-                    {/* Universal Export Card */}
+                    {/* Export Card */}
                     <View style={[styles.formCard, { backgroundColor: theme.card }]}>
                         <View style={[styles.iconCircle, { backgroundColor: theme.background + '70' }]}>
                             <Ionicons name="qr-code-outline" size={32} color={theme.primary} />
@@ -435,7 +436,7 @@ export default function Timetable({ route, navigation }) {
                         <Text style={[styles.shareDesc, { color: theme.secondary }]}>Let other ArsdSaathi users import your timetable.</Text>
 
                         <View style={{ flexDirection: 'row', gap: 10, width: '100%' }}>
-                            <TouchableOpacity style={[styles.primaryButton, { backgroundColor: theme.primary, flex: 1 }]} onPress={handleGenerateQR} activeOpacity={0.8}>
+                            <TouchableOpacity style={[styles.primaryButton, { backgroundColor: theme.primary, flex: 1 }]} onPress={handleExport} activeOpacity={0.8}>
                                 <Ionicons name="share-outline" size={18} color="#FFF" style={{ marginRight: 8 }} />
                                 <Text style={styles.primaryButtonText}>Export</Text>
                             </TouchableOpacity>

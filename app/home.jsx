@@ -1,4 +1,4 @@
-import { FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, LIBRARY_URL, PRIVACY_URL, SAMARTH_URL, SHIVAM_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
+import { APP_LINK, FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, LIBRARY_URL, PRIVACY_URL, SAMARTH_URL, SHIVAM_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
 import { Colors } from '@/constants/themeStyle';
 import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -6,7 +6,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckBox from 'expo-checkbox';
 import * as Linking from 'expo-linking';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Modal, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import * as Animatable from 'react-native-animatable';
+import QRCode from 'react-native-qrcode-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { titleCase } from 'title-case';
 import ArsdScraper from '../services/ArsdScraper';
@@ -55,6 +57,9 @@ export default function HomeTab({ route, navigation }) {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [deleteTimetable, setDeleteTimetable] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
+
+  
 
   // --- AUTOMATIC UPDATE CHECK ---
   useEffect(() => {
@@ -254,14 +259,13 @@ export default function HomeTab({ route, navigation }) {
 
   const handleShare = async () => {
     try {
-      const response = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest');
-      if (!response.ok) return; 
-      const data = await response.json();
-      const downloadUrl = data.assets?.[0]?.browser_download_url || data.html_url;
-      await Share.share({ message: `Check out the ArsdSaathi App: ${downloadUrl}`, url: downloadUrl, title: 'ArsdSaathi App Link' });
+      setShowQRModal(true);
+      // await Share.share({ message: `Check out the ArsdSaathi App: ${downloadUrl}`, url: downloadUrl, title: 'ArsdSaathi App Link' });
     } catch (error) {
-      alert(error.message);
+          Alert.alert("Error", "Could not generate link.");
+          console.log(error)
     }
+
   };
 
   const isAttendanceLow = Number(userData.percent_attendance) < 67;
@@ -272,6 +276,28 @@ export default function HomeTab({ route, navigation }) {
         barStyle={isDark ? 'light-content' : 'dark-content'}
         backgroundColor={theme.background}
       />
+
+      <Modal visible={showQRModal} transparent animationType="fade" >
+            <Pressable style={styles.modalBackdropCenter} onPress={()=>setShowQRModal(false)}>
+                <View style={[styles.qrModalContent, { backgroundColor: theme.card }]}>           
+                    <View style={{ backgroundColor: '#FFF', borderRadius: 15, marginBottom: 10 }}>
+                        <QRCode value={APP_LINK} size={200} logo={require("@/assets/images/icon.png")} color={theme.primary} backgroundColor={theme.background} />
+                    </View>
+
+
+                    <TouchableOpacity
+                        style={[styles.primaryButton, { backgroundColor: theme.background, borderColor: theme.primary, borderWidth: .5, width: '100%' }]}
+                        onPress={async () => {
+                            await Share.share({ message: `Download ArsdSaathi and boost your college life!\n\n${APP_LINK}` });
+                        }}
+                    >
+                        <Ionicons name="share-outline" size={20} color={theme.primary} style={{ marginRight: 8 }} />
+                        <Text style={[styles.primaryButtonText, { color: theme.primary }]}>Share Link Instead</Text>
+                    </TouchableOpacity>
+                </View>
+            </Pressable>
+        </Modal>
+
       {/* THEME SELECTION MODAL */}
       <Modal 
         visible={showThemeModal} 
@@ -287,7 +313,7 @@ export default function HomeTab({ route, navigation }) {
           <View style={[styles.modalListContainer, { backgroundColor: theme.background }]}>
             <Text style={[styles.modalListHeader, { color: theme.text, backgroundColor: theme.iconBg }]}>Select Theme: </Text>
             <ScrollView style={{ maxHeight: 350 }}>
-              {Object.keys(Colors).map((name) => (
+              {Object.keys(Colors).map((name, index) => (
                 <TouchableOpacity
                   key={name}
                   style={[styles.dropdownItem, {backgroundColor: themeName === name ? theme.iconBg+'70' : theme.background}]}
@@ -296,8 +322,13 @@ export default function HomeTab({ route, navigation }) {
                     setShowThemeModal(false);
                   }}
                 >
-                  <Text
-                    style={{ fontSize:18, color: themeName === name ? theme.primary : theme.text, fontWeight: themeName === name ? '800' : '500'}}>{name}</Text>
+                  <Animatable.Text
+                    style={{ fontSize:18, color: themeName === name ? theme.primary : theme.text, fontWeight: themeName === name ? '800' : '500'}}
+                    animation='fadeInUp'
+                    duration={300}
+                    delay={index*50}
+                    useNativeDriver
+                    >{name}</Animatable.Text>
                   
                   {themeName === name && (
                     <Ionicons name="checkmark" size={16} color={theme.primary} />
@@ -640,6 +671,11 @@ const styles = StyleSheet.create({
     modalButtonPrimaryText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
     modalButtonSecondary: { width: '100%', paddingVertical: 14, borderRadius: 12, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
     modalButtonSecondaryText: { fontSize: 15, fontWeight: '600' },
+    modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems:'center' },
+    modalBackdropCenter: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+    qrModalContent: { padding: 30, borderRadius: 30, alignItems: 'center', width: '100%', maxWidth: 350 },
+    primaryButton: { paddingVertical: 13, borderRadius: 16, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', marginTop: 10 },
+    primaryButtonText: { color: '#FFF', fontSize: 16, fontWeight: '800' },
     
     // Header
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 25 },
