@@ -1,5 +1,6 @@
 import Header from '@/components/Header';
 import { useTheme } from '@/hooks/useTheme';
+import { scheduleNotification } from '@/utils/notifications';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -11,7 +12,6 @@ import * as Animatable from 'react-native-animatable';
 import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { titleCase } from 'title-case';
-
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -481,6 +481,17 @@ export default function Timetable({ route, navigation }) {
                             activeOpacity={0.8}
                         >
                             <Text style={[styles.primaryButtonText, !importCode && { color: theme.background }]}>Import Data</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <View style={[styles.formCard, { backgroundColor: theme.card, marginTop: 10 }]}>
+                        <Text style={[styles.inputLabel, { color: theme.secondary, width: '100%' }]}>Notifications Test</Text>
+                        <TouchableOpacity
+                            style={[styles.primaryButton, { backgroundColor: importCode ? theme.primary : theme.primary, width: '100%' }]}
+                            onPress={async () => {await scheduleNotification("Reminder","This is from another screen", { seconds: 5 });}
+                            }
+                        >
+                            <Text style={[styles.primaryButtonText, !importCode && { color: theme.background }]}>Check Notification</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
