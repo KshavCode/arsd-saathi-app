@@ -3,7 +3,6 @@ import { Colors } from "@/constants/themeStyle";
 import ArsdScraper from '@/services/ArsdScraper';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { LinearGradient } from "expo-linear-gradient";
 import * as Linking from "expo-linking";
 import React, { useState } from "react";
 import { ActivityIndicator, Alert, Dimensions, Image, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -81,24 +80,21 @@ export default function Login({ navigation }) {
                     showsVerticalScrollIndicator={false}
                     bounces={false}
                 >
-                    <LinearGradient
-                        colors={[Colors.Default.text, Colors.Default.primary]}
+                    <View
                         style={[styles.headerBackground, { height: height * 0.40 }]}
                         importantForAccessibility="no-hide-descendants"
                     >
                         <SafeAreaView style={styles.headerContent} importantForAccessibility="no-hide-descendants">
                             <View style={styles.logoCircle}>
-                                <Image source={require("../assets/images/icon.png")} style={{ width: "70%", height: "70%" }} />
+                                <Image source={require("../assets/images/icon.png")} style={{ width: "75%", height: "70%" }} />
                             </View>
-                            <Text style={styles.appName}>ArsdSaathi</Text>
-                            <Text style={styles.tagline}>A College Companion like No Other!</Text>
                         </SafeAreaView>
-                    </LinearGradient>
+                    </View>
 
                     <View style={styles.formContainer}>
                         <View style={styles.card} accessibilityRole="header" accessiblityLabel="Form Container">
-                            <Text style={styles.cardTitle}>Student Login</Text>
-                            <Text style={styles.cardSub} importantForAccessibility="no">Sync your attendance & profile</Text>
+                            <Text style={styles.cardTitle}>ArsdSaathi Login</Text>
+                            <Text style={styles.cardSub} importantForAccessibility="no">Kindly enter your details below</Text>
 
                             <View style={styles.inputGroup}>
                                 <View style={styles.inputWrapper}>
@@ -206,14 +202,12 @@ export default function Login({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#F3F4F6" },
+    container: { flex: 1, backgroundColor: "#ffdcdc" },
     headerBackground: { justifyContent: "center", alignItems: "center", borderBottomLeftRadius: 30, borderBottomRightRadius: 30, width: "100%" },
     headerContent: { alignItems: "center", marginTop: -20 },
-    logoCircle: { width: 75, height: 75, backgroundColor: "#FFF", borderRadius: 40, alignItems: "center", justifyContent: "center", marginBottom: 12, elevation: 5 },
-    appName: { fontSize: 26, fontWeight: "800", color: "#FFF" },
-    tagline: { fontSize: 13, color: "#E0E7FF", marginTop: 4 },
-    formContainer: { paddingHorizontal: 20, marginTop: -50 },
-    card: { backgroundColor: "#FFF", borderRadius: 24, padding: 22, elevation: 10, shadowColor: "#000", shadowOpacity: 0.1, shadowRadius: 10 },
+    logoCircle: { width: 100, height: 100, backgroundColor: "#FFF", borderRadius: 40, alignItems: "center", justifyContent: "center", marginBottom: 5, elevation: 5 },
+    formContainer: { paddingHorizontal: 25, marginTop: -80 },
+    card: { backgroundColor: "#FFF", borderRadius: 20, padding: 15, elevation: 10, shadowColor: "#000", shadowOpacity: 0.1, shadowRadius: 10 },
     cardTitle: { fontSize: 19, fontWeight: "700", color: "#1F2937", textAlign: "center" },
     cardSub: { fontSize: 13, color: "#6B7280", textAlign: "center", marginTop: 4, marginBottom: 20 },
     inputGroup: { gap: 14, marginBottom: 15 },

@@ -488,7 +488,11 @@ export default function Timetable({ route, navigation }) {
                         <Text style={[styles.inputLabel, { color: theme.secondary, width: '100%' }]}>Notifications Test</Text>
                         <TouchableOpacity
                             style={[styles.primaryButton, { backgroundColor: importCode ? theme.primary : theme.primary, width: '100%' }]}
-                            onPress={async () => {await scheduleNotification("Reminder","This is from another screen", { seconds: 5 });}
+                            onPress={async () => {
+                                const granted = await requestPermission();
+                                if (!granted) return;
+                                await AsyncStorage.setItem('NOTIF_PERMISSION', 'granted');
+                                await scheduleNotification("Reminder","This is from another screen", { seconds: 5 });}
                             }
                         >
                             <Text style={[styles.primaryButtonText, !importCode && { color: theme.background }]}>Check Notification</Text>
