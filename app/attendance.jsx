@@ -135,7 +135,7 @@ export default function AttendanceTab({ navigation }) {
 
                     /* EMPTY STATE */
                     <View style={styles.centerContainer} accessible={true}>
-                        <View style={[styles.emptyIconCtx, { backgroundColor: theme.iconBg }]} importantForAccessibility="no-hide-descendants">
+                        <View style={[styles.emptyIconCtx, { backgroundColor: theme.card+'A0' }]} importantForAccessibility="no-hide-descendants">
                              <Ionicons name="calendar-outline" size={48} color={theme.primary} style={{ opacity: 0.8 }} />
                         </View>
                         <Text style={[styles.emptyTitle, { color: theme.text }]}>No Record Found</Text>
@@ -179,7 +179,7 @@ export default function AttendanceTab({ navigation }) {
                                     accessibilityRole="button"
                                 >
                                     <View style={[styles.modalListContainer, { backgroundColor: theme.card, borderColor: theme.secondary }]}>
-                                        <Text style={[styles.modalListHeader, { color: theme.text, backgroundColor: theme.iconBg, borderBottomWidth: .5, borderColor:theme.primary}]} accessibilityRole="header">Select a Subject</Text>
+                                        <Text style={[styles.modalListHeader, { color: theme.text, backgroundColor: theme.card+'A0', borderBottomWidth: .5, borderColor:theme.primary}]} accessibilityRole="header">Select a Subject</Text>
                                         <ScrollView style={{maxHeight: 350}} showsVerticalScrollIndicator={true}>
                                             {subjects.map((sub) => (
                                                 <TouchableOpacity
@@ -243,7 +243,7 @@ export default function AttendanceTab({ navigation }) {
 
                         {/* Theory Percentage Footer */}
                         {fullData.theory_percentage && (
-                             <View style={[styles.footerInfo, { backgroundColor: theme.iconBg }]} accessible={true} accessibilityLabel={`Overall Theory Attendance: ${fullData.theory_percentage} percent`}>
+                             <View style={[styles.footerInfo, { backgroundColor: theme.card+'A0' }]} accessible={true} accessibilityLabel={`Overall Theory Attendance: ${fullData.theory_percentage} percent`}>
                                 <Ionicons name="pie-chart" size={20} color={theme.primary} importantForAccessibility="no" />
                                 <Text style={[styles.footerText, { color: theme.primary }]} importantForAccessibility="no">
                                     Theory Attendance: <Text style={{fontWeight: 'bold'}}>{fullData.theory_percentage}%</Text>
@@ -252,7 +252,7 @@ export default function AttendanceTab({ navigation }) {
                         )}
                         {/* Practical Percentage Footer */}
                         {fullData.practical_percentage && (
-                             <View style={[styles.footerInfo, { backgroundColor: theme.iconBg, marginTop:10 }]} accessible={true} accessibilityLabel={`Overall Practical Attendance: ${fullData.practical_percentage} percent`}>
+                             <View style={[styles.footerInfo, { backgroundColor: theme.card+'A0', marginTop:10 }]} accessible={true} accessibilityLabel={`Overall Practical Attendance: ${fullData.practical_percentage} percent`}>
                                 <Ionicons name="pie-chart" size={20} color={theme.primary} importantForAccessibility="no" />
                                 <Text style={[styles.footerText, { color: theme.primary }]} importantForAccessibility="no">
                                     Practical Attendance: <Text style={{fontWeight: 'bold'}}>{fullData.practical_percentage}%</Text>

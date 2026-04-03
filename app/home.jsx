@@ -4,7 +4,7 @@ import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckBox from 'expo-checkbox';
-import Constants from 'expo-constants';
+// import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -66,17 +66,17 @@ export default function HomeTab({ route, navigation }) {
   useEffect(() => {
     const checkForUpdates = async () => {
       try {
-        const currentVersion = Constants.expoConfig.version;
-        const response = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest');
-        if (!response.ok) return;
-        const data = await response.json();
-        const latestVersion = data.tag_name.replace('v', '');
+        // const currentVersion = Constants.expoConfig.version;
+        // const response = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest');
+        // if (!response.ok) return;
+        // const data = await response.json();
+        // const latestVersion = data.tag_name.replace('v', '');
 
-        if (latestVersion !== currentVersion) {
-            const downloadUrl = data.assets?.[0]?.browser_download_url || data.html_url;
-            setUpdateInfo({ version: latestVersion, url: downloadUrl });
-            setShowUpdateModal(true);
-        }
+        // if (latestVersion !== currentVersion) {
+        //     const downloadUrl = data.assets?.[0]?.browser_download_url || data.html_url;
+        //     setUpdateInfo({ version: latestVersion, url: downloadUrl });
+        //     setShowUpdateModal(true);
+        // }
       } catch (error) {
         console.log("Auto-update check failed:", error); 
       }
@@ -278,15 +278,16 @@ export default function HomeTab({ route, navigation }) {
         backgroundColor={theme.background}
       />
 
-      <Modal visible={showQRModal} transparent animationType="fade" >
+      <Modal visible={showQRModal} transparent animationType="fade" onRequestClose={() => setShowQRModal(false)} >
         <TouchableOpacity 
           style={styles.modalBackdropCenter} 
           onPressOut={()=>setShowQRModal(false)}
           activeOpacity={1} 
+
         >
           <View style={[styles.qrModalContent, { backgroundColor: theme.card }]}>           
-              <View style={{ backgroundColor: '#FFF', borderRadius: 15, marginBottom: 10 }}>
-                  <QRCode value={APP_LINK} size={200} logo={require("@/assets/images/icon.png")} color={theme.primary} backgroundColor={theme.background} />
+              <View style={{borderRadius: 15, marginBottom: 10 }}>
+                  <QRCode value={APP_LINK} size={200} logo={require("@/assets/images/icon.png")} color={theme.primary} backgroundColor={theme.card} />
               </View>
               <TouchableOpacity
                   style={[styles.primaryButton, { backgroundColor: theme.background, borderColor: theme.primary, borderWidth: .5, width: '100%' }]}
@@ -314,12 +315,12 @@ export default function HomeTab({ route, navigation }) {
           onPressOut={() => setShowThemeModal(false)}
         >
           <View style={[styles.modalListContainer, { backgroundColor: theme.background, width:'85%' }]}>
-            <Text style={[styles.modalListHeader, { color: theme.text, backgroundColor: theme.iconBg }]}>Select Theme: </Text>
+            <Text style={[styles.modalListHeader, { color: theme.text, backgroundColor: theme.card }]}>Select Theme: </Text>
             <ScrollView style={{ maxHeight: 350 }}>
               {Object.keys(Colors).map((name, index) => (
                 <TouchableOpacity
                   key={name}
-                  style={[styles.dropdownItem, {backgroundColor: themeName === name ? theme.iconBg+'70' : theme.background}]}
+                  style={[styles.dropdownItem, {backgroundColor: themeName === name ? theme.card+'70' : theme.background}]}
                   onPress={() => {
                     setThemeName(name);
                   }}
@@ -531,7 +532,7 @@ export default function HomeTab({ route, navigation }) {
         </View>
 
         {/* Dashboard */}
-        <View style={[styles.heroContainer, { backgroundColor: theme.card, borderColor: theme.primary }]}>
+        <View style={[styles.heroContainer, { backgroundColor: theme.card, borderColor: theme.primary+'50' }]}>
             
             {/* Top Row - Attendance */}
             <View style={styles.heroMainRow} accessible={true} accessibilityLabel={`Theory Attendance: ${userData.percent_attendance}%`}>

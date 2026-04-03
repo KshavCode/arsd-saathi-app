@@ -488,7 +488,7 @@ export default function Timetable({ route, navigation }) {
         </ScrollView>
 
         {/* --- QR DISPLAY MODAL --- */}
-        <Modal visible={showQRModal} transparent animationType="fade">
+        <Modal visible={showQRModal} transparent animationType="fade" onRequestClose={() => setShowQRModal(false)}>
             <View style={styles.modalBackdropCenter}>
                 <View style={[styles.qrModalContent, { backgroundColor: theme.card }]}>
                     <View style={styles.modalHeaderRowCentered}>
@@ -520,7 +520,7 @@ export default function Timetable({ route, navigation }) {
         </Modal>
 
         {/* --- IN-APP CAMERA SCANNER MODAL --- */}
-        <Modal visible={isScanning} animationType="slide">
+        <Modal visible={isScanning} animationType="slide" onRequestClose={() => setIsScanning(false)}>
             <View style={styles.cameraContainer}>
                 <CameraView
                     style={StyleSheet.absoluteFillObject}
@@ -539,7 +539,7 @@ export default function Timetable({ route, navigation }) {
         </Modal>
 
         {/* --- SUBJECT EDIT MODAL --- */}
-        <Modal visible={showSubjectModal} transparent animationType="slide">
+        <Modal visible={showSubjectModal} transparent animationType="slide" onRequestClose={() => setShowSubjectModal(false)}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
                 <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={() => setShowSubjectModal(false)}>
                 <View style={[styles.modalContent, { backgroundColor: theme.card }]} onStartShouldSetResponder={() => true}>

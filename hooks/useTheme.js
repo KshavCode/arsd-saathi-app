@@ -14,7 +14,7 @@ export const useTheme = () => {
   };
 
   const { themeName, setThemeName } = useContext(ThemeContext);
-  const theme = Colors[themeName] || Colors["default"]
+  const theme = Colors[themeName] || Colors["Default"]
   const isDark = isColorDark(theme.background);
   return {
     theme,
