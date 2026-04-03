@@ -4,9 +4,10 @@ import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckBox from 'expo-checkbox';
+import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import QRCode from 'react-native-qrcode-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -65,17 +66,17 @@ export default function HomeTab({ route, navigation }) {
   useEffect(() => {
     const checkForUpdates = async () => {
       try {
-        // const currentVersion = Constants.expoConfig.version;
-        // const response = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest');
-        // if (!response.ok) return;
-        // const data = await response.json();
-        // const latestVersion = data.tag_name.replace('v', '');
+        const currentVersion = Constants.expoConfig.version;
+        const response = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest');
+        if (!response.ok) return;
+        const data = await response.json();
+        const latestVersion = data.tag_name.replace('v', '');
 
-        // if (latestVersion !== currentVersion) {
-        //     const downloadUrl = data.assets?.[0]?.browser_download_url || data.html_url;
-        //     setUpdateInfo({ version: latestVersion, url: downloadUrl });
-        //     setShowUpdateModal(true);
-        // }
+        if (latestVersion !== currentVersion) {
+            const downloadUrl = data.assets?.[0]?.browser_download_url || data.html_url;
+            setUpdateInfo({ version: latestVersion, url: downloadUrl });
+            setShowUpdateModal(true);
+        }
       } catch (error) {
         console.log("Auto-update check failed:", error); 
       }
@@ -278,25 +279,27 @@ export default function HomeTab({ route, navigation }) {
       />
 
       <Modal visible={showQRModal} transparent animationType="fade" >
-            <Pressable style={styles.modalBackdropCenter} onPress={()=>setShowQRModal(false)}>
-                <View style={[styles.qrModalContent, { backgroundColor: theme.card }]}>           
-                    <View style={{ backgroundColor: '#FFF', borderRadius: 15, marginBottom: 10 }}>
-                        <QRCode value={APP_LINK} size={200} logo={require("@/assets/images/icon.png")} color={theme.primary} backgroundColor={theme.background} />
-                    </View>
-
-
-                    <TouchableOpacity
-                        style={[styles.primaryButton, { backgroundColor: theme.background, borderColor: theme.primary, borderWidth: .5, width: '100%' }]}
-                        onPress={async () => {
-                            await Share.share({ message: `Download ArsdSaathi and boost your college life!\n\n${APP_LINK}` });
-                        }}
-                    >
-                        <Ionicons name="share-outline" size={20} color={theme.primary} style={{ marginRight: 8 }} />
-                        <Text style={[styles.primaryButtonText, { color: theme.primary }]}>Share Link Instead</Text>
-                    </TouchableOpacity>
-                </View>
-            </Pressable>
-        </Modal>
+        <TouchableOpacity 
+          style={styles.modalBackdropCenter} 
+          onPressOut={()=>setShowQRModal(false)}
+          activeOpacity={1} 
+        >
+          <View style={[styles.qrModalContent, { backgroundColor: theme.card }]}>           
+              <View style={{ backgroundColor: '#FFF', borderRadius: 15, marginBottom: 10 }}>
+                  <QRCode value={APP_LINK} size={200} logo={require("@/assets/images/icon.png")} color={theme.primary} backgroundColor={theme.background} />
+              </View>
+              <TouchableOpacity
+                  style={[styles.primaryButton, { backgroundColor: theme.background, borderColor: theme.primary, borderWidth: .5, width: '100%' }]}
+                  onPress={async () => {
+                      await Share.share({ message: `Download ArsdSaathi and boost your college life!\n\n${APP_LINK}` });
+                  }}
+              >
+                  <Ionicons name="share-outline" size={20} color={theme.primary} style={{ marginRight: 8 }} />
+                  <Text style={[styles.primaryButtonText, { color: theme.primary }]}>Share Link Instead</Text>
+              </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       {/* THEME SELECTION MODAL */}
       <Modal 
@@ -310,7 +313,7 @@ export default function HomeTab({ route, navigation }) {
           activeOpacity={1} 
           onPressOut={() => setShowThemeModal(false)}
         >
-          <View style={[styles.modalListContainer, { backgroundColor: theme.background }]}>
+          <View style={[styles.modalListContainer, { backgroundColor: theme.background, width:'85%' }]}>
             <Text style={[styles.modalListHeader, { color: theme.text, backgroundColor: theme.iconBg }]}>Select Theme: </Text>
             <ScrollView style={{ maxHeight: 350 }}>
               {Object.keys(Colors).map((name, index) => (
@@ -319,7 +322,6 @@ export default function HomeTab({ route, navigation }) {
                   style={[styles.dropdownItem, {backgroundColor: themeName === name ? theme.iconBg+'70' : theme.background}]}
                   onPress={() => {
                     setThemeName(name);
-                    setShowThemeModal(false);
                   }}
                 >
                   <Animatable.Text
@@ -351,6 +353,11 @@ export default function HomeTab({ route, navigation }) {
         navigationBarTranslucent={true}
         accessibilityViewIsModal={true}
       >
+        <TouchableOpacity 
+          style={styles.modalBackdropCenter} 
+          onPressOut={()=>setShowUpdateModal(false)}
+          activeOpacity={1} 
+        >
         <View style={[styles.modalOverlay, { backgroundColor: theme.modalOverlay }]}>
           <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
 
@@ -401,18 +408,23 @@ export default function HomeTab({ route, navigation }) {
             </View>
           </View>
         </View>
+        </TouchableOpacity>
       </Modal>
 
       {/* --- LOGOUT MODAL --- */}
       <Modal
         animationType="fade"
-        transparent={false}
+        transparent={true}
         visible={showLogoutModal}
         onRequestClose={() => setShowLogoutModal(false)}
         statusBarTranslucent={true}
         navigationBarTranslucent={true}
         accessibilityViewIsModal={true}
       >
+        <TouchableOpacity 
+          style={styles.modalBackdropCenter} 
+          activeOpacity={1} 
+        >
         <View style={[styles.modalOverlay, { backgroundColor: theme.modalOverlay }]}>
           <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
 
@@ -423,45 +435,47 @@ export default function HomeTab({ route, navigation }) {
 
             {/* Modal Text */}
             <Text style={[styles.modalTitle, { color: theme.text }]} accessibilityRole="header">Are you sure?</Text>
-            
-            <TouchableOpacity 
-               style={{flexDirection:'row', gap:7, alignItems: 'center'}} 
-               accessible={true}
-               accessibilityRole="checkbox"
-               accessibilityState={{checked: deleteTimetable}}
-               accessibilityLabel="Delete my Timetable"
-               accessibilityHint="Check to permanently remove your saved timetable details from storage upon logout"
-               onPress={() => setDeleteTimetable(!deleteTimetable)}
-               activeOpacity={1}
-            >
-              <CheckBox value={deleteTimetable} onValueChange={setDeleteTimetable} color={deleteTimetable ? theme.primary : undefined} />
-              <Text style={[styles.modalText, { color: theme.secondary, marginBottom: 0 }]} importantForAccessibility="no">Delete my Timetable</Text>
-            </TouchableOpacity>
-
-            {/* Modal Action Buttons */}
-            <View style={[styles.modalActions, {marginTop: 25}]}>
-              <TouchableOpacity
-                style={[styles.modalButtonPrimary, { backgroundColor: theme.error }]}
-                onPress={executeLogout} 
-                accessibilityRole='button'
-                accessibilityLabel="Logout"
-                accessibilityHint="Confirm and log out of the application"
-              >
-                <Ionicons name="log-out-outline" size={18} color="#FFF" style={{marginRight: 6}} importantForAccessibility="no" />
-                <Text style={styles.modalButtonPrimaryText} importantForAccessibility="no">Logout</Text>
-              </TouchableOpacity>
+            <View style={styles.modalActions}>
               <TouchableOpacity 
-                style={[styles.modalButtonSecondary, { borderColor: theme.separator }]} 
-                onPress={() => setShowLogoutModal(false)} 
-                accessibilityRole='button'
-                accessibilityLabel="Cancel"
-                accessibilityHint="Cancel the action and return to homepage"
+                 style={{flexDirection:'row', gap:7, alignItems: 'center'}} 
+                 accessible={true}
+                 accessibilityRole="checkbox"
+                 accessibilityState={{checked: deleteTimetable}}
+                 accessibilityLabel="Delete my Timetable"
+                 accessibilityHint="Check to permanently remove your saved timetable details from storage upon logout"
+                 onPress={() => setDeleteTimetable(!deleteTimetable)}
+                 activeOpacity={1}
               >
-                <Text style={[styles.modalButtonSecondaryText, { color: theme.text }]} importantForAccessibility="no">Cancel</Text>
+                <CheckBox value={deleteTimetable} onValueChange={setDeleteTimetable} color={deleteTimetable ? theme.primary : undefined} />
+                <Text style={[styles.modalText, { color: theme.secondary, marginBottom: 0 }]} importantForAccessibility="no">Delete my Timetable</Text>
               </TouchableOpacity>
+
+              {/* Modal Action Buttons */}
+              <View style={[styles.modalActions, {marginTop: 25}]}>
+                <TouchableOpacity
+                  style={[styles.modalButtonPrimary, { backgroundColor: theme.error }]}
+                  onPress={executeLogout} 
+                  accessibilityRole='button'
+                  accessibilityLabel="Logout"
+                  accessibilityHint="Confirm and log out of the application"
+                >
+                  <Ionicons name="log-out-outline" size={18} color="#FFF" style={{marginRight: 6}} importantForAccessibility="no" />
+                  <Text style={styles.modalButtonPrimaryText} importantForAccessibility="no">Logout</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.modalButtonSecondary, { borderColor: theme.primary }]} 
+                  onPress={() => setShowLogoutModal(false)} 
+                  accessibilityRole='button'
+                  accessibilityLabel="Cancel"
+                  accessibilityHint="Cancel the action and return to homepage"
+                >
+                  <Text style={[styles.modalButtonSecondaryText, { color: theme.text }]} importantForAccessibility="no">Cancel</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
+        </TouchableOpacity>
       </Modal>
 
       {/* Background Scraper */}
@@ -727,7 +741,6 @@ const styles = StyleSheet.create({
     // Modal Dropdown
     dropdown: { paddingVertical: 14, paddingHorizontal: 16, borderWidth: 1, borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     dropdownText: { fontSize: 15, fontWeight: '600', flex: 1 },
-    modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center', padding: 20 },
     modalListContainer: { width: '100%', borderRadius: 16, borderWidth: 1, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 10, elevation: 10 },
     modalListHeader: { fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase', padding: 16 },
     dropdownItem: { paddingVertical: 16, paddingHorizontal: 20, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap:5 },

@@ -7,10 +7,10 @@ import * as Linking from 'expo-linking';
 import LZString from 'lz-string';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, Share, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import * as Animatable from 'react-native-animatable';
 import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { titleCase } from 'title-case';
-// import * as Animatable from 'react-native-animatable'
 
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -313,13 +313,20 @@ export default function Timetable({ route, navigation }) {
 
         return (
           <TouchableOpacity
-            key={time}
+            key={`${selectedDay}-${existingClass?.subject || 'empty'}`}
             style={[styles.classCard, { backgroundColor: theme.card, borderLeftColor: theme.primary, borderLeftWidth: 4 }]}
             onPress={() => isEditMode && handleOpenSlot(time, existingClass)}
             disabled={!isEditMode}
             activeOpacity={0.7}
           >
-            <View style={styles.classContent}>
+            <Animatable.View
+                style={styles.classContent}
+                animation='fadeIn'
+                duration={300}
+                delay={index*50}
+                easing='ease-out'
+                useNativeDriver
+            >
               <Text style={[styles.classTime, { color: theme.primary }]}>{time} - {endTimeStr}</Text>
               <Text style={[styles.classSubject, { color: theme.text }]}>{existingClass.subject}</Text>
               <View style={styles.classMetaRow}>
@@ -338,7 +345,7 @@ export default function Timetable({ route, navigation }) {
                    </View>
                 )}
               </View>
-            </View>
+            </Animatable.View>
             {isEditMode && <Ionicons name="pencil" size={20} color={theme.secondary} />}
           </TouchableOpacity>
         );
@@ -412,7 +419,7 @@ export default function Timetable({ route, navigation }) {
                 <View>
                   {timetable[selectedDay]?.length === 0 ? (
                     <View style={[styles.emptyCard, { backgroundColor: theme.card }]}>
-                      <Text style={{ color: theme.text, fontSize: 16, fontWeight: '700' }}>No Classes Today!</Text>
+                      <Text style={{ color: theme.text, fontSize: 16, fontWeight: '700' }}>No Classes on this day!</Text>
                     </View>
                   ) : (renderSlots(false))}
                 </View>
