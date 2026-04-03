@@ -1,3 +1,4 @@
+import Header from '@/components/Header';
 import { NOTICES_URL } from '@/constants/links';
 import { useTheme } from '@/hooks/useTheme';
 import { Ionicons } from '@expo/vector-icons';
@@ -218,21 +219,7 @@ export default function Notices({ navigation}) {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.headerRow} accessible={false}>
-        <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => (navigation?.goBack ? navigation.goBack() : console.log('Back'))}
-            accessibilityRole="button"
-            accessibilityLabel="Go Back"
-            accessibilityHint="Returns to the previous screen"
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-            <Ionicons name="caret-back" size={24} color={theme.primary} importantForAccessibility="no" />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: theme.text }]} accessibilityRole="header">NOTICE BOARD</Text>
-      </View>
-      
-
+      <Header navigation={navigation} screenName='NOTICE BOARD' />
       <View style={{ height: 0, width: 0, opacity: 0 }} importantForAccessibility="no-hide-descendants">
         <WebView
           ref={webViewRef}
@@ -286,11 +273,8 @@ export default function Notices({ navigation}) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  headerRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.05)' },
-  backButton: { width: 40, height: 40, justifyContent: 'center' },
-  headerTitle: { fontSize: 18, fontWeight: '800', letterSpacing: 1 },
-  listContainer: { padding: 16, paddingBottom: 40 },
+  container: { flex: 1, paddingHorizontal: 16, paddingTop: 10 },
+  listContainer: { padding: 10 },
   centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: 100 },
   loadingText: { marginTop: 12, fontSize: 14, fontWeight: '600' },
   emptyText: { marginTop: 16, fontSize: 15, fontWeight: '500' },

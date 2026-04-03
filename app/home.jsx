@@ -297,7 +297,7 @@ export default function HomeTab({ route, navigation }) {
                   }}
                 >
                   <Text
-                    style={{ color: themeName === name ? theme.primary : theme.text, fontWeight: themeName === name ? '800' : '500'}}>{name}</Text>
+                    style={{ fontSize:18, color: themeName === name ? theme.primary : theme.text, fontWeight: themeName === name ? '800' : '500'}}>{name}</Text>
                   
                   {themeName === name && (
                     <Ionicons name="checkmark" size={16} color={theme.primary} />

@@ -1,10 +1,11 @@
+import Header from '@/components/Header';
 import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Linking from 'expo-linking';
 import LZString from 'lz-string';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, Share, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -371,13 +372,7 @@ export default function Timetable({ route, navigation }) {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-        {/* Header */}
-        <View style={styles.headerRow}>
-            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                <Ionicons name="caret-back" size={27} color={theme.primary} />
-            </TouchableOpacity>
-            <Text style={[styles.headerTitle, { color: theme.text }]}>TIMETABLE</Text>
-        </View>
+        <Header navigation={navigation} screenName='TIMETABLE' />
 
         {/* Custom Tab Switcher */}
         <View style={[styles.tabContainer, { backgroundColor: theme.card, marginTop: 10, borderColor:theme.secondary, borderWidth:.5 }]}>
@@ -395,7 +390,7 @@ export default function Timetable({ route, navigation }) {
 
         {activeTab !== 'share' && (
             <View style={styles.daySelector}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 10 }}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
                 {DAYS.map((day, index) => (
                 <TouchableOpacity
                   key={day}
@@ -410,7 +405,7 @@ export default function Timetable({ route, navigation }) {
             </View>
         )}
 
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
+        <ScrollView contentContainerStyle={{ paddingTop: 20 }}>
 
             {activeTab === 'view' && (
                 <View>
@@ -495,7 +490,7 @@ export default function Timetable({ route, navigation }) {
                        </TouchableOpacity>
                     </View>
                     
-                    <View style={{ padding: 15, backgroundColor: '#FFF', borderRadius: 15, marginBottom: 20 }}>
+                    <View style={{ backgroundColor: '#FFF', borderRadius: 15, marginBottom: 10 }}>
                         {shareLink ? <QRCode value={shareLink} size={220} /> : null}
                     </View>
 
@@ -504,12 +499,12 @@ export default function Timetable({ route, navigation }) {
                     </Text>
 
                     <TouchableOpacity
-                        style={[styles.primaryButton, { backgroundColor: theme.background, borderColor: theme.primary, borderWidth: 1, width: '100%', marginTop: 10 }]}
+                        style={[styles.primaryButton, { backgroundColor: theme.background, borderColor: theme.primary, borderWidth: 1, width: '100%' }]}
                         onPress={async () => {
                             await Share.share({ message: `Sync my ArsdSaathi timetable!\n\n${shareLink}` });
                         }}
                     >
-                        <Ionicons name="share-outline" size={18} color={theme.primary} style={{ marginRight: 8 }} />
+                        <Ionicons name="share-outline" size={20} color={theme.primary} style={{ marginRight: 8 }} />
                         <Text style={[styles.primaryButtonText, { color: theme.primary }]}>Share Link Instead</Text>
                     </TouchableOpacity>
                 </View>
@@ -547,7 +542,7 @@ export default function Timetable({ route, navigation }) {
                         </TouchableOpacity>
                     </View>
 
-                    <ScrollView style={{ padding: 20, maxHeight: 500 }} showsVerticalScrollIndicator={false}>
+                    <ScrollView style={{ padding: 20, maxHeight: 400 }} showsVerticalScrollIndicator={false}>
 
                         <Text style={[styles.inputLabel, { color: theme.secondary }]}>Select Subject</Text>
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
@@ -641,19 +636,15 @@ export default function Timetable({ route, navigation }) {
 
 // --- Styles ---
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  headerRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10 },
-  backButton: { width: 40, height: 40, justifyContent: 'center' },
-  headerTitle: { fontSize: 18, fontWeight: '800', letterSpacing: 1 },
-  themeButton: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, elevation: 3 },
+  container: { flex: 1, paddingHorizontal: 16, paddingVertical: 10  },
 
-  tabContainer: { flexDirection: 'row', marginHorizontal: 16, borderRadius: 16, padding: 5, marginBottom: 15 },
-  tabButton: { flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center' },
+  tabContainer: { flexDirection: 'row', borderRadius: 16, padding: 5, marginBottom: 15 },
+  tabButton: { flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: 'center' },
   tabActive: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, elevation: 2 },
   tabText: { fontSize: 14, fontWeight: '700' },
 
-  daySelector: { marginBottom: 15 },
-  dayPill: { paddingVertical: 10, paddingHorizontal: 20, borderRadius: 20 },
+  daySelector: { marginBottom: 10 },
+  dayPill: { paddingVertical: 10, paddingHorizontal: 20, borderRadius: 10},
   dayText: { fontSize: 14, fontWeight: '700' },
   sectionLabel: { fontSize: 13, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
 
@@ -668,7 +659,7 @@ const styles = StyleSheet.create({
   emptySlot: { flexDirection: 'row', padding: 18, borderRadius: 16, borderWidth: 2, borderStyle: 'dashed', marginBottom: 12, justifyContent: 'space-between', alignItems: 'center' },
   emptyCard: { padding: 40, borderRadius: 24, alignItems: 'center', marginTop: 20 },
 
-  formCard: { padding: 24, borderRadius: 24, shadowColor: '#000', shadowOpacity: 0.05, elevation: 2, alignItems: 'center' },
+  formCard: { padding: 20, borderRadius: 24, shadowColor: '#000', shadowOpacity: 0.05, elevation: 2, alignItems: 'center' },
   iconCircle: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
   shareTitle: { fontSize: 20, fontWeight: '800', marginBottom: 8 },
   shareDesc: { fontSize: 14, textAlign: 'center', lineHeight: 20, marginBottom: 20 },

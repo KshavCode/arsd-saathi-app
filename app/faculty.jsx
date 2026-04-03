@@ -1,8 +1,9 @@
+import Header from '@/components/Header';
 import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { titleCase } from 'title-case';
@@ -91,19 +92,7 @@ export default function FacultyTab({ navigation }) {
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-            <View style={styles.headerRow} accessible={false}>
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => (navigation?.goBack ? navigation.goBack() : console.log('Back'))}
-                    accessibilityRole="button"
-                    accessibilityLabel="Go Back"
-                    accessibilityHint="Returns to the previous screen"
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                    <Ionicons name="caret-back" size={24} color={theme.primary} importantForAccessibility="no" />
-                </TouchableOpacity>
-                <Text style={[styles.headerTitle, { color: theme.text }]} accessibilityRole="header" accessibilityLabel='Faculty Details'>FACULTY DETAILS</Text>
-            </View>
+            <Header screenName={"FACULTY"} navigation={navigation}/>
 
             {loading ? (
                 <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 50 }} accessibilityLabel="Loading faculty data" />
@@ -128,10 +117,6 @@ export default function FacultyTab({ navigation }) {
 
 const styles = StyleSheet.create({
     container: { flex: 1, paddingHorizontal: 16, paddingTop: 10 },
-    headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
-    backButton: { width: 40, height: 40, alignItems: 'flex-start', justifyContent: 'center' },
-    headerTitle: { fontSize: 18, fontWeight: '700', letterSpacing: 0.5 },
-    themeButton: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
     centerContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 50 },
     
     // --- Faculty Card Styles ---
