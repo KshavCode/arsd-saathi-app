@@ -221,7 +221,7 @@ export default function AttendanceTab({ navigation }) {
                                                     style={[ styles.tableCell,  { borderColor: theme.secondary }, isHeaderRow && { backgroundColor: theme.primary + '20' }, cIdx === COLS - 1 && styles.tableCellLast ]}
                                                     importantForAccessibility={isHeaderRow ? "yes" : "no-hide-descendants"} // Hide individual cells
                                                 >
-                                                    <Text style={[ styles.cellText,  { color: theme.text }, isHeaderRow && { color: theme.text, fontWeight: '700', fontSize: 10 },  isRowHeader && { fontWeight: '600' } ]}
+                                                    <Text style={[ styles.cellText,  { color: theme.text }, isHeaderRow && { color: theme.text, fontWeight: '700', fontSize: 10 }, isRowHeader && { fontWeight: '600' } ]}
                                                         numberOfLines={1}
                                                         adjustsFontSizeToFit
                                                     >
@@ -282,11 +282,11 @@ const styles = StyleSheet.create({
     dropdownItemText: { fontSize: 15 },
 
     // Table
-    tableContainer: { overflow: 'hidden', borderRadius: 12, borderWidth: 1, marginBottom: 20 },
+    tableContainer: { overflow: 'hidden', borderRadius: 12, borderWidth: .5, marginBottom: 20 },
     tableRow: { flexDirection: 'row' },
-    tableCell: { flex: 1, paddingVertical: 12, paddingHorizontal: 1, borderRightWidth: 0.5, alignItems: 'center', justifyContent: 'center' },
+    tableCell: { flex: 1, paddingVertical: 10, paddingHorizontal: 1, borderRightWidth: 0.5, alignItems: 'center', justifyContent: 'center' },
     tableCellLast: { borderRightWidth: 0 },
-    cellText: { fontSize: 11, textAlign: 'center' },
+    cellText: { fontSize: 13, textAlign: 'center' },
 
     // Footer
     footerInfo: { padding: 14, borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }
