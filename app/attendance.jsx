@@ -164,27 +164,21 @@ export default function AttendanceTab({ navigation }) {
                                 <Ionicons name={'chevron-down'} size={18} color={theme.secondary} importantForAccessibility="no" />
                             </TouchableOpacity>
 
-                            <Modal
-                                visible={showDropdown}
-                                transparent={true}
-                                animationType="fade"
+                            <Modal 
+                                visible={showDropdown} 
+                                transparent={true} 
+                                animationType="fade" 
                                 onRequestClose={() => setShowDropdown(false)}
                                 accessibilityViewIsModal={true}
                             >
-                                <TouchableOpacity
-                                    style={styles.modalBackdrop}
-                                    activeOpacity={1}
-                                    onPressOut={() => setShowDropdown(false)}
-                                    accessibilityLabel="Close subject list"
-                                    accessibilityRole="button"
-                                >
-                                    <View style={[styles.modalListContainer, { backgroundColor: theme.card, borderColor: theme.secondary }]}>
-                                        <Text style={[styles.modalListHeader, { color: theme.text, backgroundColor: theme.card+'A0', borderBottomWidth: .5, borderColor:theme.primary}]} accessibilityRole="header">Select a Subject</Text>
+                                <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPressOut={() => setShowDropdown(false)} accessibilityLabel="Close subject list" accessibilityRole="button">
+                                    <View style={[styles.modalListContainer, { backgroundColor: theme.background, borderColor: theme.secondary }]}>
+                                        <Text style={[styles.modalListHeader, { color: theme.text, backgroundColor: theme.iconBg, borderBottomWidth: .5, borderColor:theme.primary}]} accessibilityRole="header">Select a Subject</Text>
                                         <ScrollView style={{maxHeight: 350}} showsVerticalScrollIndicator={true}>
                                             {subjects.map((sub) => (
-                                                <TouchableOpacity
-                                                    key={sub}
-                                                    style={[styles.dropdownItem, { borderBottomColor: theme.secondary }]}
+                                                <TouchableOpacity 
+                                                    key={sub} 
+                                                    style={[styles.dropdownItem, { borderBottomColor: theme.secondary }]} 
                                                     onPress={() => {
                                                         setSelectedSubject(sub);
                                                         setShowDropdown(false);
