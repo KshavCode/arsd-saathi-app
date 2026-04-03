@@ -549,10 +549,10 @@ export default function Timetable({ route, navigation }) {
                             {availableSubjects.map((sub) => (
                                 <TouchableOpacity
                                     key={sub}
-                                    style={[styles.chip, { backgroundColor: theme.background}]}
+                                    style={[styles.chip, { backgroundColor: formSubject === sub ? theme.secondary : theme.background}]}
                                     onPress={() => setFormSubject(sub)}
                                 >
-                                    <Text style={{ color: formSubject === sub ? '#FFF' : theme.primary, fontWeight: '600' }}>{sub}</Text>
+                                    <Text style={{ color: formSubject === sub ? theme.background : theme.primary, fontWeight: '600' }}>{sub}</Text>
                                 </TouchableOpacity>
                             ))}
                         </ScrollView>
