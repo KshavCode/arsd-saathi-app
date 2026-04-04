@@ -33,12 +33,30 @@ Notifications.setNotificationHandler({
 });
 
 export default function Stack1() {
-useEffect(() => {initNotifications()}, []);
-  return (
-    <ThemeProvider>
-      <StackContent />
-    </ThemeProvider>
-  );
+    useEffect(() => {
+      (async () => {
+        const granted = await initNotifications();
+
+        console.log("Permission:", granted);
+
+        if (granted) {
+          setTimeout(() => {
+            Notifications.scheduleNotificationAsync({
+              content: {
+                title: "TEST",
+                body: "If you see this, it works",
+              },
+              trigger: { seconds: 3 },
+            });
+          }, 2000);
+        }
+      })();
+    }, []);
+    return (
+      <ThemeProvider>
+        <StackContent />
+      </ThemeProvider>
+    );
 }
 
 function StackContent() {
@@ -89,7 +107,6 @@ function StackContent() {
     }
 
     return (
-        <ThemeProvider>
             <Stack.Navigator 
                 initialRouteName={initialRoute}
                 screenOptions={{ 
@@ -114,6 +131,5 @@ function StackContent() {
             
                 <Stack.Screen name="Timetable" component={Timetable} initialParams={homeParams} />
             </Stack.Navigator>
-        </ThemeProvider>
     );
 }
