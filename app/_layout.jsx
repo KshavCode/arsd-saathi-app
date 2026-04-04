@@ -34,29 +34,27 @@ Notifications.setNotificationHandler({
 
 export default function Stack1() {
     useEffect(() => {
-      (async () => {
-        const granted = await initNotifications();
+  (async () => {
+    const granted = await initNotifications();
 
-        console.log("Permission:", granted);
+    if (granted) {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "TEST",
+          body: "Working even after app closes",
+          sound: 'default',
+        },
+        trigger: {
+          type: 'timeInterval',
+          seconds: 10,
+          repeats: false,
+        },
+      });
 
-        if (granted) {
-          setTimeout(() => {
-            Notifications.scheduleNotificationAsync({
-              content: {
-                title: "TEST",
-                body: "Working?",
-                sound: 'default',
-              },
-              trigger: {
-                type: 'timeInterval',
-                seconds: 3,
-                repeats: false,
-              }
-            });
-          }, 2000);
-        }
-      })();
-    }, []);
+      console.log("Notification scheduled");
+    }
+  })();
+}, []);
     return (
       <ThemeProvider>
         <StackContent />
