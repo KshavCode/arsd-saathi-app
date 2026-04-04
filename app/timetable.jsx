@@ -565,25 +565,24 @@ export default function Timetable({ route, navigation }) {
                         <Text style={[styles.inputLabel, { color: theme.secondary, width: '100%' }]}>Notifications Test</Text>
                         <TouchableOpacity
                             style={[styles.primaryButton, { backgroundColor: importCode ? theme.primary : theme.primary, width: '100%' }]}
-                            onPress={ (async () => {
-                                            const granted = await initNotifications();
-                                            if (granted) {
-                                              await Notifications.scheduleNotificationAsync({
-                                                content: {
-                                                  title: "TEST",
-                                                  body: "Notifications are working!",
-                                                  sound: 'default',
-                                                },
-                                                trigger: {
-                                                  type: 'timeInterval',
-                                                  seconds: 5,
-                                                  repeats: false,
-                                                },
-                                              });
-                                              console.log("Notification scheduled");
-                                            }
-                                        })()
-                                    }
+                            onPress={ 
+                                async () => {
+                                    const granted = await initNotifications();
+                                    if (granted) {
+                                      await Notifications.scheduleNotificationAsync({
+                                        content: {
+                                          title: "TEST",
+                                          body: "Notifications are working!",
+                                          sound: 'default',
+                                        },
+                                        trigger: {
+                                          type: 'timeInterval',
+                                          seconds: 5,
+                                          repeats: false,
+                                        },
+                                      });
+                                      console.log("Notification scheduled");
+                                }}}
                             >
                             <Text style={[styles.primaryButtonText, !importCode && { color: theme.background }]}>Check Notification</Text>
                         </TouchableOpacity>
