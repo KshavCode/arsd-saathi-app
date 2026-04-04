@@ -1,10 +1,10 @@
 import { Colors } from '@/constants/themeStyle';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createStackNavigator } from '@react-navigation/stack';
-import * as NavigationBar from 'expo-navigation-bar';
 import React, { useContext, useEffect, useState } from 'react';
-import { ActivityIndicator, Platform, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 
+import { initNotifications } from '@/utils/notifications';
 import * as Notifications from 'expo-notifications';
 import Attendance from './attendance';
 import Details from './basic';
@@ -23,6 +23,7 @@ const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
 const TWO_DAYS = 2 * 24 * 60 * 60 * 1000;
 
 
+// REQUIRED HANDLER
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -32,6 +33,7 @@ Notifications.setNotificationHandler({
 });
 
 export default function Stack1() {
+useEffect(() => {initNotifications()}, []);
   return (
     <ThemeProvider>
       <StackContent />
@@ -75,14 +77,6 @@ function StackContent() {
         };
         verifySession();
     }, []);
-
-    useEffect(() => {
-        if (Platform.OS === 'android') {
-            const color = isDarkMode ? Colors.dark.background : Colors.pinkish.background;
-            NavigationBar.setBackgroundColorAsync(color);
-            NavigationBar.setButtonStyleAsync(isDarkMode ? 'light' : 'dark');
-        }
-    }, [isDarkMode]);
 
     const currentBackgroundColor = isDarkMode ? Colors.dark.background : Colors.pinkish.background;
 
