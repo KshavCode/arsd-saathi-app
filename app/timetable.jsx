@@ -169,7 +169,7 @@ export default function Timetable({ route, navigation }) {
         sound: 'default',
       },
       trigger: {
-        type: 'calendar',
+        type: 'timeInterval',
         weekday: weekday,
         hour: hour,
         minute: minute,
