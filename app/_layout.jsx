@@ -44,9 +44,14 @@ export default function Stack1() {
             Notifications.scheduleNotificationAsync({
               content: {
                 title: "TEST",
-                body: "If you see this, it works",
+                body: "Working?",
+                sound: 'default',
               },
-              trigger: { seconds: 3 },
+              trigger: {
+                type: 'timeInterval',
+                seconds: 3,
+                repeats: false,
+              }
             });
           }, 2000);
         }
