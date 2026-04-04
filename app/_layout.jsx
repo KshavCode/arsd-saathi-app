@@ -4,7 +4,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import React, { useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
-import { initNotifications } from '@/utils/notifications';
 import * as Notifications from 'expo-notifications';
 import Attendance from './attendance';
 import Details from './basic';
@@ -23,7 +22,6 @@ const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
 const TWO_DAYS = 2 * 24 * 60 * 60 * 1000;
 
 
-// REQUIRED HANDLER
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -33,28 +31,6 @@ Notifications.setNotificationHandler({
 });
 
 export default function Stack1() {
-    useEffect(() => {
-  (async () => {
-    const granted = await initNotifications();
-
-    if (granted) {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: "TEST",
-          body: "Working even after app closes",
-          sound: 'default',
-        },
-        trigger: {
-          type: 'timeInterval',
-          seconds: 10,
-          repeats: false,
-        },
-      });
-
-      console.log("Notification scheduled");
-    }
-  })();
-}, []);
     return (
       <ThemeProvider>
         <StackContent />

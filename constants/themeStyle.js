@@ -1,18 +1,19 @@
 export const Colors = {
   Default: {
-    primary: "#396a98",
-    secondary: "#6b8fb2",
-    background: "#ffffff",
-    text: "#284866",
-    success: "#16A34A",
-    error: "#DC2626",
-    card: "#f1f5f9",
-    iconBg: "#e2e8f0",
-    iconPlaceholder: "#64748b",
-    destructiveBg: "#FFF0F0",
-    destructiveBorder: "#FFE0E0",
-    separator: "#e5e7eb",
-    footer: "#396a98",
+    primary: '#1E3A8A',
+    secondary: '#64748B',
+    background: '#F8FAFC',
+    text: '#0F172A',
+    success: '#16A34A',   
+    error: '#DC2626',      
+    card: '#FFFFFF',
+    iconBg: '#F0F4FF',
+    iconPlaceholder: '#475569',
+    destructiveBg: '#FFF0F0',
+    destructiveBorder: '#FFE0E0',
+    separator: '#F0F0F0',
+    footer: '#4F46E5',
+    borderColor: '#F1F5F9'
   },
 
   pinkish: {
@@ -30,23 +31,6 @@ export const Colors = {
     destructiveBg: "#FFF0F0",
     destructiveBorder: "#FFE0E0",
   },
-
-  blueRay: {
-    primary: '#1E3A8A',
-    secondary: '#64748B',
-    background: '#F8FAFC',
-    text: '#0F172A',
-    success: '#16A34A',   
-    error: '#DC2626',      
-    card: '#FFFFFF',
-    iconBg: '#F0F4FF',
-    iconPlaceholder: '#475569',
-    destructiveBg: '#FFF0F0',
-    destructiveBorder: '#FFE0E0',
-    separator: '#F0F0F0',
-    footer: '#4F46E5',
-    borderColor: '#F1F5F9'
-    },
 
   charcoal: {
     primary: "#5c5b5b",
@@ -94,6 +78,22 @@ export const Colors = {
     iconPlaceholder: "#64748b",
     destructiveBg: "#FFF0F0",
     destructiveBorder: "#FFE0E0",
+  },
+
+  seaSick: {
+    primary: "#396a98",
+    secondary: "#6b8fb2",
+    background: "#ffffff",
+    text: "#284866",
+    success: "#16A34A",
+    error: "#DC2626",
+    card: "#f1f5f9",
+    iconBg: "#e2e8f0",
+    iconPlaceholder: "#64748b",
+    destructiveBg: "#FFF0F0",
+    destructiveBorder: "#FFE0E0",
+    separator: "#e5e7eb",
+    footer: "#396a98",
   },
 
   purplePlace: {

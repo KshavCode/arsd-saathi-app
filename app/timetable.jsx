@@ -1,6 +1,6 @@
 import Header from '@/components/Header';
 import { useTheme } from '@/hooks/useTheme';
-import { scheduleNotification } from '@/utils/notifications';
+import { initNotifications } from '@/utils/notifications';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -12,6 +12,8 @@ import * as Animatable from 'react-native-animatable';
 import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { titleCase } from 'title-case';
+
+import * as Notifications from 'expo-notifications';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -87,6 +89,15 @@ const deserializeTimetable = (str) => {
   });
   return tt;
 };
+
+// REQUIRED HANDLER
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 // -----------------------------------------
 
 export default function Timetable({ route, navigation }) {
@@ -117,6 +128,55 @@ export default function Timetable({ route, navigation }) {
   const [showQRModal, setShowQRModal] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
+
+  // --- NOTIFICATION HELPERS ---
+  const parseTimeForNotification = (timeString, dayIndex) => {
+    // Converts "08:30 AM" to 24h format and subtracts 10 minutes
+    const [time, modifier] = timeString.split(' ');
+    let [hours, minutes] = time.split(':').map(Number);
+    
+    if (hours === 12 && modifier === 'AM') hours = 0;
+    if (hours < 12 && modifier === 'PM') hours += 12;
+
+    minutes -= 10;
+    if (minutes < 0) {
+        minutes += 60;
+        hours -= 1;
+    }
+    if (hours < 0) hours += 24;
+
+    // Expo Weekdays: 1=Sun, 2=Mon, 3=Tue, 4=Wed, 5=Thu, 6=Fri, 7=Sat
+    // App dayIndex: 0=Mon, 1=Tue, ...
+    const weekday = dayIndex + 2; 
+
+    return { hour: hours, minute: minutes, weekday };
+  };
+
+  const scheduleClassReminder = async (classData, dayIndex) => {
+    const granted = await initNotifications();
+    if (!granted) return;
+
+    // Cancel existing notification for this specific slot to prevent duplicates
+    await Notifications.cancelScheduledNotificationAsync(classData.id);
+
+    const { hour, minute, weekday } = parseTimeForNotification(classData.slot, dayIndex);
+
+    await Notifications.scheduleNotificationAsync({
+      identifier: classData.id, 
+      content: {
+        title: `Upcoming Class: ${classData.subject}`,
+        body: `Room: ${classData.room || ''} | ${classData.type === 'TH' ? 'Theory' : 'Practical'}`,
+        sound: 'default',
+      },
+      trigger: {
+        type: 'calendar',
+        weekday: weekday,
+        hour: hour,
+        minute: minute,
+        repeats: true,
+      },
+    });
+  };
 
   useEffect(() => {
     const initialize = async () => {
@@ -209,14 +269,22 @@ export default function Timetable({ route, navigation }) {
 
     updatedDay.push(newClass);
     updatedDay.sort((a, b) => TIME_SLOTS.indexOf(a.slot) - TIME_SLOTS.indexOf(b.slot));
+    
     saveTimetable({ ...timetable, [selectedDay]: updatedDay });
     setShowSubjectModal(false);
+
+    // 🔔 Schedule the notification when saved
+    scheduleClassReminder(newClass, selectedDay);
   };
 
-  const handleDeleteClass = (slotTime) => {
+  const handleDeleteClass = async (slotTime) => {
+    const classId = `${selectedDay}-${slotTime}`;
     const updatedDay = timetable[selectedDay].filter(item => item.slot !== slotTime);
     saveTimetable({ ...timetable, [selectedDay]: updatedDay });
     setShowSubjectModal(false);
+
+    // 🔔 Cancel the notification when deleted
+    await Notifications.cancelScheduledNotificationAsync(classId);
   };
 
   const getEndTime = (startSlot, duration) => {
@@ -272,7 +340,7 @@ export default function Timetable({ route, navigation }) {
       }
   };
 
-  const processImportData = (dataString) => {
+  const processImportData = async (dataString) => {
     try {
       let code = dataString;
       // Extract data if it's a full URL
@@ -284,7 +352,16 @@ export default function Timetable({ route, navigation }) {
       if (!rawString) throw new Error("Decompression failed");
 
       const expandedData = deserializeTimetable(rawString);
-      saveTimetable({...DEFAULT_TIMETABLE, ...expandedData});
+      const newTimetable = {...DEFAULT_TIMETABLE, ...expandedData};
+      
+      await saveTimetable(newTimetable);
+
+      // 🔔 Schedule all notifications for the newly imported timetable
+      for (const dayIndex of Object.keys(newTimetable)) {
+          for (const classData of newTimetable[dayIndex]) {
+              await scheduleClassReminder(classData, parseInt(dayIndex));
+          }
+      }
 
       setImportCode('');
       setShowQRModal(false);
@@ -488,10 +565,26 @@ export default function Timetable({ route, navigation }) {
                         <Text style={[styles.inputLabel, { color: theme.secondary, width: '100%' }]}>Notifications Test</Text>
                         <TouchableOpacity
                             style={[styles.primaryButton, { backgroundColor: importCode ? theme.primary : theme.primary, width: '100%' }]}
-                            onPress={() => {
-                                scheduleNotification("Test", "Working", 5);
-                            }}
-                        >
+                            onPress={ (async () => {
+                                            const granted = await initNotifications();
+                                            if (granted) {
+                                              await Notifications.scheduleNotificationAsync({
+                                                content: {
+                                                  title: "TEST",
+                                                  body: "Notifications are working!",
+                                                  sound: 'default',
+                                                },
+                                                trigger: {
+                                                  type: 'timeInterval',
+                                                  seconds: 5,
+                                                  repeats: false,
+                                                },
+                                              });
+                                              console.log("Notification scheduled");
+                                            }
+                                        })()
+                                    }
+                            >
                             <Text style={[styles.primaryButtonText, !importCode && { color: theme.background }]}>Check Notification</Text>
                         </TouchableOpacity>
                     </View>
