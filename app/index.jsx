@@ -7,6 +7,7 @@ import * as Linking from "expo-linking";
 import React, { useState } from "react";
 import { ActivityIndicator, Alert, Dimensions, Image, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from 'react-native-toast-message';
 
 const { height } = Dimensions.get("window");
 
@@ -31,12 +32,12 @@ export default function Login({ navigation }) {
     const handleLogin = () => {
         Keyboard.dismiss();
         if (!roll || !fullName || !dob) {
-            Alert.alert("Missing Fields", "Please fill in all details exactly as they appear on your ID card.");
+            Toast.show({position: 'bottom', bottomOffset:70, type:'success', text1:'Missing Fields!', text2: 'Please fill in all details.', props: {borderColor: Colors.Default.error, bg: Colors.Default.card, text1Color: Colors.Default.error, text2Color: Colors.Default.secondary}})
             return;
         }
         const dobRegex = /^\d{1,2}-\d{1,2}-\d{4}$/;
         if (!dobRegex.test(dob)) {
-            Alert.alert("Invalid Date", "Please use the format DD-MM-YYYY (e.g., 15-08-2004)");
+            Toast.show({position: 'bottom', bottomOffset:70, type:'success', text1:'Invalid Date!', text2: 'Please use the format DD-MM-YYYY', props: {borderColor: Colors.Default.error, bg: Colors.Default.card, text1Color: Colors.Default.error, text2Color: Colors.Default.secondary}})
             return;
         }
         setProgressMsg("Connecting to ARSD Portal...");
@@ -202,7 +203,7 @@ export default function Login({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#ffdcdc" },
+    container: { flex: 1, backgroundColor: "#e6efff" },
     headerBackground: { justifyContent: "center", alignItems: "center", borderBottomLeftRadius: 30, borderBottomRightRadius: 30, width: "100%" },
     headerContent: { alignItems: "center", marginTop: -20 },
     logoCircle: { width: 100, height: 100, backgroundColor: "#FFF", borderRadius: 40, alignItems: "center", justifyContent: "center", marginBottom: 5, elevation: 5 },

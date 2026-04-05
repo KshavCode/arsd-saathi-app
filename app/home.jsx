@@ -11,6 +11,7 @@ import { ActivityIndicator, Alert, Modal, ScrollView, Share, StatusBar, StyleShe
 import * as Animatable from 'react-native-animatable';
 import QRCode from 'react-native-qrcode-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 import { titleCase } from 'title-case';
 import ArsdScraper from '../services/ArsdScraper';
 
@@ -263,7 +264,7 @@ export default function HomeTab({ route, navigation }) {
       setShowQRModal(true);
       // await Share.share({ message: `Check out the ArsdSaathi App: ${downloadUrl}`, url: downloadUrl, title: 'ArsdSaathi App Link' });
     } catch (error) {
-          Alert.alert("Error", "Could not generate link.");
+          Toast.show({position: 'bottom', bottomOffset:70, type:'success', text1:'Error!', text2: "Couldn't generate a link, kindly try again later.", props: {borderColor: theme.error, bg: theme.card, text1Color: theme.error, text2Color: theme.secondary}})
           console.log(error)
     }
 
