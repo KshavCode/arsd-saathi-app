@@ -1,10 +1,11 @@
 import { Colors } from '@/constants/themeStyle';
+import { toastConfig } from '@/constants/toastConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 
-import * as Notifications from 'expo-notifications';
 import Attendance from './attendance';
 import Details from './basic';
 import Faculty from './faculty';
@@ -22,19 +23,14 @@ const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
 const TWO_DAYS = 2 * 24 * 60 * 60 * 1000;
 
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
-
 export default function Stack1() {
     return (
-      <ThemeProvider>
-        <StackContent />
-      </ThemeProvider>
+    <>
+        <ThemeProvider>
+            <StackContent />
+        </ThemeProvider>
+        <Toast config={toastConfig}/>
+    </>
     );
 }
 

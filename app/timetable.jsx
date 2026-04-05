@@ -1,6 +1,6 @@
 import Header from '@/components/Header';
+import { toastConfig } from '@/constants/toastConfig';
 import { useTheme } from '@/hooks/useTheme';
-import { initNotifications } from '@/utils/notifications';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -11,9 +11,8 @@ import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, Scroll
 import * as Animatable from 'react-native-animatable';
 import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 import { titleCase } from 'title-case';
-
-import * as Notifications from 'expo-notifications';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -89,15 +88,6 @@ const deserializeTimetable = (str) => {
   });
   return tt;
 };
-
-// REQUIRED HANDLER
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
 // -----------------------------------------
 
 export default function Timetable({ route, navigation }) {
@@ -129,55 +119,6 @@ export default function Timetable({ route, navigation }) {
   const [isScanning, setIsScanning] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
 
-  // --- NOTIFICATION HELPERS ---
-  const parseTimeForNotification = (timeString, dayIndex) => {
-    // Converts "08:30 AM" to 24h format and subtracts 10 minutes
-    const [time, modifier] = timeString.split(' ');
-    let [hours, minutes] = time.split(':').map(Number);
-    
-    if (hours === 12 && modifier === 'AM') hours = 0;
-    if (hours < 12 && modifier === 'PM') hours += 12;
-
-    minutes -= 10;
-    if (minutes < 0) {
-        minutes += 60;
-        hours -= 1;
-    }
-    if (hours < 0) hours += 24;
-
-    // Expo Weekdays: 1=Sun, 2=Mon, 3=Tue, 4=Wed, 5=Thu, 6=Fri, 7=Sat
-    // App dayIndex: 0=Mon, 1=Tue, ...
-    const weekday = dayIndex + 2; 
-
-    return { hour: hours, minute: minutes, weekday };
-  };
-
-  const scheduleClassReminder = async (classData, dayIndex) => {
-    const granted = await initNotifications();
-    if (!granted) return;
-
-    // Cancel existing notification for this specific slot to prevent duplicates
-    await Notifications.cancelScheduledNotificationAsync(classData.id);
-
-    const { hour, minute, weekday } = parseTimeForNotification(classData.slot, dayIndex);
-
-    await Notifications.scheduleNotificationAsync({
-      identifier: classData.id, 
-      content: {
-        title: `Upcoming Class: ${classData.subject}`,
-        body: `Room: ${classData.room || ''} | ${classData.type === 'TH' ? 'Theory' : 'Practical'}`,
-        sound: 'default',
-      },
-      trigger: {
-        type: 'timeInterval',
-        weekday: weekday,
-        hour: hour,
-        minute: minute,
-        repeats: true,
-      },
-    });
-  };
-
   useEffect(() => {
     const initialize = async () => {
       try {
@@ -201,8 +142,8 @@ export default function Timetable({ route, navigation }) {
     initialize();
 
     // DEEP LINK LISTENER
-    const subscription = Linking.addEventListener('url', ({ url }) => handleDeepLink(url));
-    Linking.getInitialURL().then((url) => { if (url) handleDeepLink(url); });
+    const subscription = Linking.addEventListener('url', ({ url }) => handleImportLink(url));
+    Linking.getInitialURL().then((url) => { if (url) handleImportLink(url); });
 
     return () => subscription.remove();
   }, []);
@@ -245,7 +186,10 @@ export default function Timetable({ route, navigation }) {
   };
 
   const handleSaveClass = () => {
-    if (!formSubject) { Alert.alert("Required", "Please select a subject."); return; }
+    if (!formSubject) { 
+        Toast.show({position: 'bottom', bottomOffset:70, type:'success', text1:'Required!', text2: 'Please select a subject.', props: {borderColor: theme.error, bg: theme.card, text1Color: theme.error, text2Color: theme.secondary}})
+        return; 
+    }
 
     const newClass = {
       id: `${selectedDay}-${editingSlot}`,
@@ -269,22 +213,14 @@ export default function Timetable({ route, navigation }) {
 
     updatedDay.push(newClass);
     updatedDay.sort((a, b) => TIME_SLOTS.indexOf(a.slot) - TIME_SLOTS.indexOf(b.slot));
-    
     saveTimetable({ ...timetable, [selectedDay]: updatedDay });
     setShowSubjectModal(false);
-
-    // 🔔 Schedule the notification when saved
-    scheduleClassReminder(newClass, selectedDay);
   };
 
-  const handleDeleteClass = async (slotTime) => {
-    const classId = `${selectedDay}-${slotTime}`;
+  const handleDeleteClass = (slotTime) => {
     const updatedDay = timetable[selectedDay].filter(item => item.slot !== slotTime);
     saveTimetable({ ...timetable, [selectedDay]: updatedDay });
     setShowSubjectModal(false);
-
-    // 🔔 Cancel the notification when deleted
-    await Notifications.cancelScheduledNotificationAsync(classId);
   };
 
   const getEndTime = (startSlot, duration) => {
@@ -300,7 +236,7 @@ export default function Timetable({ route, navigation }) {
     try {
       const flatString = serializeTimetable(timetable);
       if (!flatString || !flatString.includes('~')) {
-        Alert.alert("Error!", "Kindly create your timetable first.");
+        Toast.show({position: 'bottom', bottomOffset:70, type:'success', text1:'Error!', text2: 'Kindly create your timetable first.', props: {borderColor: theme.error, bg: theme.card, text1Color: theme.error, text2Color: theme.secondary}})
         return;
       }
       const tinyCode = LZString.compressToEncodedURIComponent(flatString);
@@ -311,7 +247,7 @@ export default function Timetable({ route, navigation }) {
       
       setShowQRModal(true);
     } catch (error) {
-      Alert.alert("Error", "Could not generate link.");
+      Toast.show({position: 'bottom', bottomOffset:70, type:'success', text1:'Error!', text2: "Couldn't generate the link.", props: {borderColor: theme.error, bg: theme.card, text1Color: theme.error, text2Color: theme.secondary}})
       console.log(error)
     }
   };
@@ -327,20 +263,20 @@ export default function Timetable({ route, navigation }) {
       setIsScanning(true);
   };
 
-  const handleBarCodeScanned = ({ data }) => {
+  const handleScanQR = ({ data }) => {
       setIsScanning(false);
       // Whether they scanned a URL or just the code, processImportData handles it
       processImportData(data);
   };
 
-  const handleDeepLink = (url) => {
+  const handleImportLink = (url) => {
       const data = Linking.parse(url);
       if (data.queryParams?.data) {
           processImportData(data.queryParams.data);
       }
   };
 
-  const processImportData = async (dataString) => {
+  const processImportData = (dataString) => {
     try {
       let code = dataString;
       // Extract data if it's a full URL
@@ -352,24 +288,15 @@ export default function Timetable({ route, navigation }) {
       if (!rawString) throw new Error("Decompression failed");
 
       const expandedData = deserializeTimetable(rawString);
-      const newTimetable = {...DEFAULT_TIMETABLE, ...expandedData};
-      
-      await saveTimetable(newTimetable);
-
-      // 🔔 Schedule all notifications for the newly imported timetable
-      for (const dayIndex of Object.keys(newTimetable)) {
-          for (const classData of newTimetable[dayIndex]) {
-              await scheduleClassReminder(classData, parseInt(dayIndex));
-          }
-      }
+      saveTimetable({...DEFAULT_TIMETABLE, ...expandedData});
 
       setImportCode('');
       setShowQRModal(false);
-      Alert.alert("Success", "Timetable imported successfully!");
+      Toast.show({position: 'bottom', bottomOffset:70, type:'success', text1:'Timetable Imported!', text2: 'Changes have been done to your schedule.', props: {borderColor: theme.success, bg: theme.card, text1Color: theme.success, text2Color: theme.secondary}})
       setActiveTab('view');
       
     } catch (e) {
-      Alert.alert("Invalid Link", "The scanned QR code or pasted link is invalid.");
+      Toast.show({position: 'bottom', bottomOffset:70, type:'success', text1:'Invalid!', text2: 'Seems like the QR / Link is broken,', props: {borderColor: theme.error, bg: theme.card, text1Color: theme.error, text2Color: theme.secondary}})
       console.log(e)
     }
   };
@@ -510,7 +437,7 @@ export default function Timetable({ route, navigation }) {
             )}
 
             {activeTab === 'share' && (
-                <View style={{ gap: 20 }}>
+                <View style={{ gap: 20, height:1000 }}>
                     {/* Export Card */}
                     <View style={[styles.formCard, { backgroundColor: theme.card }]}>
                         <View style={[styles.iconCircle, { backgroundColor: theme.background + '70' }]}>
@@ -560,39 +487,12 @@ export default function Timetable({ route, navigation }) {
                             <Text style={[styles.primaryButtonText, !importCode && { color: theme.background }]}>Import Data</Text>
                         </TouchableOpacity>
                     </View>
-
-                    <View style={[styles.formCard, { backgroundColor: theme.card, marginTop: 10 }]}>
-                        <Text style={[styles.inputLabel, { color: theme.secondary, width: '100%' }]}>Notifications Test</Text>
-                        <TouchableOpacity
-                            style={[styles.primaryButton, { backgroundColor: importCode ? theme.primary : theme.primary, width: '100%' }]}
-                            onPress={ 
-                                async () => {
-                                    const granted = await initNotifications();
-                                    if (granted) {
-                                      await Notifications.scheduleNotificationAsync({
-                                        content: {
-                                          title: "TEST",
-                                          body: "Notifications are working!",
-                                          sound: 'default',
-                                        },
-                                        trigger: {
-                                          type: 'timeInterval',
-                                          seconds: 5,
-                                          repeats: false,
-                                        },
-                                      });
-                                      console.log("Notification scheduled");
-                                }}}
-                            >
-                            <Text style={[styles.primaryButtonText, !importCode && { color: theme.background }]}>Check Notification</Text>
-                        </TouchableOpacity>
-                    </View>
                 </View>
             )}
         </ScrollView>
 
         {/* --- QR DISPLAY MODAL --- */}
-        <Modal visible={showQRModal} transparent animationType="fade" onRequestClose={() => setShowQRModal(false)}>
+        <Modal visible={showQRModal} transparent animationType="fade">
             <View style={styles.modalBackdropCenter}>
                 <View style={[styles.qrModalContent, { backgroundColor: theme.card }]}>
                     <View style={styles.modalHeaderRowCentered}>
@@ -624,12 +524,12 @@ export default function Timetable({ route, navigation }) {
         </Modal>
 
         {/* --- IN-APP CAMERA SCANNER MODAL --- */}
-        <Modal visible={isScanning} animationType="slide" onRequestClose={() => setIsScanning(false)}>
+        <Modal visible={isScanning} animationType="slide">
             <View style={styles.cameraContainer}>
                 <CameraView
                     style={StyleSheet.absoluteFillObject}
                     facing="back"
-                    onBarcodeScanned={isScanning ? handleBarCodeScanned : undefined}
+                    onBarcodeScanned={isScanning ? handleScanQR : undefined}
                     barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
                 />
                 <View style={styles.scannerOverlay}>
@@ -643,7 +543,7 @@ export default function Timetable({ route, navigation }) {
         </Modal>
 
         {/* --- SUBJECT EDIT MODAL --- */}
-        <Modal visible={showSubjectModal} transparent animationType="slide" onRequestClose={() => setShowSubjectModal(false)}>
+        <Modal visible={showSubjectModal} transparent animationType="slide">
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
                 <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={() => setShowSubjectModal(false)}>
                 <View style={[styles.modalContent, { backgroundColor: theme.card }]} onStartShouldSetResponder={() => true}>
@@ -699,7 +599,7 @@ export default function Timetable({ route, navigation }) {
                                     onPress={() => {
                                         if (formDuration === 1) {
                                             if (TIME_SLOTS.indexOf(editingSlot) === TIME_SLOTS.length - 1) {
-                                                Alert.alert("Invalid", "Cannot schedule a 2-hour class at 4:30 PM.");
+                                                Toast.show({position: 'bottom', bottomOffset:70, type:'success', text1:'Invalid!', text2: 'Cannot schedule a 2-hour class at 4:30 PM.', props: {borderColor: theme.error, bg: theme.card, text1Color: theme.error, text2Color: theme.secondary}})
                                             } else setFormDuration(2);
                                         } else setFormDuration(1);
                                     }}
@@ -741,6 +641,7 @@ export default function Timetable({ route, navigation }) {
                 </View>
                 </TouchableOpacity>
             </KeyboardAvoidingView>
+            <Toast config={toastConfig} />
         </Modal>
     </SafeAreaView>
   );
