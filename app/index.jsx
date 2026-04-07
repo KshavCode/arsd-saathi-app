@@ -63,12 +63,12 @@ export default function Login({ navigation }) {
 
     const handleError = (errorMsg) => {
         setIsScraping(false);
-        Alert.alert("Connection Failed", "Could not verify details. Please check your credentials or internet connection.");
+        Alert.alert("Connection Failed", "Could not verify details. Please check your credentials, internet connection or the server might be busy.");
     };
 
     return (
         <View style={styles.container}>
-            <StatusBar barStyle="pinkish-content" />
+            <StatusBar barStyle="light-content" />
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
