@@ -4,7 +4,7 @@ import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckBox from 'expo-checkbox';
-// import Constants from 'expo-constants';
+import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -63,17 +63,17 @@ export default function HomeTab({ route, navigation }) {
   useEffect(() => {
     const checkForUpdates = async () => {
       try {
-        // const currentVersion = Constants.expoConfig.version;
-        // const response = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest');
-        // if (!response.ok) return;
-        // const data = await response.json();
-        // const latestVersion = data.tag_name.replace('v', '');
+        const currentVersion = Constants.expoConfig.version;
+        const response = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest');
+        if (!response.ok) return;
+        const data = await response.json();
+        const latestVersion = data.tag_name.replace('v', '');
 
-        // if (latestVersion !== currentVersion) {
-        //     const downloadUrl = data.assets?.[0]?.browser_download_url || data.html_url;
-        //     setUpdateInfo({ version: latestVersion, url: downloadUrl });
-        //     setShowUpdateModal(true);
-        // }
+        if (latestVersion !== currentVersion) {
+            const downloadUrl = data.assets?.[0]?.browser_download_url || data.html_url;
+            setUpdateInfo({ version: latestVersion, url: downloadUrl });
+            setShowUpdateModal(true);
+        }
       } catch (error) {
         console.log("Auto-update check failed:", error); 
       }
@@ -595,11 +595,12 @@ export default function HomeTab({ route, navigation }) {
         {/* Grid Buttons */}
         <Text style={[styles.sectionHeader, { color: theme.text, marginTop: 10 }]} accessibilityRole="header" accessibilityLabel='Quick Actions'>Quick Actions</Text>
         <View style={styles.actionsGrid}>
-            <GridActionButton title="Notices" icon="newspaper" onPress={() => navigation.navigate("Notice")} theme={theme} />
+            <GridActionButton title="Notices" icon="megaphone" onPress={() => navigation.navigate("Notice")} theme={theme} />
             <GridActionButton title="Attendance" icon="bar-chart" onPress={() => navigation.navigate("Attendance")} theme={theme} />
             <GridActionButton title="Predictor" icon="color-wand" onPress={() => navigation.navigate("Predictor")} theme={theme} />
             <GridActionButton title="Timetable" icon="calendar" onPress={() => navigation.navigate("Timetable")} theme={theme} />
             <GridActionButton title="Faculty" icon="people" onPress={() => navigation.navigate("Faculty")} theme={theme} />
+            <GridActionButton title="Support" icon="sparkles" onPress={() => navigation.navigate("Support")} theme={theme} />
             <GridActionButton title="Logout" icon="log-out-outline" onPress={handleLogout} isDestructive={true} theme={theme} accessibilityHint="Opens confirmation dialog to securely log out"/>
         </View>
 
