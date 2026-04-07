@@ -395,7 +395,7 @@ export default function Timetable({ route, navigation }) {
                   onPress={() => setActiveTab(tab)}
                   activeOpacity={0.8}
                 >
-                    <Text style={[styles.tabText, { color: activeTab === tab ? '#FFF' : theme.secondary }]}>{tab.charAt(0).toUpperCase() + tab.slice(1)}</Text>
+                    <Text style={[styles.tabText, { color: activeTab === tab ? theme.background : theme.secondary }]}>{tab.charAt(0).toUpperCase() + tab.slice(1)}</Text>
                 </TouchableOpacity>
             ))}
         </View>
@@ -410,7 +410,7 @@ export default function Timetable({ route, navigation }) {
                   onPress={() => setSelectedDay(index)}
                   activeOpacity={0.7}
                 >
-                    <Text style={[styles.dayText, { color: selectedDay === index ? '#FFF' : theme.secondary }]}>{day}</Text>
+                    <Text style={[styles.dayText, { color: selectedDay === index ? theme.background : theme.secondary }]}>{day}</Text>
                 </TouchableOpacity>
                 ))}
             </ScrollView>
@@ -625,7 +625,7 @@ export default function Timetable({ route, navigation }) {
                           style={[styles.primaryButton, { backgroundColor: theme.primary, marginBottom: 12 }]}
                           onPress={handleSaveClass}
                         >
-                            <Text style={styles.primaryButtonText}>Save Class</Text>
+                            <Text style={[styles.primaryButtonText, {color:theme.background}]}>Save Class</Text>
                         </TouchableOpacity>
 
                         {timetable[selectedDay]?.find(c => c.slot === editingSlot) && (

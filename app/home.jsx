@@ -1,4 +1,4 @@
-import { APP_LINK, FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, LIBRARY_URL, PRIVACY_URL, SAMARTH_URL, SHIVAM_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
+import { APP_LINK, CHANGELOG_URL, FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, LIBRARY_URL, PRIVACY_URL, SAMARTH_URL, SHIVAM_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
 import { Colors } from '@/constants/themeStyle';
 import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { titleCase } from 'title-case';
 import ArsdScraper from '../services/ArsdScraper';
+
 
 const handleFeedback = () => {
   const email = "arsdsaathi.help@gmail.com"; 
@@ -382,12 +383,12 @@ export default function HomeTab({ route, navigation }) {
                 accessibilityLabel="Update Now"
                 accessibilityHint="Downloads the updated application by redirecting to the download link"
               >
-                <Ionicons name="download-outline" size={18} color="#FFF" style={{marginRight: 6}} importantForAccessibility="no" />
-                <Text style={styles.modalButtonPrimaryText} importantForAccessibility="no">Update Now</Text>
+                <Ionicons name="download-outline" size={18} color={theme.background} style={{marginRight: 6}} importantForAccessibility="no" />
+                <Text style={[styles.modalButtonPrimaryText, {color:theme.backgroundColor}]} importantForAccessibility="no">Update Now</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={[styles.modalButtonSecondary, { borderColor: theme.separator }]} 
-                onPress={() => Linking.openURL("https://github.com/KshavCode/arsd-saathi-app/blob/master/CHANGELOG.md")} 
+                onPress={() => Linking.openURL(CHANGELOG_URL)} 
                 accessibilityRole='button'
                 accessibilityLabel="What's New"
                 accessibilityHint="Redirects to the new updates information of the application"
@@ -531,8 +532,8 @@ export default function HomeTab({ route, navigation }) {
             
             {/* Top Row - Attendance */}
             <View style={styles.heroMainRow} accessible={true} accessibilityLabel={`Theory Attendance: ${userData.percent_attendance}%`}>
-                <View style={[styles.heroIconBox, { backgroundColor: isAttendanceLow ? theme.error : "#10B981" }]} importantForAccessibility="no-hide-descendants">
-                    <Ionicons name="pie-chart" size={24} color="#FFF" />
+                <View style={[styles.heroIconBox, { backgroundColor: isAttendanceLow ? theme.error : theme.success }]} importantForAccessibility="no-hide-descendants">
+                    <Ionicons name="pie-chart" size={24} color='#FFF' />
                 </View>
                 <View style={styles.heroTextContent} importantForAccessibility="no-hide-descendants">
                     <Text style={[styles.heroValue, { color: theme.text }]}>{userData.percent_attendance}%</Text>
@@ -679,14 +680,14 @@ const styles = StyleSheet.create({
     modalText: { fontSize: 14, textAlign: 'center', lineHeight: 22, marginBottom: 25 },
     modalActions: { width: '100%', alignItems: 'center' },
     modalButtonPrimary: { flexDirection: 'row', width: '100%', paddingVertical: 14, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
-    modalButtonPrimaryText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
+    modalButtonPrimaryText: { fontSize: 16, fontWeight: '700' },
     modalButtonSecondary: { width: '100%', paddingVertical: 14, borderRadius: 12, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
     modalButtonSecondaryText: { fontSize: 15, fontWeight: '600' },
     modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems:'center' },
     modalBackdropCenter: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 },
     qrModalContent: { padding: 30, borderRadius: 30, alignItems: 'center', width: '100%', maxWidth: 350 },
     primaryButton: { paddingVertical: 13, borderRadius: 16, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', marginTop: 10 },
-    primaryButtonText: { color: '#FFF', fontSize: 16, fontWeight: '800' },
+    primaryButtonText: { fontSize: 16, fontWeight: '800' },
     
     // Header
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 25 },
