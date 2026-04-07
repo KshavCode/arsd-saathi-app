@@ -418,7 +418,7 @@ export default function Timetable({ route, navigation }) {
             )}
 
             {activeTab === 'share' && (
-                <View style={{ gap: 20, height:1000 }}>
+                <View style={{ gap: 20, height:600 }}>
                     {/* Export Card */}
                     <View style={[styles.formCard, { backgroundColor: theme.card }]}>
                         <View style={[styles.iconCircle, { backgroundColor: theme.background + '70' }]}>
@@ -429,8 +429,8 @@ export default function Timetable({ route, navigation }) {
 
                         <View style={{ flexDirection: 'row', gap: 10, width: '100%' }}>
                             <TouchableOpacity style={[styles.primaryButton, { backgroundColor: theme.primary, flex: 1 }]} onPress={handleExport} activeOpacity={0.8}>
-                                <Ionicons name="share-outline" size={18} color="#FFF" style={{ marginRight: 8 }} />
-                                <Text style={styles.primaryButtonText}>Export</Text>
+                                <Ionicons name="share-outline" size={18} color={theme.text} style={{ marginRight: 8 }} />
+                                <Text style={[styles.primaryButtonText, {color:theme.text}]}>Export</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -445,12 +445,12 @@ export default function Timetable({ route, navigation }) {
                             onChangeText={setImportCode}
                         />
                         <TouchableOpacity
-                            style={[styles.primaryButton, { backgroundColor: importCode ? theme.primary : theme.primary, width: '100%' }]}
+                            style={[styles.primaryButton, { backgroundColor: importCode ? theme.primary : theme.primary+'50', width: '100%' }]}
                             onPress={() => processImportData(importCode)}
                             disabled={!importCode}
                             activeOpacity={0.8}
                         >
-                            <Text style={[styles.primaryButtonText, !importCode && { color: theme.background }]}>Import Data</Text>
+                            <Text style={[styles.primaryButtonText, importCode && {color:theme.text}]}>Import Data</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -643,13 +643,6 @@ const styles = StyleSheet.create({
   compactPillText: { fontSize: 15, fontWeight: '800' },
 
   primaryButton: { paddingVertical: 16, borderRadius: 16, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', paddingHorizontal: 20 },
-  primaryButtonText: { color: '#FFF', fontSize: 16, fontWeight: '800' },
+  primaryButtonText: { fontSize: 16, fontWeight: '800' },
 
-  // Camera Styles
-  cameraContainer: { flex: 1, backgroundColor: '#000' },
-  scannerOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
-  scannerText: { color: '#FFF', fontSize: 20, fontWeight: '700', marginBottom: 40, textAlign: 'center' },
-  scannerFrame: { width: 250, height: 250, borderWidth: 3, borderColor: '#FFF', borderRadius: 20, backgroundColor: 'transparent' },
-  cancelScanButton: { position: 'absolute', bottom: 50, backgroundColor: '#FFF', paddingVertical: 15, paddingHorizontal: 40, borderRadius: 30 },
-  cancelScanText: { color: '#000', fontSize: 16, fontWeight: '800' },
 });
