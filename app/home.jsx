@@ -25,11 +25,7 @@ const handleFeedback = () => {
 // Grid Button
 const GridActionButton = ({ title, icon, onPress, theme, isDestructive, accessibilityHint='' }) => (
   <TouchableOpacity 
-    style={[
-      styles.gridActionCard, 
-      { backgroundColor: theme.card },
-      isDestructive && { backgroundColor: theme.destructiveBg, borderWidth: 1, borderColor: theme.destructiveBorder }
-    ]}
+    style={[styles.gridActionCard]}
     onPress={onPress}
     activeOpacity={0.8}
     accessibilityRole="button"
@@ -37,7 +33,7 @@ const GridActionButton = ({ title, icon, onPress, theme, isDestructive, accessib
     accessibilityHint={accessibilityHint || `Maps to ${title}`}
   >
     <View style={[styles.gridActionIconCtx, { backgroundColor: 'transparent'  }]} importantForAccessibility="no-hide-descendants">
-      <Ionicons name={icon} color={isDestructive ? theme.error : theme.primary} size={35} />
+      <Ionicons name={icon} color={isDestructive ? theme.error : theme.primary} size={33} />
     </View>
     <Text style={[styles.gridActionText, { color: isDestructive ? theme.error : theme.text }]} importantForAccessibility="no">{title}</Text>
   </TouchableOpacity>
@@ -511,7 +507,6 @@ export default function HomeTab({ route, navigation }) {
           
           <View style={styles.topIconContainer}>
             <TouchableOpacity 
-              style={[styles.themeButton, { backgroundColor: theme.card }]} 
               onPress={handleShare}
               accessibilityRole="button"
               accessibilityLabel="Share App"
@@ -521,7 +516,6 @@ export default function HomeTab({ route, navigation }) {
                <Ionicons name='share-social' size={25} color={theme.primary} importantForAccessibility="no" />
             </TouchableOpacity>
             <TouchableOpacity 
-              style={[styles.themeButton, { backgroundColor: theme.card }]} 
               onPress={()=>setShowThemeModal(true)}
               accessibilityRole="button"
               accessibilityLabel="Toggle Theme"
@@ -606,7 +600,7 @@ export default function HomeTab({ route, navigation }) {
             <GridActionButton title="Predictor" icon="color-wand" onPress={() => navigation.navigate("Predictor")} theme={theme} />
             <GridActionButton title="Timetable" icon="calendar" onPress={() => navigation.navigate("Timetable")} theme={theme} />
             <GridActionButton title="Faculty" icon="people" onPress={() => navigation.navigate("Faculty")} theme={theme} />
-            <GridActionButton title="Logout" icon="log-out" onPress={handleLogout} isDestructive={true} theme={theme} accessibilityHint="Opens confirmation dialog to securely log out"/>
+            <GridActionButton title="Logout" icon="log-out-outline" onPress={handleLogout} isDestructive={true} theme={theme} accessibilityHint="Opens confirmation dialog to securely log out"/>
         </View>
 
         {/* Footer Section */}
@@ -695,41 +689,39 @@ const styles = StyleSheet.create({
     
     // Header
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 25 },
-    topIconContainer: { flexDirection: 'row', gap: 12 },
+    topIconContainer: { flexDirection: 'row', gap: 20 },
     greeting: { fontSize: 14, fontWeight: '600', letterSpacing: 0.5, textTransform: 'uppercase' },
     username: { fontSize: 28, fontWeight: '900', letterSpacing: -0.5 },
-    themeButton: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 3 },
     
     // Dashboard
-    heroContainer: { borderRadius: 24, padding: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 12, elevation: 4, marginBottom: 25, borderWidth: 1, overflow:'hidden' },
+    heroContainer: { borderRadius: 24, padding: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 12, elevation: 4, marginBottom: 20, borderWidth: 1, overflow:'hidden' },
     heroMainRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     heroIconBox: { width: 56, height: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginRight: 16 },
     heroTextContent: { flex: 1, justifyContent: 'center' },
     heroValue: { fontSize: 36, fontWeight: '900', letterSpacing: -1 },
     heroLabel: { fontSize: 13, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 2 },
-    warningText: { fontSize: 12, fontWeight: '600', marginTop: 16, fontStyle: 'italic' },
-    heroDivider: { height: 1, width: '100%', marginVertical: 20 },
+    warningText: { fontSize: 12, fontWeight: '600', marginTop: 10, fontStyle: 'italic' },
+    heroDivider: { height: 2, width: '100%', marginVertical:20 },
     
     mentorRow: { flexDirection: 'row', alignItems: 'center' },
-    mentorLabel: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 },
-    mentorName: { fontSize: 16, fontWeight: '800' },
+    mentorLabel: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5},
+    mentorName: { fontSize: 18, fontWeight: '800' },
 
     // Next Class Section
-    nextClassRow: { marginTop: 4 },
-    nextClassHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-    nextClassTitle: { fontSize: 13, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5, marginLeft: 6 },
+    nextClassHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 },
+    nextClassTitle: { fontSize: 12, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5, marginLeft: 6 },
     nextClassTime: { fontSize: 13, fontWeight: '800' },
-    nextClassSubject: { fontSize: 18, fontWeight: '800', marginBottom: 12 },
+    nextClassSubject: { fontSize: 18, fontWeight: '800', marginBottom: 10 },
     nextClassMetaRow: { flexDirection: 'row', gap: 10 },
     metaBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, gap: 5 },
     metaText: { fontSize: 12, fontWeight: '700' },
 
     // Grid Actions
-    sectionHeader: { fontSize: 18, fontWeight: '800', marginBottom: 16, letterSpacing: -0.5 },
-    actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' },
-    gridActionCard: { width: '48%', padding: 10, borderRadius: 20, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
+    sectionHeader: { fontSize: 18, fontWeight: '800', marginBottom: 10, letterSpacing: -0.5 },
+    actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'flex-start' },
+    gridActionCard: { width: '22%', padding: 5, borderRadius: 20, alignItems: 'center', justifyContent: 'center'},
     gridActionIconCtx: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
-    gridActionText: { fontSize: 14, fontWeight: '700', textAlign: 'center' },
+    gridActionText: { fontSize: 12, fontWeight: '700', textAlign: 'center' },
 
     // Footer Block
     footerContainer: { borderRadius: 24, padding: 20, marginTop: 30, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
