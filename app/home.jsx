@@ -458,8 +458,8 @@ export default function HomeTab({ route, navigation }) {
                   accessibilityLabel="Logout"
                   accessibilityHint="Confirm and log out of the application"
                 >
-                  <Ionicons name="log-out-outline" size={18} color="#FFF" style={{marginRight: 6}} importantForAccessibility="no" />
-                  <Text style={styles.modalButtonPrimaryText} importantForAccessibility="no">Logout</Text>
+                  <Ionicons name="log-out-outline" size={18} color='#FFF' style={{marginRight: 6}} importantForAccessibility="no" />
+                  <Text style={[styles.modalButtonPrimaryText, {color:'#FFF'}]} importantForAccessibility="no">Logout</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={[styles.modalButtonSecondary, { borderColor: theme.primary }]} 
