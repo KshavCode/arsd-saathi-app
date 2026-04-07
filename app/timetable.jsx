@@ -3,11 +3,10 @@ import { toastConfig } from '@/constants/toastConfig';
 import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Linking from 'expo-linking';
 import LZString from 'lz-string';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, Share, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, ScrollView, Share, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -116,8 +115,6 @@ export default function Timetable({ route, navigation }) {
   const [importCode, setImportCode] = useState('');
   const [shareLink, setShareLink] = useState('');
   const [showQRModal, setShowQRModal] = useState(false);
-  const [isScanning, setIsScanning] = useState(false);
-  const [permission, requestPermission] = useCameraPermissions();
 
   useEffect(() => {
     const initialize = async () => {
@@ -242,9 +239,9 @@ export default function Timetable({ route, navigation }) {
       const tinyCode = LZString.compressToEncodedURIComponent(flatString);
       
       // Generate the universal Deep Link
-      const link = Linking.createURL(`timetable?data=${tinyCode}`);
-      setShareLink(link);
+      const link = Linking.createURL(`Timetable?data=${tinyCode}`);
       
+      setShareLink(link);
       setShowQRModal(true);
     } catch (error) {
       Toast.show({position: 'bottom', bottomOffset:70, type:'success', text1:'Error!', text2: "Couldn't generate the link.", props: {borderColor: theme.error, bg: theme.card, text1Color: theme.error, text2Color: theme.secondary}})
@@ -252,22 +249,6 @@ export default function Timetable({ route, navigation }) {
     }
   };
 
-  const startScanning = async () => {
-      if (!permission?.granted) {
-          const { granted } = await requestPermission();
-          if (!granted) {
-              Alert.alert("Permission Required", "Camera access is needed to scan QR codes.");
-              return;
-          }
-      }
-      setIsScanning(true);
-  };
-
-  const handleScanQR = ({ data }) => {
-      setIsScanning(false);
-      // Whether they scanned a URL or just the code, processImportData handles it
-      processImportData(data);
-  };
 
   const handleImportLink = (url) => {
       const data = Linking.parse(url);
@@ -454,23 +435,8 @@ export default function Timetable({ route, navigation }) {
                         </View>
                     </View>
 
-                    {/* Camera Import Card */}
-                    <View style={[styles.formCard, { backgroundColor: theme.card }]}>
-                        <View style={[styles.iconCircle, { backgroundColor: theme.background + '70' }]}>
-                            <Ionicons name="scan-outline" size={32} color={theme.primary} />
-                        </View>
-                        <Text style={[styles.shareTitle, { color: theme.text }]}>Import Timetable</Text>
-                        <Text style={[styles.shareDesc, { color: theme.secondary }]}>Use your camera to scan an ArsdSaathi code.</Text>
-
-                        <TouchableOpacity style={[styles.primaryButton, { backgroundColor: theme.background, borderColor: theme.primary, borderWidth: 1, width: '100%' }]} onPress={startScanning} activeOpacity={0.8}>
-                            <Ionicons name="camera" size={18} color={theme.primary} style={{ marginRight: 8 }} />
-                            <Text style={[styles.primaryButtonText, { color: theme.primary }]}>Open Scanner</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    {/* Manual Link Fallback */}
                     <View style={[styles.formCard, { backgroundColor: theme.card, marginTop: 10 }]}>
-                        <Text style={[styles.inputLabel, { color: theme.secondary, width: '100%' }]}>Or Paste Link / Code</Text>
+                        <Text style={[styles.inputLabel, { color: theme.secondary, width: '100%' }]}>Paste Link / Code</Text>
                         <TextInput
                             style={[styles.inputField, { borderColor: theme.primary, color: theme.text, width: '100%', marginBottom: 16 }]}
                             placeholder="Paste link here..."
@@ -507,7 +473,7 @@ export default function Timetable({ route, navigation }) {
                     </View>
 
                     <Text style={[styles.shareDesc, { color: theme.secondary }]}>
-                        Scan with your phone&apos;s camera or the ArsdSaathi app.
+                        Scan with your phone&apos;s QR scanner app.
                     </Text>
 
                     <TouchableOpacity
@@ -523,24 +489,6 @@ export default function Timetable({ route, navigation }) {
             </View>
         </Modal>
 
-        {/* --- IN-APP CAMERA SCANNER MODAL --- */}
-        <Modal visible={isScanning} animationType="slide">
-            <View style={styles.cameraContainer}>
-                <CameraView
-                    style={StyleSheet.absoluteFillObject}
-                    facing="back"
-                    onBarcodeScanned={isScanning ? handleScanQR : undefined}
-                    barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
-                />
-                <View style={styles.scannerOverlay}>
-                    <Text style={styles.scannerText}>Scan Timetable QR</Text>
-                    <View style={styles.scannerFrame} />
-                    <TouchableOpacity style={styles.cancelScanButton} onPress={() => setIsScanning(false)}>
-                        <Text style={styles.cancelScanText}>Cancel Scan</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        </Modal>
 
         {/* --- SUBJECT EDIT MODAL --- */}
         <Modal visible={showSubjectModal} transparent animationType="slide">

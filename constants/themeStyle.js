@@ -8,9 +8,6 @@ export const Colors = {
     error: '#DC2626',      
     card: '#FFFFFF',
     iconBg: '#F0F4FF',
-    iconPlaceholder: '#475569',
-    destructiveBg: '#FFF0F0',
-    destructiveBorder: '#FFE0E0',
     separator: '#F0F0F0',
     footer: '#4F46E5',
     borderColor: '#F1F5F9'
@@ -27,9 +24,6 @@ export const Colors = {
     footer: "#cd4e9c",
     success: "#16A34A",
     error: "#DC2626",
-    iconPlaceholder: "#64748b",
-    destructiveBg: "#FFF0F0",
-    destructiveBorder: "#FFE0E0",
   },
 
   charcoal: {
@@ -43,9 +37,6 @@ export const Colors = {
     footer: "#5c5b5b",
     success: "#16A34A",
     error: "#DC2626",
-    iconPlaceholder: "#64748b",
-    destructiveBg: "#FFF0F0",
-    destructiveBorder: "#FFE0E0",
   },
 
   moonLight: {
@@ -59,9 +50,6 @@ export const Colors = {
     footer: "#4c3f91",
     success: "#16A34A",
     error: "#DC2626",
-    iconPlaceholder: "#64748b",
-    destructiveBg: "#FFF0F0",
-    destructiveBorder: "#FFE0E0",
   },
 
   dragonFruit: {
@@ -75,9 +63,6 @@ export const Colors = {
     footer: "#f24793",
     success: "#16A34A",
     error: "#DC2626",
-    iconPlaceholder: "#64748b",
-    destructiveBg: "#FFF0F0",
-    destructiveBorder: "#FFE0E0",
   },
 
   seaSick: {
@@ -89,9 +74,6 @@ export const Colors = {
     error: "#DC2626",
     card: "#f1f5f9",
     iconBg: "#e2e8f0",
-    iconPlaceholder: "#64748b",
-    destructiveBg: "#FFF0F0",
-    destructiveBorder: "#FFE0E0",
     separator: "#e5e7eb",
     footer: "#396a98",
   },
@@ -107,9 +89,6 @@ export const Colors = {
     footer: "#9a66f1",
     success: "#16A34A",
     error: "#DC2626",
-    iconPlaceholder: "#64748b",
-    destructiveBg: "#FFF0F0",
-    destructiveBorder: "#FFE0E0",
   },
 
   sunsetGlow: {
@@ -123,9 +102,6 @@ export const Colors = {
     footer: "#fb923c",
     success: "#16A34A",
     error: "#DC2626",
-    iconPlaceholder: "#64748b",
-    destructiveBg: "#FFF0F0",
-    destructiveBorder: "#FFE0E0",
   },
 
   helloYellow: {
@@ -138,9 +114,6 @@ export const Colors = {
     footer: "#495E57",
     success: "#16A34A",
     error: "#DC2626",
-    iconPlaceholder: "#64748b",
-    destructiveBg: "#FFF0F0",
-    destructiveBorder: "#FFE0E0",
   },
 
   // --- DARK THEMES ---
@@ -153,9 +126,6 @@ export const Colors = {
     error: "#F87171",
     card: "#1E293B",
     iconBg: "#252F45",
-    iconPlaceholder: "#CBD5E1",
-    destructiveBg: "#0e0c0c",
-    destructiveBorder: "#5c2222",
     separator: "#2E3A52",
     footer: "#b2aeff",
     borderColor: "#2E3A52",
@@ -172,9 +142,6 @@ export const Colors = {
     footer: "#9ca3af",
     success: "#46c474",
     error: "#ec5c5c",
-    iconPlaceholder: "#64748b",
-    destructiveBg: "#1a0202",
-    destructiveBorder: "#FFE0E0",
   },
 
   darkYell: {
@@ -188,9 +155,6 @@ export const Colors = {
     footer: "#facc15",
     success: "#46c474",
     error: "#ec5c5c",
-    iconPlaceholder: "#64748b",
-    destructiveBg: "#1a0202",
-    destructiveBorder: "#FFE0E0",
   },
 
   goDarkGreen: {
@@ -204,9 +168,6 @@ export const Colors = {
     footer: "#22c55e",
     success: "#46c474",
     error: "#ec5c5c",
-    iconPlaceholder: "#64748b",
-    destructiveBg: "#1a0202",
-    destructiveBorder: "#FFE0E0",
   },
 
   moonNight: {
@@ -220,12 +181,9 @@ export const Colors = {
     footer: "#c4b5fd",
     success: "#46c474",
     error: "#ec5c5c",
-    iconPlaceholder: "#64748b",
-    destructiveBg: "#1a0202",
-    destructiveBorder: "#FFE0E0",
   },
 
-  hacksAndAttacks: {
+  hacksAttacks: {
     primary: "#4ade80",
     secondary: "#22c55e",
     background: "#020617",
@@ -236,24 +194,18 @@ export const Colors = {
     footer: "#22c55e",
     success: "#46c474",
     error: "#ec5c5c",
-    iconPlaceholder: "#64748b",
-    destructiveBg: "#1a0202",
-    destructiveBorder: "#FFE0E0",
   },
 
-  deepCrimson: {
-    primary: "#f87171",
-    secondary: "#dc2626",
-    background: "#1c0a0a",
-    text: "#fee2e2",
-    card: "#2a0f0f",
-    iconBg: "#3b0d0d",
-    separator: "#ef4444",
-    footer: "#f87171",
-    success: "#46c474",
-    error: "#ff3737",
-    iconPlaceholder: "#64748b",
-    destructiveBg: "#1a0202",
-    destructiveBorder: "#FFE0E0",
+  deepCyan: {
+    primary: "#69e6bc",
+    secondary: "#5fd6e6",
+    background: "#0a1c16",
+    text: "#e2fef9",
+    card: "#0f272a",
+    iconBg: "#0f272a",
+    separator: "#30a783",
+    footer: "#71f8d0",
+    success: "#49c978",
+    error: "#ec5c5c",
   },
 };

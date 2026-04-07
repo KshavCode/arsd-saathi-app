@@ -384,7 +384,7 @@ export default function HomeTab({ route, navigation }) {
                 accessibilityHint="Downloads the updated application by redirecting to the download link"
               >
                 <Ionicons name="download-outline" size={18} color={theme.background} style={{marginRight: 6}} importantForAccessibility="no" />
-                <Text style={[styles.modalButtonPrimaryText, {color:theme.backgroundColor}]} importantForAccessibility="no">Update Now</Text>
+                <Text style={[styles.modalButtonPrimaryText, {color:theme.background}]} importantForAccessibility="no">Update Now</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={[styles.modalButtonSecondary, { borderColor: theme.separator }]} 
@@ -565,7 +565,7 @@ export default function HomeTab({ route, navigation }) {
                       <View style={styles.nextClassHeader} importantForAccessibility="no-hide-descendants">
                         <View style={{flexDirection: 'row', alignItems: 'center'}}>
                           <Ionicons name="alarm-outline" size={16} color={theme.success} />
-                          <Text style={[styles.nextClassTitle, { color: theme.success }]}>Next Class - {nextClassInfo.dayName}</Text>
+                          <Text style={[styles.nextClassTitle, { color: theme.success }]}> {nextClassInfo.dayName}</Text>
                         </View>
                         <Text style={[styles.nextClassTime, { color: theme.primary }]}>{nextClassInfo.slot}</Text>
                       </View>

@@ -28,4 +28,4 @@ export const APP_LINK = "https://github.com/KshavCode/arsd-saathi-app/releases/l
 
 export const ANDROID_RULE_URL = "https://keepandroidopen.org/"
 
-export const CHANGELOG_URL = "ttps://github.com/KshavCode/arsd-saathi-app/blob/master/CHANGELOG.md"
+export const CHANGELOG_URL = "https://github.com/KshavCode/arsd-saathi-app/blob/master/CHANGELOG.md"
