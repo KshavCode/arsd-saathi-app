@@ -372,14 +372,14 @@ const styles = StyleSheet.create({
 
     // Controls
     controlsGrid: { flexDirection: 'row', justifyContent: 'space-between', gap: 15, marginBottom: 25 },
-    controlBox: { flex: 1, borderRadius: 16, padding: 15, alignItems: 'center' },
+    controlBox: { flex: 1, borderRadius: 16, padding: 15, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 3 },
     controlLabel: { fontSize: 15, fontWeight: '700', marginBottom: 15 },
     counterRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 15 },
     counterBtn: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
     counterVal: { fontSize: 22, fontWeight: 'bold', width: 30, textAlign: 'center' },
 
     // Result Card
-    resultCard: { marginBottom: 20, borderRadius: 16, padding: 25, alignItems: 'center', justifyContent: 'center' },
+    resultCard: { marginBottom: 20, borderRadius: 16, padding: 25, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.1, shadowRadius: 12, elevation: 5 },
     resultLabel: { fontSize: 14, color: 'rgba(255,255,255,0.8)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 5 },
     resultVal: { fontSize: 48, color: '#FFF', fontWeight: '900', marginBottom: 5 },
     resultSub: { fontSize: 13, color: 'rgba(255,255,255,0.9)', fontWeight: '500' },
