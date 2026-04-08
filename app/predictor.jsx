@@ -4,6 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import * as Animatable from 'react-native-animatable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PredictTab({ navigation }) {
@@ -146,76 +147,79 @@ export default function PredictTab({ navigation }) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         
         {/* Step 1: Selection Controls */}
-        <Text style={[styles.sectionLabel, { color: theme.secondary }]}>1. Select Subject</Text>
-        <View style={styles.pillContainerRow}>
-            <View style={{flex:1, minWidth:100}}>
-                <TouchableOpacity 
-                    style={[styles.dropdown, { backgroundColor: theme.card, borderColor: theme.secondary }]} 
-                    onPress={() => setShowDropdown(true)}
-                    activeOpacity={0.8}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Selected subject: ${selectedSubject || "None"}. Open subject list.`}
-                    accessibilityHint="Opens a modal to select a different subject"
-                >
-                    <Text style={[styles.dropdownText, { color: theme.text }]} numberOfLines={1} importantForAccessibility="no">
-                        {selectedSubject || "No Subjects Found"}
-                    </Text>
-                    <Ionicons name={'chevron-down'} size={18} color={theme.secondary} importantForAccessibility="no" />
-                </TouchableOpacity>
-            </View>
-            <View>
-            <TouchableOpacity
-                style={[styles.compactPill, { borderColor: theme.secondary, backgroundColor: theme.primary + '20' }]}
-                onPress={() => setSelectedType(selectedType === 'TH' ? 'PR' : 'TH')}
-            >
-                <Text style={[styles.compactPillText, { color: theme.primary }]}>{selectedType}</Text>
-                <Ionicons name="swap-horizontal" size={14} color={selectedType === 'TH' ? theme.secondary : theme.primary} style={{marginLeft: 4}}/>
-            </TouchableOpacity>
-        </View>
+        <Animatable.View animation='fadeInRight' duration={500} useNativeDriver >
+            <Text style={[styles.sectionLabel, { color: theme.secondary }]}>1. Select Subject</Text>
+            <View style={styles.pillContainerRow}>
+                <View style={{flex:1, minWidth:100}}>
+                    <TouchableOpacity 
+                        style={[styles.dropdown, { backgroundColor: theme.card, borderColor: theme.secondary }]} 
+                        onPress={() => setShowDropdown(true)}
+                        activeOpacity={0.8}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Selected subject: ${selectedSubject || "None"}. Open subject list.`}
+                        accessibilityHint="Opens a modal to select a different subject"
+                    >
+                        <Text style={[styles.dropdownText, { color: theme.text }]} numberOfLines={1} importantForAccessibility="no">
+                            {selectedSubject || "No Subjects Found"}
+                        </Text>
+                        <Ionicons name={'chevron-down'} size={18} color={theme.secondary} importantForAccessibility="no" />
+                    </TouchableOpacity>
+                </View>
+                <View>
+                    <TouchableOpacity
+                        style={[styles.compactPill, { borderColor: theme.secondary, backgroundColor: theme.primary + '20' }]}
+                        onPress={() => setSelectedType(selectedType === 'TH' ? 'PR' : 'TH')}
+                    >
+                        <Text style={[styles.compactPillText, { color: theme.primary }]}>{selectedType}</Text>
+                        <Ionicons name="swap-horizontal" size={14} color={selectedType === 'TH' ? theme.secondary : theme.primary} style={{marginLeft: 4}}/>
+                    </TouchableOpacity>
+                </View>
 
-            <Modal 
-              visible={showDropdown} 
-              transparent={true} 
-              animationType="fade" 
-              onRequestClose={() => setShowDropdown(false)}
-              accessibilityViewIsModal={true}
-            >
-                <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPressOut={() => setShowDropdown(false)} accessibilityLabel="Close subject list" accessibilityRole="button">
-                    <View style={[styles.modalListContainer, { backgroundColor: theme.background, borderColor: theme.secondary }]}>
-                        <Text style={[styles.modalListHeader, { color: theme.text, backgroundColor: theme.iconBg, borderBottomWidth: .5, borderColor:theme.primary}]} accessibilityRole="header">Select a Subject</Text>
-                        <ScrollView style={{maxHeight: 350}} showsVerticalScrollIndicator={true}>
-                            {subjects.map((sub) => (
-                                <TouchableOpacity 
-                                    key={sub} 
-                                    style={[styles.dropdownItem, { borderBottomColor: theme.secondary }]} 
-                                    onPress={() => {
-                                        setSelectedSubject(sub);
-                                        setShowDropdown(false);
-                                    }}
-                                    accessibilityRole="button"
-                                    accessibilityLabel={sub}
-                                    accessibilityState={{ selected: selectedSubject === sub }}
-                                >
-                                    <Text style={[styles.dropdownItemText, { color: theme.secondary }, selectedSubject === sub && { color: theme.primary, fontWeight: '700' }]} importantForAccessibility="no">
-                                        {sub}
-                                    </Text>
-                                    {selectedSubject === sub && <Ionicons name="checkmark" size={16} color={theme.primary} importantForAccessibility="no" />}
-                                </TouchableOpacity>
-                            ))}
-                        </ScrollView>
-                    </View>
-                </TouchableOpacity>
-            </Modal>
-        </View>
+
+                <Modal 
+                  visible={showDropdown} 
+                  transparent={true} 
+                  animationType="fade" 
+                  onRequestClose={() => setShowDropdown(false)}
+                  accessibilityViewIsModal={true}
+                >
+                    <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPressOut={() => setShowDropdown(false)} accessibilityLabel="Close subject list" accessibilityRole="button">
+                        <View style={[styles.modalListContainer, { backgroundColor: theme.background, borderColor: theme.secondary }]}>
+                            <Text style={[styles.modalListHeader, { color: theme.text, backgroundColor: theme.iconBg, borderBottomWidth: .5, borderColor:theme.primary}]} accessibilityRole="header">Select a Subject</Text>
+                            <ScrollView style={{maxHeight: 350}} showsVerticalScrollIndicator={true}>
+                                {subjects.map((sub) => (
+                                    <TouchableOpacity 
+                                        key={sub} 
+                                        style={[styles.dropdownItem, { borderBottomColor: theme.secondary }]} 
+                                        onPress={() => {
+                                            setSelectedSubject(sub);
+                                            setShowDropdown(false);
+                                        }}
+                                        accessibilityRole="button"
+                                        accessibilityLabel={sub}
+                                        accessibilityState={{ selected: selectedSubject === sub }}
+                                    >
+                                        <Text style={[styles.dropdownItemText, { color: theme.secondary }, selectedSubject === sub && { color: theme.primary, fontWeight: '700' }]} importantForAccessibility="no">
+                                            {sub}
+                                        </Text>
+                                        {selectedSubject === sub && <Ionicons name="checkmark" size={16} color={theme.primary} importantForAccessibility="no" />}
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
+                        </View>
+                    </TouchableOpacity>
+                </Modal>
+            </View>
+        </Animatable.View>
 
         {currentStats.held === 0 ? (
-            <View style={[styles.emptyCard, { backgroundColor: theme.card }]} accessible={true} accessibilityLabel="No data found for this selection. Try switching between Theory and Practical.">
+            <Animatable.View style={[styles.emptyCard, { backgroundColor: theme.card }]} accessible={true} accessibilityLabel="No data found for this selection. Try switching between Theory and Practical." animation='fadeInLeft' duration={500} useNativeDriver>
                 <Ionicons name="information-circle-outline" size={32} color={theme.secondary} style={{marginBottom: 10}} importantForAccessibility="no" />
                 <Text style={{color: theme.text, textAlign: 'center', fontWeight: '500'}} importantForAccessibility="no">No data found for this selection.</Text>
                 <Text style={{color: theme.secondary, textAlign: 'center', fontSize: 13, marginTop: 5}} importantForAccessibility="no">Try switching between Theory and Practical.</Text>
-            </View>
+            </Animatable.View>
         ) : (
-            <>
+            <Animatable.View animation='fadeInLeft' duration={600} delay={100} useNativeDriver >
 
                 {/* Step 2: Current Status */}
                 <Text style={[styles.sectionLabel, { color: theme.secondary }]}>2. CURRENT STATS</Text>
@@ -311,12 +315,12 @@ export default function PredictTab({ navigation }) {
                   accessibilityLabel={`Predicted Attendance: ${prediction.newPercentage} percent. Based on ${currentStats.attended + attendCount} out of ${currentStats.held + attendCount + bunkCount} total classes.`}
                 >
                     <Text style={styles.resultLabel} importantForAccessibility="no">Predicted Attendance (x)</Text>
-                    <Text style={styles.resultVal} importantForAccessibility="no">{prediction.newPercentage}%</Text>
+                    <Animatable.Text style={styles.resultVal} importantForAccessibility="no">{prediction.newPercentage}%</Animatable.Text>
                     <Text style={styles.resultSub} importantForAccessibility="no">
                         ({currentStats.attended + attendCount} / {currentStats.held + attendCount + bunkCount} classes)
                     </Text>
                 </View>
-            </>
+            </Animatable.View>
         )}
 
         {/* MARKS INFO */}
