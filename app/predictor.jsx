@@ -44,9 +44,11 @@ export default function PredictTab({ navigation }) {
             setSelectedSubject(uniqueSubjects[0]);
           }
         }
-      } catch (error) {
+      } 
+			catch (error) {
         console.error("Failed to load attendance for predictor:", error);
-      } finally {
+      } 
+			finally {
         setLoading(false);
       }
     };
@@ -55,89 +57,86 @@ export default function PredictTab({ navigation }) {
 
   // Reset counters when subject or type changes
   useEffect(() => {
-      setAttendCount(0);
-      setBunkCount(0);
+    setAttendCount(0);
+    setBunkCount(0);
   }, [selectedSubject, selectedType]);
 
   // Helper to extract values safely
   const getVal = (row, ...keys) => {
     for (const key of keys) {
-        if (row[key] !== undefined && row[key] !== null && row[key] !== "") {
-            return parseInt(row[key], 10) || 0;
-        }
+      if (row[key] !== undefined && row[key] !== null && row[key] !== "") {
+      	return parseInt(row[key], 10) || 0;
+      }
     }
     return 0;
   };
 
   // --- 2. CALCULATE CURRENT STATS ---
   const currentStats = useMemo(() => {
-      if (!fullData || !selectedSubject) return { attended: 0, held: 0, percentage: 0 };
+    if (!fullData || !selectedSubject) return { attended: 0, held: 0, percentage: 0 };
 
-      const targetObject = selectedType === 'TH' ? fullData.theory : (fullData.practical || fullData.tutorial);
-      const rows = targetObject?.[selectedSubject] || [];
+    const targetObject = selectedType === 'TH' ? fullData.theory : (fullData.practical || fullData.tutorial);
+    const rows = targetObject?.[selectedSubject] || [];
 
-      let attended = 0;
-      let held = 0;
+    let attended = 0;
+    let held = 0;
 
-      rows.forEach(row => {
-          attended += getVal(row, 'Final Lect. Attended', 'LECT_ATTD', 'Lecture Attended');
-          held += getVal(row, 'Final Lect. Held', 'LECT_HELD', 'Lecture Delivered');
-      });
+    rows.forEach(row => {
+        attended += getVal(row, 'Final Lect. Attended', 'LECT_ATTD', 'Lecture Attended');
+        held += getVal(row, 'Final Lect. Held', 'LECT_HELD', 'Lecture Delivered');
+    });
 
-      const percentage = held === 0 ? 0 : (attended / held) * 100;
+    const percentage = held === 0 ? 0 : (attended / held) * 100;
 
-      return { attended, held, percentage: percentage.toFixed(1) };
+    return { attended, held, percentage: percentage.toFixed(1) };
   }, [fullData, selectedSubject, selectedType]);
 
   // --- 3. CALCULATE PREDICTIONS ---
   const prediction = useMemo(() => {
-      const { attended, held } = currentStats;
-      const newAttended = attended + attendCount;
-      const newHeld = held + attendCount + bunkCount;
-      
-      const newPercentage = newHeld === 0 ? 0 : (newAttended / newHeld) * 100;
-      
-      // (Target 67%)
-      let insight = "";
-      let insightColor = theme.secondary;
-
-      if (held > 0) {
-          const target = 0.67;
-          const currentDecimal = attended / held;
-
-          if (currentDecimal >= target) {
-              // Calculate Safe Bunks: M = (A - 0.67H) / 0.67
-              const safeBunks = Math.floor((attended - (target * held)) / target);
-              if (safeBunks > 0) {
-                  insight = `You can safely bunk ${safeBunks} more class${safeBunks > 1 ? 'es' : ''} and stay above 67%.`;
-                  insightColor = theme.success;
-              } else {
-                  insight = `You are exactly at the border! Don't bunk the next class.`;
-                  insightColor = theme.secondary;
-              }
+    const { attended, held } = currentStats;
+    const newAttended = attended + attendCount;
+    const newHeld = held + attendCount + bunkCount;
+    
+    const newPercentage = newHeld === 0 ? 0 : (newAttended / newHeld) * 100;
+    
+    // (Target 67%)
+    let insight = "";
+    let insightColor = theme.secondary;
+    if (held > 0) {
+      const target = 0.67;
+      const currentDecimal = attended / held;
+      if (currentDecimal >= target) {
+          // Calculate Safe Bunks: M = (A - 0.67H) / 0.67
+          const safeBunks = Math.floor((attended - (target * held)) / target);
+          if (safeBunks > 0) {
+              insight = `You can safely bunk ${safeBunks} more class${safeBunks > 1 ? 'es' : ''} and stay above 67%.`;
+              insightColor = theme.success;
           } else {
-              // Calculate Required Classes: R = (0.67H - A) / 0.33
-              const reqClasses = Math.ceil(((target * held) - attended) / 0.33);
-              insight = `You need to attend ${reqClasses} more class(es) to reach 67%.`;
-              insightColor = theme.error;
+              insight = `You are exactly at the border! Don't bunk the next class.`;
+              insightColor = theme.secondary;
           }
+      } 
+			else {
+        // Calculate Required Classes: R = (0.67H - A) / 0.33
+        const reqClasses = Math.ceil(((target * held) - attended) / 0.33);
+        insight = `You need to attend ${reqClasses} more class(es) to reach 67%.`;
+        insightColor = theme.error;
       }
-
-      return { 
-          newPercentage: newPercentage.toFixed(1), 
-          insight, 
-          insightColor,
-          isLow: newPercentage < 67 
-      };
+    }
+    return { 
+        newPercentage: newPercentage.toFixed(1), 
+        insight, 
+        insightColor,
+        isLow: newPercentage < 67 
+    };
   }, [currentStats, attendCount, bunkCount, theme]);
 
-
   if (loading) {
-      return (
-          <SafeAreaView style={[styles.container, { backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center' }]}>
-              <ActivityIndicator size="large" color={theme.primary} accessibilityLabel="Loading predictor data" />
-          </SafeAreaView>
-      );
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={theme.primary} accessibilityLabel="Loading predictor data" />
+      </SafeAreaView>
+    );
   }
 
   return (
@@ -148,179 +147,169 @@ export default function PredictTab({ navigation }) {
         
         {/* Step 1: Selection Controls */}
         <Animatable.View animation='fadeInRight' duration={500} useNativeDriver >
-            <Text style={[styles.sectionLabel, { color: theme.secondary }]}>1. Select Subject</Text>
-            <View style={styles.pillContainerRow}>
-                <View style={{flex:1, minWidth:100}}>
-                    <TouchableOpacity 
-                        style={[styles.dropdown, { backgroundColor: theme.card, borderColor: theme.secondary }]} 
-                        onPress={() => setShowDropdown(true)}
-                        activeOpacity={0.8}
-                        accessibilityRole="button"
-                        accessibilityLabel={`Selected subject: ${selectedSubject || "None"}. Open subject list.`}
-                        accessibilityHint="Opens a modal to select a different subject"
-                    >
-                        <Text style={[styles.dropdownText, { color: theme.text }]} numberOfLines={1} importantForAccessibility="no">
-                            {selectedSubject || "No Subjects Found"}
-                        </Text>
-                        <Ionicons name={'chevron-down'} size={18} color={theme.secondary} importantForAccessibility="no" />
-                    </TouchableOpacity>
-                </View>
-                <View>
-                    <TouchableOpacity
-                        style={[styles.compactPill, { borderColor: theme.secondary, backgroundColor: theme.primary + '20' }]}
-                        onPress={() => setSelectedType(selectedType === 'TH' ? 'PR' : 'TH')}
-                    >
-                        <Text style={[styles.compactPillText, { color: theme.primary }]}>{selectedType}</Text>
-                        <Ionicons name="swap-horizontal" size={14} color={selectedType === 'TH' ? theme.secondary : theme.primary} style={{marginLeft: 4}}/>
-                    </TouchableOpacity>
-                </View>
-
-
-                <Modal 
-                  visible={showDropdown} 
-                  transparent={true} 
-                  animationType="fade" 
-                  onRequestClose={() => setShowDropdown(false)}
-                  accessibilityViewIsModal={true}
-                >
-                    <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPressOut={() => setShowDropdown(false)} accessibilityLabel="Close subject list" accessibilityRole="button">
-                        <View style={[styles.modalListContainer, { backgroundColor: theme.background, borderColor: theme.secondary }]}>
-                            <Text style={[styles.modalListHeader, { color: theme.text, backgroundColor: theme.iconBg, borderBottomWidth: .5, borderColor:theme.primary}]} accessibilityRole="header">Select a Subject</Text>
-                            <ScrollView style={{maxHeight: 350}} showsVerticalScrollIndicator={true}>
-                                {subjects.map((sub) => (
-                                    <TouchableOpacity 
-                                        key={sub} 
-                                        style={[styles.dropdownItem, { borderBottomColor: theme.secondary }]} 
-                                        onPress={() => {
-                                            setSelectedSubject(sub);
-                                            setShowDropdown(false);
-                                        }}
-                                        accessibilityRole="button"
-                                        accessibilityLabel={sub}
-                                        accessibilityState={{ selected: selectedSubject === sub }}
-                                    >
-                                        <Text style={[styles.dropdownItemText, { color: theme.secondary }, selectedSubject === sub && { color: theme.primary, fontWeight: '700' }]} importantForAccessibility="no">
-                                            {sub}
-                                        </Text>
-                                        {selectedSubject === sub && <Ionicons name="checkmark" size={16} color={theme.primary} importantForAccessibility="no" />}
-                                    </TouchableOpacity>
-                                ))}
-                            </ScrollView>
-                        </View>
-                    </TouchableOpacity>
-                </Modal>
+          <Text style={[styles.sectionLabel, { color: theme.secondary }]}>1. Select Subject</Text>
+          <View style={styles.pillContainerRow}>
+            <View style={{flex:1, minWidth:100}}>
+              <TouchableOpacity 
+                style={[styles.dropdown, { backgroundColor: theme.card, borderColor: theme.secondary }]} 
+                onPress={() => setShowDropdown(true)}
+                activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel={`Selected subject: ${selectedSubject || "None"}. Open subject list.`}
+                accessibilityHint="Opens a modal to select a different subject"
+              >
+                <Text style={[styles.dropdownText, { color: theme.text }]} numberOfLines={1} importantForAccessibility="no">
+                  {selectedSubject || "No Subjects Found"}
+                </Text>
+                <Ionicons name={'chevron-down'} size={18} color={theme.secondary} importantForAccessibility="no" />
+              </TouchableOpacity>
             </View>
+            <View>
+              <TouchableOpacity
+                  style={[styles.compactPill, { borderColor: theme.secondary, backgroundColor: theme.primary + '20' }]}
+                  onPress={() => setSelectedType(selectedType === 'TH' ? 'PR' : 'TH')}
+              >
+                  <Text style={[styles.compactPillText, { color: theme.primary }]}>{selectedType}</Text>
+                  <Ionicons name="swap-horizontal" size={14} color={selectedType === 'TH' ? theme.secondary : theme.primary} style={{marginLeft: 4}}/>
+              </TouchableOpacity>
+            </View>
+            <Modal 
+              visible={showDropdown} 
+              transparent={true} 
+              animationType="fade" 
+              onRequestClose={() => setShowDropdown(false)}
+              accessibilityViewIsModal={true}
+            >
+              <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPressOut={() => setShowDropdown(false)} accessibilityLabel="Close subject list" accessibilityRole="button">
+                <View style={[styles.modalListContainer, { backgroundColor: theme.background, borderColor: theme.secondary }]}>
+                  <Text style={[styles.modalListHeader, { color: theme.text, backgroundColor: theme.iconBg, borderBottomWidth: .5, borderColor:theme.primary}]} accessibilityRole="header">Select a Subject</Text>
+                  <ScrollView style={{maxHeight: 350}} showsVerticalScrollIndicator={true}>
+                    {subjects.map((sub) => (
+                      <TouchableOpacity 
+                        key={sub} 
+                        style={[styles.dropdownItem, { borderBottomColor: theme.secondary }]} 
+                        onPress={() => {
+                            setSelectedSubject(sub);
+                            setShowDropdown(false);
+                        }}
+                        accessibilityRole="button"
+                        accessibilityLabel={sub}
+                        accessibilityState={{ selected: selectedSubject === sub }}
+                      >
+                        <Text style={[styles.dropdownItemText, { color: theme.secondary }, selectedSubject === sub && { color: theme.primary, fontWeight: '700' }]} importantForAccessibility="no">
+                            {sub}
+                        </Text>
+                        {selectedSubject === sub && <Ionicons name="checkmark" size={16} color={theme.primary} importantForAccessibility="no" />}
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              </TouchableOpacity>
+            </Modal>
+          </View>
         </Animatable.View>
 
         {currentStats.held === 0 ? (
-            <Animatable.View style={[styles.emptyCard, { backgroundColor: theme.card }]} accessible={true} accessibilityLabel="No data found for this selection. Try switching between Theory and Practical." animation='fadeInLeft' duration={500} useNativeDriver>
-                <Ionicons name="information-circle-outline" size={32} color={theme.secondary} style={{marginBottom: 10}} importantForAccessibility="no" />
-                <Text style={{color: theme.text, textAlign: 'center', fontWeight: '500'}} importantForAccessibility="no">No data found for this selection.</Text>
-                <Text style={{color: theme.secondary, textAlign: 'center', fontSize: 13, marginTop: 5}} importantForAccessibility="no">Try switching between Theory and Practical.</Text>
-            </Animatable.View>
+          <Animatable.View style={[styles.emptyCard, { backgroundColor: theme.card }]} accessible={true} accessibilityLabel="No data found for this selection. Try switching between Theory and Practical." animation='fadeInLeft' duration={500} useNativeDriver>
+            <Ionicons name="information-circle-outline" size={32} color={theme.secondary} style={{marginBottom: 10}} importantForAccessibility="no" />
+            <Text style={{color: theme.text, textAlign: 'center', fontWeight: '500'}} importantForAccessibility="no">No data found for this selection.</Text>
+            <Text style={{color: theme.secondary, textAlign: 'center', fontSize: 13, marginTop: 5}} importantForAccessibility="no">Try switching between Theory and Practical.</Text>
+          </Animatable.View>
         ) : (
-            <Animatable.View animation='fadeInLeft' duration={600} delay={100} useNativeDriver >
-
-                {/* Step 2: Current Status */}
-                <Text style={[styles.sectionLabel, { color: theme.secondary }]}>2. CURRENT STATS</Text>
-
-                {/* Step 3: Calculation */}
-                <View 
-                  style={[styles.statusCard, { backgroundColor: theme.card }]} 
-                  accessible={true} 
-                  accessibilityLabel={`Current Stats: You have attended ${currentStats.attended} out of ${currentStats.held} classes. Current total is ${currentStats.percentage} percent.`}
-                >
-                    <View style={styles.statusCol} importantForAccessibility="no-hide-descendants">
-                        <Text style={[styles.statusVal, { color: theme.text }]}>{currentStats.attended}/{currentStats.held}</Text>
-                        <Text style={[styles.statusLabel, { color: theme.secondary }]}>Classes Attended</Text>
-                    </View>
-                    <View style={[styles.statusDivider, { backgroundColor: theme.secondary }]} />
-                    <View style={styles.statusCol} importantForAccessibility="no-hide-descendants">
-                        <Text style={[styles.statusVal, { color: Number(currentStats.percentage) < 67 ? theme.error : theme.success }]}>
-                            {currentStats.percentage}%
-                        </Text>
-                        <Text style={[styles.statusLabel, { color: theme.secondary }]}>Current Total</Text>
-                    </View>
+          <Animatable.View animation='fadeInLeft' duration={600} delay={100} useNativeDriver >
+              {/* Step 2: Current Status */}
+              <Text style={[styles.sectionLabel, { color: theme.secondary }]}>2. CURRENT STATS</Text>
+              <View 
+                style={[styles.statusCard, { backgroundColor: theme.card }]} 
+                accessible={true} 
+                accessibilityLabel={`Current Stats: You have attended ${currentStats.attended} out of ${currentStats.held} classes. Current total is ${currentStats.percentage} percent.`}
+              >
+                <View style={styles.statusCol} importantForAccessibility="no-hide-descendants">
+                  <Text style={[styles.statusVal, { color: theme.text }]}>{currentStats.attended}/{currentStats.held}</Text>
+                  <Text style={[styles.statusLabel, { color: theme.secondary }]}>Classes Attended</Text>
                 </View>
-
-                {/* Smart Insight */}
-                <View style={[{backgroundColor: theme.card}]} accessible={true} accessibilityLabel={`Insight: ${prediction.insight}. Reminder: A 2-hour class gives you 2 points worth of attendance!`}>
-                  <View style={[styles.insightBox]} importantForAccessibility="no-hide-descendants">
-                      <Ionicons name="bulb-outline" size={25} color={prediction.insightColor} />
-                      <Text style={[styles.insightText, { color: prediction.insightColor }]}>{prediction.insight}</Text>
-                  </View>
-                  <Text style={ { color: theme.primary, padding:16, paddingTop:0, fontSize:13 }} importantForAccessibility="no">Reminder: A 2-hour class gives you 2 points worth of attendance!</Text>
+                <View style={[styles.statusDivider, { backgroundColor: theme.secondary }]} />
+                <View style={styles.statusCol} importantForAccessibility="no-hide-descendants">
+                  <Text style={[styles.statusVal, { color: Number(currentStats.percentage) < 67 ? theme.error : theme.success }]}>
+                      {currentStats.percentage}%
+                  </Text>
+                  <Text style={[styles.statusLabel, { color: theme.secondary }]}>Current Total</Text>
                 </View>
-
-                <Text style={[styles.sectionLabel, { color: theme.secondary, marginTop: 20 }]}>3. Plan Future Classes</Text>
-                
-                <View style={styles.controlsGrid}>
-                    {/* Attend Control */}
-                    <View style={[styles.controlBox, { backgroundColor: theme.card }]}>
-                        <Text style={[styles.controlLabel, { color: theme.success }]} accessibilityRole="header">To Attend</Text>
-                        <View style={styles.counterRow}>
-                            <TouchableOpacity 
-                              style={[styles.counterBtn, { backgroundColor: theme.background }]} 
-                              onPress={() => setAttendCount(Math.max(0, attendCount - 1))}
-                              accessibilityRole="button"
-                              accessibilityLabel="Decrease classes to attend"
-                              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                            >
-                                <Ionicons name="remove" size={25} color={theme.primary} importantForAccessibility="no" />
-                            </TouchableOpacity>
-                            <Text style={[styles.counterVal, { color: theme.text }]} accessibilityLabel={`${attendCount} classes planned to attend`}>{attendCount}</Text>
-                            <TouchableOpacity 
-                              style={[styles.counterBtn, { backgroundColor: theme.background }]} 
-                              onPress={() => {if (attendCount < 15) setAttendCount(Math.max(0, attendCount + 1))}}
-                              accessibilityRole="button"
-                              accessibilityLabel="Increase classes to attend"
-                              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                            >
-                                <Ionicons name="add" size={25} color={theme.primary} importantForAccessibility="no" />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-
-                    {/* Miss Control */}
-                    <View style={[styles.controlBox, { backgroundColor: theme.card }]}>
-                        <Text style={[styles.controlLabel, { color: theme.error }]} accessibilityRole="header">To Miss</Text>
-                        <View style={styles.counterRow}>
-                            <TouchableOpacity 
-                              style={[styles.counterBtn, { backgroundColor: theme.background }]} 
-                              onPress={() => setBunkCount(Math.max(0, bunkCount - 1))}
-                              accessibilityRole="button"
-                              accessibilityLabel="Decrease classes to miss"
-                              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                            >
-                                <Ionicons name="remove" size={25} color={theme.primary} importantForAccessibility="no" />
-                            </TouchableOpacity>
-                            <Text style={[styles.counterVal, { color: theme.text }]} accessibilityLabel={`${bunkCount} classes planned to miss`}>{bunkCount}</Text>
-                            <TouchableOpacity 
-                              style={[styles.counterBtn, { backgroundColor: theme.background }]} 
-                              onPress={() => {if (bunkCount < 15) setBunkCount(Math.max(0, bunkCount + 1))}}
-                              accessibilityRole="button"
-                              accessibilityLabel="Increase classes to miss"
-                              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                            >
-                                <Ionicons name="add" size={25} color={theme.primary} importantForAccessibility="no" />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
+              </View>
+              {/* Smart Insight */}
+              <View style={[{backgroundColor: theme.card}]} accessible={true} accessibilityLabel={`Insight: ${prediction.insight}. Reminder: A 2-hour class gives you 2 points worth of attendance!`}>
+                <View style={[styles.insightBox]} importantForAccessibility="no-hide-descendants">
+                  <Ionicons name="bulb-outline" size={25} color={prediction.insightColor} />
+                  <Text style={[styles.insightText, { color: prediction.insightColor }]}>{prediction.insight}</Text>
                 </View>
-
-                {/* Result Card */}
-                <View 
-                  style={[styles.resultCard, { backgroundColor: prediction.isLow ? theme.error : theme.success }]}
-                  accessible={true}
-                  accessibilityLabel={`Predicted Attendance: ${prediction.newPercentage} percent. Based on ${currentStats.attended + attendCount} out of ${currentStats.held + attendCount + bunkCount} total classes.`}
-                >
-                    <Text style={styles.resultLabel} importantForAccessibility="no">Predicted Attendance (x)</Text>
-                    <Text style={styles.resultVal} importantForAccessibility="no">{prediction.newPercentage}%</Text>
-                    <Text style={styles.resultSub} importantForAccessibility="no">
-                        ({currentStats.attended + attendCount} / {currentStats.held + attendCount + bunkCount} classes)
-                    </Text>
+                <Text style={ { color: theme.primary, padding:16, paddingTop:0, fontSize:13 }} importantForAccessibility="no">Reminder: A 2-hour class gives you 2 points worth of attendance!</Text>
+              </View>
+            <Text style={[styles.sectionLabel, { color: theme.secondary, marginTop: 20 }]}>3. Plan Future Classes</Text>  
+            <View style={styles.controlsGrid}>
+              {/* Attend Control */}
+              <View style={[styles.controlBox, { backgroundColor: theme.card }]}>
+                <Text style={[styles.controlLabel, { color: theme.success }]} accessibilityRole="header">To Attend</Text>
+                <View style={styles.counterRow}>
+                  <TouchableOpacity 
+                    style={[styles.counterBtn, { backgroundColor: theme.background }]} 
+                    onPress={() => setAttendCount(Math.max(0, attendCount - 1))}
+                    accessibilityRole="button"
+                    accessibilityLabel="Decrease classes to attend"
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
+                    <Ionicons name="remove" size={25} color={theme.primary} importantForAccessibility="no" />
+                  </TouchableOpacity>
+                  <Text style={[styles.counterVal, { color: theme.text }]} accessibilityLabel={`${attendCount} classes planned to attend`}>{attendCount}</Text>
+                  <TouchableOpacity 
+                    style={[styles.counterBtn, { backgroundColor: theme.background }]} 
+                    onPress={() => {if (attendCount < 15) setAttendCount(Math.max(0, attendCount + 1))}}
+                    accessibilityRole="button"
+                    accessibilityLabel="Increase classes to attend"
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
+                  	<Ionicons name="add" size={25} color={theme.primary} importantForAccessibility="no" />
+                  </TouchableOpacity>
                 </View>
-            </Animatable.View>
+              </View>
+                {/* Miss Control */}
+              <View style={[styles.controlBox, { backgroundColor: theme.card }]}>
+                <Text style={[styles.controlLabel, { color: theme.error }]} accessibilityRole="header">To Miss</Text>
+                <View style={styles.counterRow}>
+                  <TouchableOpacity 
+                    style={[styles.counterBtn, { backgroundColor: theme.background }]} 
+                    onPress={() => setBunkCount(Math.max(0, bunkCount - 1))}
+                    accessibilityRole="button"
+                    accessibilityLabel="Decrease classes to miss"
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
+                    <Ionicons name="remove" size={25} color={theme.primary} importantForAccessibility="no" />
+                  </TouchableOpacity>
+                  <Text style={[styles.counterVal, { color: theme.text }]} accessibilityLabel={`${bunkCount} classes planned to miss`}>{bunkCount}</Text>
+                  <TouchableOpacity 
+                    style={[styles.counterBtn, { backgroundColor: theme.background }]} 
+                    onPress={() => {if (bunkCount < 15) setBunkCount(Math.max(0, bunkCount + 1))}}
+                    accessibilityRole="button"
+                    accessibilityLabel="Increase classes to miss"
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
+                    <Ionicons name="add" size={25} color={theme.primary} importantForAccessibility="no" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+            {/* Result Card */}
+            <View 
+              style={[styles.resultCard, { backgroundColor: prediction.isLow ? theme.error : theme.success }]}
+              accessible={true}
+              accessibilityLabel={`Predicted Attendance: ${prediction.newPercentage} percent. Based on ${currentStats.attended + attendCount} out of ${currentStats.held + attendCount + bunkCount} total classes.`}
+            >
+              <Text style={styles.resultLabel} importantForAccessibility="no">Predicted Attendance (x)</Text>
+              <Text style={styles.resultVal} importantForAccessibility="no">{prediction.newPercentage}%</Text>
+              <Text style={styles.resultSub} importantForAccessibility="no">
+                ({currentStats.attended + attendCount} / {currentStats.held + attendCount + bunkCount} classes)
+              </Text>
+            </View>
+          </Animatable.View>
         )}
 
         {/* MARKS INFO */}
@@ -336,8 +325,8 @@ export default function PredictTab({ navigation }) {
 
         {/* INSTRUCTIONS */}
         <View 
-            style={{padding:10}} 
-            accessible={true}
+          style={{padding:10}} 
+          accessible={true}
         >
           <Text style={[styles.infoText, { color: theme.secondary, fontSize:18, marginTop:10 }]}>HOW IT WORKS?</Text>
           <Text style={[styles.infoText, { color: theme.secondary, fontWeight:"normal", textAlign:'justify'}]}>1. The formula assumes that the next class would be of one hour and will be held with 100% surity.</Text>
@@ -369,15 +358,9 @@ const styles = StyleSheet.create({
     dropdownItem: { paddingVertical: 16, paddingHorizontal: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 0.5 },
     dropdownItemText: { fontSize: 15 },
 
-    // Toggle
-    toggleContainer: { flexDirection: 'row', borderRadius: 12, padding: 4, marginBottom: 25 },
-    toggleButton: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 8 },
-    toggleActive: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2 },
-    toggleText: { fontSize: 14, fontWeight: '600' },
-
     // Status Card
     emptyCard: { padding: 30, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginTop: 20 },
-    statusCard: { flexDirection: 'row', padding: 15, paddingBottom:0, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 3 },
+    statusCard: { flexDirection: 'row', padding: 15, paddingBottom:0 },
     statusCol: { flex: 1, alignItems: 'center', justifyContent: 'center' },
     statusDivider: { width: 1, height: '80%', alignSelf: 'center' },
     statusVal: { fontSize: 26, fontWeight: 'bold', marginBottom: 4 },
