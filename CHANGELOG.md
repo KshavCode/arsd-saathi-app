@@ -2,20 +2,20 @@
 
 ## 💫 What's New?
 - **Notice Retrieval**: Never miss announcements now! One button and get the notice right to your phone!
-- **Shareable Timetable**: Still stuck with sharing codes? Experience easy exporting via QR Codes!
-- **Custom Label**: Test on next week's GE class? Edit the timetabale and put a label right up there now!
+- **Shareable Timetable**: Export and share your timetable seamlessly using QR codes, removing the need for manual code sharing.
+- **Custom Label**: Enhance organization by adding personalized labels to your timetable for classes, tests, or events.
 - **More Stacked**: Experience smoother and organized layout with this upgraded version!
-- **Color Themes**: Make your college companion one of your own! Introducing 9 light and 7 dark themes to apply on ArsdSaathi.
-- **Support Page**: Show your support by donating some funds which will help the devs keep the app running.
+- **Color Themes**: Customize the app’s appearance with a collection of 9 light and 7 dark themes to suit your preference.
+- **Support Page**: Support ongoing development and maintenance by contributing through the dedicated support page.
 
 ## 🔍 Fixes
-- **Minor Spelling errors**: Making the information accurate and up to date.
-- **Notification config**: Weird notification set-ups removed while building the app.
-- **App Icon**: An optimized and cleanly designed ArsdSaathi icon.
-- **White Flash**: An appearing of white flash for milliseconds when navigation to new screens while in dark mode.
-- **Predictor Layout**: Cleaner and more stacked elements to increase UX.
-- **Sudden popping**: Now elements follow a smoother transition rather than just appearing.
-- **Dashboard**: Next class element is now a button which redirects to the 'view timetable'.
+- **Spelling Corrections**: Fixed minor spelling errors to ensure information is accurate and up to date.
+- **Notification config**: Removed inconsistent or unintended notification behaviors during the app build process.
+- **App Icon**: Introduced a cleaner and optimized ArsdSaathi app icon.
+- **White Flash Issue**: Resolved the brief white flash that appeared during screen transitions in dark mode.
+- **Predictor Layout**: Improved layout with cleaner and better-stacked elements for enhanced user experience.
+- **Sudden popping**: Replaced abrupt element appearances with smoother transitions across the app.
+- **Dashboard**: Converted the “Next Class” element into an interactive button that redirects to the “View Timetable” screen.
 
 ## 📦 How to Install
 1. Download the attached .apk file below.
@@ -31,4 +31,3 @@ To verify the integrity of this APK, you can compare the SHA-256 checksum:
 
 🚩 Issues
 In case of issues and feedbacks, use the report feature in the application.
-
