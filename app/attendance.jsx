@@ -4,6 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import * as Animatable from 'react-native-animatable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function AttendanceTab({ navigation }) {
@@ -11,11 +12,8 @@ export default function AttendanceTab({ navigation }) {
     const [fullData, setFullData] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Selection State
     const [subjects, setSubjects] = useState([]);
     const [selectedSubject, setSelectedSubject] = useState('');
-
-    // UI State
     const [showDropdown, setShowDropdown] = useState(false);
 
     useEffect(() => {
@@ -46,7 +44,7 @@ export default function AttendanceTab({ navigation }) {
         fetchLocal();
     }, []);
 
-    // Defaults to '-' if missing attendance
+    // Defaults to '-'
     const getValue = (row, ...keys) => {
         for (const key of keys) {
             if (row[key] !== undefined && row[key] !== null && row[key] !== "") return row[key];
@@ -95,7 +93,7 @@ export default function AttendanceTab({ navigation }) {
         addRowsToMap(theoryRows, 'theory');
         addRowsToMap(tutorialRows, 'practical');
 
-        // Convert the merged map back into an array for the grid
+        // Convert the merged map back into an array for grid
         Object.values(mergedByMonth).forEach(data => {
             formattedGrid.push([data.month, data.lecAtt, data.lecTotal, data.pracAtt, data.pracTotal]);
         });
@@ -134,7 +132,7 @@ export default function AttendanceTab({ navigation }) {
                 ) : (!fullData || subjects.length === 0) ? (
 
                     /* EMPTY STATE */
-                    <View style={styles.centerContainer} accessible={true}>
+                    <Animatable.View style={styles.centerContainer} accessible={true} animation='zoomIn' duration={500} useNativeDriver> 
                         <View style={[styles.emptyIconCtx, { backgroundColor: theme.card+'A0' }]} importantForAccessibility="no-hide-descendants">
                              <Ionicons name="calendar-outline" size={48} color={theme.primary} style={{ opacity: 0.8 }} />
                         </View>
@@ -142,12 +140,12 @@ export default function AttendanceTab({ navigation }) {
                         <Text style={[styles.emptySub, { color: theme.secondary }]}>
                             Attendance data is empty, kindly verify it on portal in case of an error.
                         </Text>
-                    </View>
+                    </Animatable.View>
 
                 ) : (
 
                     /* DATA VIEW */
-                    <>
+                    <Animatable.View animation='zoomIn' duration={500} delay={50} useNativeDriver>
                         <View style={styles.controlsRow}>
                             <Text style={[styles.selectLabel, { color: theme.secondary }]}>Select Subject:</Text>
                             <TouchableOpacity
@@ -253,7 +251,7 @@ export default function AttendanceTab({ navigation }) {
                                 </Text>
                              </View>
                         )}
-                    </>
+                    </Animatable.View>
                 )}
             </ScrollView>
         </SafeAreaView>
