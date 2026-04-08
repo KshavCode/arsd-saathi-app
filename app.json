@@ -7,7 +7,7 @@
     "jsEngine": "hermes",
     "icon": "./assets/images/icon.png",
     "scheme": "arsdsaathi",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
@@ -19,7 +19,6 @@
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/icon.png"
       },
-      "edgeToEdgeEnabled": true,
       "package": "com.keshav.arsdsaathi",
       "versionCode": 6,
       "intentFilters": [
@@ -34,10 +33,6 @@
           "category": ["BROWSABLE", "DEFAULT"]
         }
       ]
-    },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/icon.png"
     },
     "plugins": [
       "expo-router",
