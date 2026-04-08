@@ -1,4 +1,4 @@
-# ArsdSaathi v1.4.0 is now available!
+# ArsdSaathi v1.5.0 is now available!
 
 ## 💫 What's New?
 - **Notice Retrieval**: Never miss announcements now! One button and get the notice right to your phone!
