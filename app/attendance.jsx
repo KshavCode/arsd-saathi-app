@@ -145,7 +145,7 @@ export default function AttendanceTab({ navigation }) {
                 ) : (
 
                     /* DATA VIEW */
-                    <Animatable.View animation='zoomIn' duration={500} delay={50} useNativeDriver>
+                    <View>
                         <View style={styles.controlsRow}>
                             <Text style={[styles.selectLabel, { color: theme.secondary }]}>Select Subject:</Text>
                             <TouchableOpacity
@@ -251,7 +251,7 @@ export default function AttendanceTab({ navigation }) {
                                 </Text>
                              </View>
                         )}
-                    </Animatable.View>
+                    </View>
                 )}
             </ScrollView>
         </SafeAreaView>

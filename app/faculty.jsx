@@ -24,7 +24,7 @@ const FacultyCard = ({ data, theme, delay }) => {
             animation='fadeInLeft'
             delay={delay}
             duration={500}
-            useNativeDriver={true}
+            useNativeDriver
         >
             {/* --- Header: Teacher Identity --- */}
             <View style={styles.cardHeader} importantForAccessibility="no-hide-descendants">
