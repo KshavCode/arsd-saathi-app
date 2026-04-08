@@ -46,7 +46,7 @@ const NoticeCard = React.memo(({ item, theme, delay }) => (
 NoticeCard.displayName = 'NoticeCard';
 
 export default function Notices({ navigation}) {
-  const {theme, themeName, setThemeName} = useTheme()
+  const {theme} = useTheme()
   const webViewRef = useRef(null);
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);

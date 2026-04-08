@@ -30,7 +30,7 @@ const DetailRow = ({ label, value, icon, theme, isLast, delay }) => (
 );
 
 export default function DetailsTab({ navigation }) {
-    const {theme, themeName, setThemeName} = useTheme()
+    const {theme} = useTheme()
 
     const [profileData, setProfileData] = useState(null);
     const [loading, setLoading] = useState(true);

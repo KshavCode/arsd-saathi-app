@@ -69,7 +69,7 @@ const FacultyCard = ({ data, theme, delay }) => {
 };
 
 export default function FacultyTab({ navigation }) {
-    const {theme, themeName, setThemeName} = useTheme()
+    const {theme} = useTheme()
     const [facultyList, setFacultyList] = useState([]);
     const [loading, setLoading] = useState(true);
 
