@@ -28,13 +28,11 @@ const SupportCard = ({ icon, title, description, delay, theme }) => (
 export default function SupportUsTab({ navigation }) {
   const { theme } = useTheme();
 
-  // Replace these with your actual links
   const handleSupport = () => {
     Linking.openURL('upi://pay?pa=kshav005@okaxis&pn=Keshav&cu=INR').catch(() =>
         alert('No UPI app found on your phone.')
     )
   };
-
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <Header screenName={"SUPPORT US"} navigation={navigation} />
@@ -66,11 +64,11 @@ export default function SupportUsTab({ navigation }) {
             </Text>
           </TouchableOpacity>
           <Text style={[styles.storyText, { color: theme.secondary, marginTop: 10 }]}>
+            As you all know, this is an unofficial app and is undergoing various processes in order to be official. 
             If this app has saved you time or helped you out, a small contribution goes a long way.
           </Text>
         </Animatable.View>
 
-        {/* Where the money goes */}
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>Why we need your help</Text>
         </View>
