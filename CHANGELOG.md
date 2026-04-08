@@ -26,7 +26,7 @@
 ## 🔒 Security & Verification
 To verify the integrity of this APK, you can compare the SHA-256 checksum:
 ```bash
-code_here
+6c327fc665590d733d103fa2f56a1f78e0c760984ebc8fa38a40c152cf4411e7
 ```
 
 🚩 Issues
