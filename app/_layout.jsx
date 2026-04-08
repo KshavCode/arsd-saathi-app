@@ -2,6 +2,8 @@ import { Colors } from '@/constants/themeStyle';
 import { toastConfig } from '@/constants/toastConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createStackNavigator } from '@react-navigation/stack';
+import * as Linking from 'expo-linking';
+import { useRouter } from 'expo-router';
 import React, { useContext, useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import Toast from 'react-native-toast-message';
@@ -23,13 +25,40 @@ const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
 const TWO_DAYS = 2 * 24 * 60 * 60 * 1000;
 
 export default function Stack1() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const handleDeepLink = (url) => {
+      const parsed = Linking.parse(url);
+
+      if (parsed.path === 'timetable' && parsed.queryParams?.data) {
+        router.push({
+          pathname: '/timetable',
+          params: { importData: parsed.queryParams.data },
+        });
+      }
+    };
+
+    // cold start
+    Linking.getInitialURL().then((url) => {
+      if (url) handleDeepLink(url);
+    });
+
+    // app open
+    const sub = Linking.addEventListener('url', ({ url }) => {
+      handleDeepLink(url);
+    });
+
+    return () => sub.remove();
+  }, []);
+
   return (
-  <>
-    <ThemeProvider>
+    <>
+      <ThemeProvider>
         <StackContent />
-    </ThemeProvider>
-    <Toast config={toastConfig}/>
-  </>
+      </ThemeProvider>
+      <Toast config={toastConfig}/>
+    </>
   );
 }
 

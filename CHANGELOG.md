@@ -1,12 +1,12 @@
 # ArsdSaathi v1.5.0 is now available!
 
 ## 💫 What's New?
-- **Notice Retrieval**: Never miss announcements now! One button and get the notice right to your phone!
-- **Shareable Timetable**: Still stuck with sharing codes? Experience easy exporting via QR Codes!
-- **Custom Label**: Test on next week's GE class? Edit the timetabale and put a label right up there now!
-- **More Stacked**: Experience smoother and organized layout with this upgraded version!
-- **Color Themes**: Make your college companion one of your own! Introducing 9 light and 7 dark themes to apply on ArsdSaathi.
-- **Support Page**: Show your support by donating some funds which will help the devs keep the app running.
+- **Notice Retrieval**: Stay updated with the latest announcements instantly. With a single tap, receive important notices directly on your device!
+- **Shareable Timetable**: Easily share your timetable using QR codes, eliminating the need for manual code sharing.
+- **Custom Label**: Personalize your timetable by adding custom labels to classes or events for better clarity and planning.
+- **More Stacked**: Enjoy a more structured and visually organized interface with enhanced stacking and layout improvements.
+- **Color Themes**: Customize your experience with a selection of 9 light and 7 dark themes, allowing you to tailor the app’s appearance to your preference.
+- **Support Page**: Contribute to the development and maintenance of the app by supporting the developers through donations.
 
 ## 🔍 Fixes
 - **Minor Spelling errors**: Making the information accurate and up to date.
@@ -16,6 +16,8 @@
 - **Predictor Layout**: Cleaner and more stacked elements to increase UX.
 - **Sudden popping**: Now elements follow a smoother transition rather than just appearing.
 - **Dashboard**: Next class element is now a button which redirects to the 'view timetable'.
+- **Unwanted Dependencies**: The app is now more lightweight with new features.
+- **Toast Messages**: Alerts in the app are now replaced by visually appealing elements which appear at bottom of the screen.
 
 ## 📦 How to Install
 1. Download the attached .apk file below.
@@ -26,7 +28,7 @@
 ## 🔒 Security & Verification
 To verify the integrity of this APK, you can compare the SHA-256 checksum:
 ```bash
-code_here
+6c327fc665590d733d103fa2f56a1f78e0c760984ebc8fa38a40c152cf4411e7
 ```
 
 🚩 Issues

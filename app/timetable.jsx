@@ -4,6 +4,7 @@ import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Linking from 'expo-linking';
+import { useLocalSearchParams } from 'expo-router';
 import LZString from 'lz-string';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, ScrollView, Share, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -89,7 +90,8 @@ const deserializeTimetable = (str) => {
 };
 // -----------------------------------------
 
-export default function Timetable({ route, navigation }) {
+export default function Timetable({ navigation }) {
+	const {importData} = useLocalSearchParams()
 	let day = new Date().getDay()-1;
 	const {theme} = useTheme()
 	const [loading, setLoading] = useState(true);
@@ -142,6 +144,12 @@ export default function Timetable({ route, navigation }) {
 		Linking.getInitialURL().then((url) => { if (url) handleImportLink(url); });
 		return () => subscription.remove();
 	}, []);
+
+	useEffect(() => {
+  		if (importData) {
+    		processImportData(importData);
+  			}
+		}, [importData]);
 
 	const saveTimetable = async (newData) => {
 		setTimetable(newData);
@@ -238,7 +246,7 @@ export default function Timetable({ route, navigation }) {
 			const tinyCode = LZString.compressToEncodedURIComponent(flatString);
 			
 			// Generate the link
-			const link = Linking.createURL(`Timetable?data=${tinyCode}`);
+			const link = Linking.createURL(`timetable?data=${tinyCode}`);
 			
 			setShareLink(link);
 			setShowQRModal(true);
