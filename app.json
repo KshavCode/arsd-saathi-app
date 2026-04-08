@@ -14,6 +14,7 @@
       "bundleIdentifier": "com.keshav.arsdsaathi"
     },
     "android": {
+      "edgeToEdgeEnabled": true,
       "enableProguardInReleaseBuilds": true,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
