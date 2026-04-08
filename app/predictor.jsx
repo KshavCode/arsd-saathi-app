@@ -315,7 +315,7 @@ export default function PredictTab({ navigation }) {
                   accessibilityLabel={`Predicted Attendance: ${prediction.newPercentage} percent. Based on ${currentStats.attended + attendCount} out of ${currentStats.held + attendCount + bunkCount} total classes.`}
                 >
                     <Text style={styles.resultLabel} importantForAccessibility="no">Predicted Attendance (x)</Text>
-                    <Animatable.Text style={styles.resultVal} importantForAccessibility="no">{prediction.newPercentage}%</Animatable.Text>
+                    <Text style={styles.resultVal} importantForAccessibility="no">{prediction.newPercentage}%</Text>
                     <Text style={styles.resultSub} importantForAccessibility="no">
                         ({currentStats.attended + attendCount} / {currentStats.held + attendCount + bunkCount} classes)
                     </Text>
