@@ -1,4 +1,5 @@
 export const KESHAV_URL = "https://kshavcode.me"
+
 export const SHIVAM_URL = "https://github.com/SHIVAMY007"
 
 // Terms & Conditions
@@ -29,3 +30,6 @@ export const APP_LINK = "https://github.com/KshavCode/arsd-saathi-app/releases/l
 export const ANDROID_RULE_URL = "https://keepandroidopen.org/"
 
 export const CHANGELOG_URL = "https://github.com/KshavCode/arsd-saathi-app/blob/master/CHANGELOG.md"
+
+export const GENERATE_PASSWORD_URL = "https://www.arsdcollege.in/Internet/Student/Login_Password_Generator.aspx"
+

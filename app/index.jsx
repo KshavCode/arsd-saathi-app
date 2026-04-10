@@ -1,13 +1,14 @@
-import { PRIVACY_URL, TERMS_URL } from '@/constants/links';
+import { PRIVACY_URL, TERMS_URL, GENERATE_PASSWORD_URL, CHANGELOG_URL } from '@/constants/links';
 import { Colors } from "@/constants/themeStyle";
 import ArsdScraper from '@/services/ArsdScraper';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Linking from "expo-linking";
-import React, { useState } from "react";
-import { ActivityIndicator, Alert, Dimensions, Image, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useState, useEffect } from "react";
+import { ActivityIndicator, Alert, Dimensions, Image, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from 'react-native-toast-message';
+import Constants from 'expo-constants';
 
 const { height } = Dimensions.get("window");
 
@@ -21,23 +22,20 @@ const handleFeedback = () => {
 export default function Login({ navigation }) {
     const [roll, setRoll] = useState("");
     const [fullName, setFullName] = useState("");
-    const [dob, setDob] = useState("");
+    const [passw, setPassw] = useState("");
     const [consentGiven, setConsentGiven] = useState(false);
     const [isScraping, setIsScraping] = useState(false);
     const [progressMsg, setProgressMsg] = useState("");
+    const [showUpdateModal, setShowUpdateModal] = useState(false);
+	  const [updateInfo, setUpdateInfo] = useState({ version: '', url: '' });
 
     // --- Connect button disabled
-    const isReadyToSync = roll.length > 0 && fullName.length > 0 && dob.length > 0 && consentGiven;
+    const isReadyToSync = roll.length > 0 && fullName.length > 0 && passw.length > 0 && consentGiven;
 
     const handleLogin = () => {
         Keyboard.dismiss();
-        if (!roll || !fullName || !dob) {
+        if (!roll || !fullName || !passw) {
             Toast.show({position: 'bottom', bottomOffset:70, type:'success', text1:'Missing Fields!', text2: 'Please fill in all details.', props: {borderColor: Colors.Default.error, bg: Colors.Default.card, text1Color: Colors.Default.error, text2Color: Colors.Default.secondary}})
-            return;
-        }
-        const dobRegex = /^\d{1,2}-\d{1,2}-\d{4}$/;
-        if (!dobRegex.test(dob)) {
-            Toast.show({position: 'bottom', bottomOffset:70, type:'success', text1:'Invalid Date!', text2: 'Please use the format DD-MM-YYYY', props: {borderColor: Colors.Default.error, bg: Colors.Default.card, text1Color: Colors.Default.error, text2Color: Colors.Default.secondary}})
             return;
         }
         setProgressMsg("Connecting to ARSD Portal...");
@@ -66,9 +64,102 @@ export default function Login({ navigation }) {
         Alert.alert("Connection Failed", "Could not verify details. Please check your credentials, internet connection or the server might be busy.");
     };
 
+      // --- AUTOMATIC UPDATE CHECK ---
+  useEffect(() => {
+		const checkForUpdates = async () => {
+			try {
+				const currentVersion = Constants.expoConfig.version;
+				const response = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest');
+				if (!response.ok) return;
+				const data = await response.json();
+				const latestVersion = data.tag_name.replace('v', '');
+
+				if (latestVersion !== currentVersion) {
+					const downloadUrl = data.assets?.[0]?.browser_download_url || data.html_url;
+					setUpdateInfo({ version: latestVersion, url: downloadUrl });
+					setShowUpdateModal(true);
+				}
+		  } 
+			catch (error) {
+				console.log("Auto-update check failed:", error);
+		  }
+		};
+	checkForUpdates();
+	}, []);
+
+
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" />
+
+            {/* --- UPDATE MODAL --- */}
+		        <Modal
+			      	animationType="fade"
+			      	transparent={true}
+			      	visible={showUpdateModal}
+			      	onRequestClose={() => setShowUpdateModal(false)}
+			      	statusBarTranslucent={true}
+			      	navigationBarTranslucent={true}
+			      	accessibilityViewIsModal={true}
+		        >
+			      	<TouchableOpacity
+			      	  style={styles.modalBackdropCenter}
+			      	  onPressOut={()=>setShowUpdateModal(false)}
+			      	  activeOpacity={1}
+			      	>
+			      		<View style={[styles.modalOverlay, { backgroundColor: Colors.Default.modalOverlay }]}>
+			      		  <View style={[styles.modalContent, { backgroundColor: Colors.Default.card }]}>
+      
+			      				{/* Modal Header Icon */}
+			      				<View style={[styles.modalIconContainer, { backgroundColor: Colors.Default.background + '70' }]}  importantForAccessibility="no-hide-descendants">
+			      				  <Ionicons name="rocket" size={36} color={Colors.Default.primary} />
+			      				</View>
+      
+			      				{/* Modal Text */}
+			      				<Text style={[styles.modalTitle, { color: Colors.Default.text }]} accessibilityRole="header">Update Available!</Text>
+			      				<Text style={[styles.modalText, { color: Colors.Default.secondary }]}>
+			      				  Version {updateInfo.version} is ready. We&apos;ve crushed some bugs and added improvements to keep your app running smoothly.
+			      				</Text>
+      
+			      				{/* Modal Action Buttons */}
+			      				<View style={styles.modalActions}>
+			      				  <TouchableOpacity
+			      						style={[styles.modalButtonPrimary, { backgroundColor: Colors.Default.primary }]}
+			      						onPress={() => {
+			      						  Linking.openURL(updateInfo.url);
+			      						  setShowUpdateModal(false);
+			      						}}
+			      						accessibilityRole='button'
+			      						accessibilityLabel="Update Now"
+			      						accessibilityHint="Downloads the updated application by redirecting to the download link"
+			      				  >
+			      					<Ionicons name="download-outline" size={18} color={Colors.Default.background} style={{marginRight: 6}}  importantForAccessibility="no" />
+			      					<Text style={[styles.modalButtonPrimaryText, {color:Colors.Default.background}]} importantForAccessibility="no">Update Now</Text>
+			      				  </TouchableOpacity>
+			      				  <TouchableOpacity
+			      						style={[styles.modalButtonSecondary, { borderColor: Colors.Default.separator }]}
+			      						onPress={() => Linking.openURL(CHANGELOG_URL)}
+			      						accessibilityRole='button'
+			      						accessibilityLabel="What's New"
+			      						accessibilityHint="Redirects to the new updates information of the application"
+			      				  >
+			      						<Text style={[styles.modalButtonSecondaryText, { color: Colors.Default.text }]} importantForAccessibility="no">What&apos;s  New</Text>
+			      				  </TouchableOpacity>
+			      				  <TouchableOpacity
+			      						style={{ marginTop: 15, paddingVertical: 5 }}
+			      						onPress={() => setShowUpdateModal(false)}
+			      						accessibilityRole='button'
+			      						accessibilityLabel="Not Now"
+			      						accessibilityHint="Dismiss this dialog and remind again when you open the app next time"
+			      				  >
+			      						<Text style={{ color: Colors.Default.secondary, fontSize: 13, fontWeight: '500' }} importantForAccessibility="no">Not Now</ Text>
+			      				  </TouchableOpacity>
+			      				</View>
+			      		  </View>
+			      		</View>
+			      	</TouchableOpacity>
+		        </Modal>
+
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -124,17 +215,20 @@ export default function Login({ navigation }) {
                                     />
                                 </View>
                                 <View style={styles.inputWrapper}>
-                                    <Ionicons name="calendar-outline" size={20} color="#6B7280" style={styles.inputIcon} importantForAccessibility="no" />
+                                    <Ionicons name="key-outline" size={20} color="#6B7280" style={styles.inputIcon} importantForAccessibility="no" />
                                     <TextInput 
                                         style={styles.input} 
-                                        placeholder="Date of Birth (DD-MM-YYYY)" 
+                                        placeholder="Password (if generated)" 
                                         placeholderTextColor="#9CA3AF" 
-                                        value={dob} 
-                                        onChangeText={setDob} 
+                                        value={passw} 
+                                        onChangeText={setPassw} 
                                         keyboardType="numbers-and-punctuation"
-                                        accessibilityLabel="Date of Birth"
-                                        accessibilityHint="Enter your date of birth in day dash month dash year format"
+                                        accessibilityLabel="Password"
+                                        accessibilityHint="Enter your password here, if not generated, the link is given below"
                                     />
+                                </View>
+                                <View style={styles.consentContainer}>
+                                    <Text style={styles.linkText} onPress={() => Linking.openURL(GENERATE_PASSWORD_URL)} accessibilityRole="link" accessibilityLabel="Terms and Conditions">Generate your password</Text>
                                 </View>
                             </View>
 
@@ -163,7 +257,7 @@ export default function Login({ navigation }) {
                                     <View style={styles.loadingState} accessible={true} accessibilityLabel={`Loading. ${progressMsg}`}>
                                         <ActivityIndicator size="large" color={Colors.Default.primary} />
                                         <Text style={styles.loadingText} importantForAccessibility="no">{progressMsg}</Text>
-                                        <ArsdScraper credentials={{ name: fullName, rollNo: roll, dob: dob }} onProgress={setProgressMsg} onFinish={handleCompletion} onError={handleError} />
+                                        <ArsdScraper credentials={{ name: fullName, rollNo: roll, passw: passw }} onProgress={setProgressMsg} onFinish={handleCompletion} onError={handleError} />
                                     </View>
                                 ) : (
                                     <TouchableOpacity
@@ -226,4 +320,21 @@ const styles = StyleSheet.create({
     loadingState: { alignItems: "center", gap: 8 },
     loadingText: { fontSize: 13, color: "#4F46E5", fontWeight: "600" },
     footerText: { textAlign: "center", fontSize: 12 },
+
+    // Modal
+	  modalOverlay: { ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', padding: 5 },
+	  modalContent: { width: '90%', borderRadius: 24, padding: 24, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 20, elevation: 15 },
+	  modalIconContainer: { width: 70, height: 70, borderRadius: 35, alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
+	  modalTitle: { fontSize: 22, fontWeight: '800', marginBottom: 10, textAlign: 'center' },
+	  modalText: { fontSize: 14, textAlign: 'center', lineHeight: 22, marginBottom: 25 },
+	  modalActions: { width: '100%', alignItems: 'center' },
+	  modalButtonPrimary: { flexDirection: 'row', width: '100%', paddingVertical: 14, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+	  modalButtonPrimaryText: { fontSize: 16, fontWeight: '700' },
+	  modalButtonSecondary: { width: '100%', paddingVertical: 14, borderRadius: 12, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+	  modalButtonSecondaryText: { fontSize: 15, fontWeight: '600' },
+	  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems:'center' },
+	  modalBackdropCenter: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+	  qrModalContent: { padding: 30, borderRadius: 30, alignItems: 'center', width: '100%', maxWidth: 350 },
+	  primaryButton: { paddingVertical: 13, borderRadius: 16, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', marginTop: 10 },
+	  primaryButtonText: { fontSize: 16, fontWeight: '800' },
 });

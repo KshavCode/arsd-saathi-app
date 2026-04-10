@@ -536,7 +536,7 @@ export default function HomeTab({ route, navigation }) {
 					<Ionicons name="person-outline" size={18} color={theme.primary} importantForAccessibility="no" />
 					<View style={{marginLeft: 12, flex: 1}} importantForAccessibility="no-hide-descendants">
 						<Text style={[styles.mentorLabel, { color: theme.secondary }]}>Assigned Mentor</Text>
-						<Text style={[styles.mentorName, { color: theme.text }]} numberOfLines={2}>{userData.mentor_name}</Text>
+						<Text style={[styles.mentorName, { color: theme.text }]} numberOfLines={2}>{userData.mentor_name.split(")")[1].trim()}</Text>
 					</View>
 				</View>
 			

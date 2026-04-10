@@ -74,14 +74,8 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
           log("Verifying credentials...");
           input.value = "${credentials.rollNo}";
           document.getElementById("txtname").value = "${credentials.name}";
-          
-          const dob = "${credentials.dob}".split("-");
-          const selects = document.getElementsByTagName("select");
-          if (selects.length >= 4) {
-            setSelect(selects[1], dob[0]);
-            setSelect(selects[2], dob[1]);
-            setSelect(selects[3], dob[2]);
-          }
+          document.getElementById("txtpassword").value = "${credentials.passw}";
+
           
           setTimeout(() => {
             const btn = document.getElementById("btnsearch") || document.querySelector('input[type="submit"]');
@@ -123,6 +117,11 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
             window.location.href = "https://www.arsdcollege.in/Internet/Student/Mentor_Details.aspx";
           }, 800);
         });
+      }
+
+      // ERROR PAGE
+      else if (url.includes("Generate_Std_Password.aspx")) {
+        sendError("Wrong credentials or Server Error");
       }
 
       // --- 3. MENTOR DETAILS ---
