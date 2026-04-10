@@ -1,21 +1,27 @@
-# ArsdSaathi v1.5.0 is now available!
+# ArsdSaathi v1.5.1 is now available!
 
-## 💫 What's New?
-- **Notice Retrieval**: Never miss announcements now! One button and get the notice right to your phone!
-- **Shareable Timetable**: Export and share your timetable seamlessly using QR codes, removing the need for manual code sharing.
-- **Custom Label**: Enhance organization by adding personalized labels to your timetable for classes, tests, or events.
-- **More Stacked**: Experience smoother and organized layout with this upgraded version!
-- **Color Themes**: Customize the app’s appearance with a collection of 9 light and 7 dark themes to suit your preference.
-- **Support Page**: Support ongoing development and maintenance by contributing through the dedicated support page.
+## v1.5.1 - 10 April 2026
+### 🔍 Fixes
+- **Spelling Corrections**: Sentences with minor grammatical errors have been corrected.
+- **Website layout**: ArsdSaathi now supports the new login system adopted by the college portal which requires a password to sign in.
+- **Update Check**: Update modal now spawns even on the login page other than home page in case for future bug fixes.
 
-## 🔍 Fixes
-- **Spelling Corrections**: Fixed minor spelling errors to ensure information is accurate and up to date.
-- **Notification config**: Removed inconsistent or unintended notification behaviors during the app build process.
-- **App Icon**: Introduced a cleaner and optimized ArsdSaathi app icon.
-- **White Flash Issue**: Resolved the brief white flash that appeared during screen transitions in dark mode.
-- **Predictor Layout**: Improved layout with cleaner and better-stacked elements for enhanced user experience.
-- **Sudden popping**: Replaced abrupt element appearances with smoother transitions across the app.
-- **Dashboard**: Converted the “Next Class” element into an interactive button that redirects to the “View Timetable” screen.
+## v1.5.0 - 8 April 2026
+### 💫 Added
+- Notice Board
+- QR Timetable Sharing
+- Custom label for subjects in timetable
+- Compact and organized layout
+- 16 new themes
+- Support page for raising funds
+
+### 🔍 Fixes
+- Spelling Corrections
+- Notification configurations incomplete code
+- Cleaner and optimized app icon
+- Brief white flash during navigation in dark mode
+- Smoother transitions across the app
+- Dashboard Updates regarding next class
 
 ## 📦 How to Install
 1. Download the attached .apk file below.
@@ -26,7 +32,7 @@
 ## 🔒 Security & Verification
 To verify the integrity of this APK, you can compare the SHA-256 checksum:
 ```bash
-6c327fc665590d733d103fa2f56a1f78e0c760984ebc8fa38a40c152cf4411e7
+a03ce708d80e95b174c77ec2c4c4931945d9e444a9d38c83b175ce1216e83128
 ```
 
 🚩 Issues
