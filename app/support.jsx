@@ -56,7 +56,7 @@ export default function SupportUsTab({ navigation }) {
 						This app was built by students, for students. We started this project to make campus life easier, and seeing so many of you use it every day means the world to us. But as our community grows, so do the costs.
 					</Text>
 					<Text style={[styles.storyText, { color: theme.secondary, marginTop: 10 }]}>
-						Right now, we are trying our best to provide features without any external cost but also need funds to cover the ₹2500 Google Play Store developer fee so we can officially launch and reach more students.
+						Right now, we are trying our best to provide features without any external cost but we also need funds to cover the ₹2500 Google Play Store developer fee so we can officially launch and reach more students.
 					</Text>
 					<TouchableOpacity onPress={()=> {Linking.openURL(ANDROID_RULE_URL)}}>
 						<Text style={[styles.storyText, { color: theme.primary, marginTop: 10, textDecorationLine:'underline' }]}>
