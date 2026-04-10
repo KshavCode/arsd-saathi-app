@@ -1,21 +1,21 @@
-import { PRIVACY_URL, TERMS_URL, GENERATE_PASSWORD_URL, CHANGELOG_URL } from '@/constants/links';
+import { CHANGELOG_URL, GENERATE_PASSWORD_URL, PRIVACY_URL, TERMS_URL } from '@/constants/links';
 import { Colors } from "@/constants/themeStyle";
 import ArsdScraper from '@/services/ArsdScraper';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from 'expo-constants';
 import * as Linking from "expo-linking";
-import { useState, useEffect } from "react";
-import { ActivityIndicator, Alert, Dimensions, Image, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View, Modal } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, Dimensions, Image, Keyboard, KeyboardAvoidingView, Modal, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from 'react-native-toast-message';
-import Constants from 'expo-constants';
 
 const { height } = Dimensions.get("window");
 
 const handleFeedback = () => {
     const email = "arsdsaathi.help@gmail.com";
     const subject = `ArsdSaathi Feedback`;
-    const body = "Name: \nRoll Number: \nDOB (optional, for testing): \n\nIssue/Feedback: ";
+    const body = "Name: \nRoll Number: \nScreenshots: \n\nIssue/Feedback: ";
     Linking.openURL(`mailto:${email}?subject=${subject}&body=${body}`);
 };
 

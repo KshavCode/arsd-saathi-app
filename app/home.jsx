@@ -18,7 +18,7 @@ import { titleCase } from 'title-case';
 const handleFeedback = () => {
 	const email = "arsdsaathi.help@gmail.com";
 	const subject = `ArsdSaathi Feedback`;
-	const body = "Name: \nRoll Number: \nDOB (optional, for testing): \n\nIssue/Feedback: ";
+	const body = "Name: \nRoll Number: \nScreenshots: \n\nIssue/Feedback: ";
 	Linking.openURL(`mailto:${email}?subject=${subject}&body=${body}`);
 };
 
@@ -160,7 +160,7 @@ export default function HomeTab({ route, navigation }) {
 			rollNo: basic?.rollNo || creds?.rollNo || "N/A",
 			enrollmentNumber: basic?.enrollmentNumber || "N/A",
 			percent_attendance: att?.theory_percentage || 0,
-			mentor_name: mentor?.mentor || "N/A"
+			mentor_name: mentor?.mentor.split(")")?.[1]?.trim() || "N/A"
 		  });
 		}
 
@@ -536,7 +536,7 @@ export default function HomeTab({ route, navigation }) {
 					<Ionicons name="person-outline" size={18} color={theme.primary} importantForAccessibility="no" />
 					<View style={{marginLeft: 12, flex: 1}} importantForAccessibility="no-hide-descendants">
 						<Text style={[styles.mentorLabel, { color: theme.secondary }]}>Assigned Mentor</Text>
-						<Text style={[styles.mentorName, { color: theme.text }]} numberOfLines={2}>{userData.mentor_name.split(")")[1].trim()}</Text>
+						<Text style={[styles.mentorName, { color: theme.text }]} numberOfLines={2}>{userData.mentor_name}</Text>
 					</View>
 				</View>
 			

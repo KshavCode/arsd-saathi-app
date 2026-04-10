@@ -119,9 +119,10 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
         });
       }
 
-      // ERROR PAGE
+      ERROR PAGE
       else if (url.includes("Generate_Std_Password.aspx")) {
         sendError("Wrong credentials or Server Error");
+        return;
       }
 
       // --- 3. MENTOR DETAILS ---
