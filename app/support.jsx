@@ -75,21 +75,28 @@ export default function SupportUsTab({ navigation }) {
 
 				<SupportCard 
 					theme={theme}
-					delay={350}
+					delay={250}
 					icon="logo-google-playstore" 
 					title="Play Store Launch" 
 					description="Funding the one-time developer fee to get the app officially on the Google Play Store." 
 				/>
 				<SupportCard 
 					theme={theme}
-					delay={200}
+					delay={350}
+					icon="logo-apple" 
+					title="App Store Launch" 
+					description="Funding the 99$ fee to get the app officially on the App Store for iOS users." 
+				/>
+				<SupportCard 
+					theme={theme}
+					delay={450}
 					icon="server-outline" 
 					title="Server & Database Costs" 
 					description="More features require app to be dependent on servers." 
 				/>
 				<SupportCard 
 					theme={theme}
-					delay={500}
+					delay={550}
 					icon="cafe-outline" 
 					title="Late Night Coffee" 
 					description="Fuel for the developers who stay up fixing bugs and building new features before exams." 
