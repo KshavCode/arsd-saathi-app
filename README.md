@@ -19,8 +19,9 @@ It utilizes a secure, client-side scraping architecture to fetch data directly f
 * **Privacy First:** Your credentials are stored **locally** on your device using `AsyncStorage`. No external database or server stores your credentials.
 * **Offline Access:** Internet connection is only required for syncing!
 * **Modern UI:** A clean, responsive interface built with `React Native`, helping students navigate to different features in minimal number of interactions.
+* **Timetable Sharing:** Create a customizable and shareable timetable via QR. Ability to add labels to the timetable as well!
+* **Attendance Planner:** Stay above 67% of attendance and flexibly plan your trips, holidays and more!
 * **Color Themes Support:** Lets you switch between 16 different theme presets, both dark and light mode included!
-* **Automated Retrieval:** No need to move through links and navbars in the portal. One time login ensures that the data is being synced once in two days.
 * **Built by Students:** All the features are added according to the student needs!
 * **Independent Infrastructure:** This app is the personal project of a student in ARSD, hence transparency is given the utmost importance to build trust and reliability.
 
