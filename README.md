@@ -28,7 +28,7 @@ It utilizes a secure, client-side scraping architecture to fetch data directly f
 
 ## 📷 Screenshots
 - DashBoard
-![Image](https://github.com/user-attachments/assets/33ce3930-048a-43c1-acc2-396403352b9f)
+![Image](https://github.com/user-attachments/assets/edfe880e-c860-454e-bb5b-681c7e59d60c)
 
 - Attendance
 ![Image](https://github.com/user-attachments/assets/d874483a-cb26-49b2-bd16-0415797cde2d)
