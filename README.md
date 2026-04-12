@@ -27,7 +27,21 @@ It utilizes a secure, client-side scraping architecture to fetch data directly f
 ---
 
 ## 📷 Screenshots
+- DashBoard
+![Image](https://github.com/user-attachments/assets/33ce3930-048a-43c1-acc2-396403352b9f)
 
+- Attendance
+![Image](https://github.com/user-attachments/assets/d874483a-cb26-49b2-bd16-0415797cde2d)
+
+- Notice Board
+![Image](https://github.com/user-attachments/assets/5fd5b4ef-f8a4-4ab5-a3fb-ee8956074395)
+
+- Customizable Timetable along with QR Sharing
+![Image](https://github.com/user-attachments/assets/f15a2894-cef4-45f4-a9ba-3cdec211588a)
+![Image](https://github.com/user-attachments/assets/2691ff72-1642-4ca9-832c-459ced939604)
+
+- Attendance Planner (to stay above 67%)
+![Image](https://github.com/user-attachments/assets/caf6a0b7-a4c6-42a3-9f99-4ce7ad595dbc)
 
 ## 📱 Requirements
 Currently not available for iOS devices (but would be added soon!)
