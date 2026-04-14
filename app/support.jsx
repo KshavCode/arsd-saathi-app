@@ -1,5 +1,5 @@
 import Header from '@/components/Header';
-import { ANDROID_RULE_URL } from '@/constants/links';
+import { ANDROID_RULE_URL, REPOSITORY_URL } from '@/constants/links';
 import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import React from 'react';
@@ -116,6 +116,14 @@ export default function SupportUsTab({ navigation }) {
 					>
 						<Ionicons name="qr-code-outline" size={20} color={theme.background} style={{ marginRight: 10 }} />
 						<Text style={[styles.primaryButtonText, {color:theme.background}]}>Support via UPI</Text>
+					</TouchableOpacity>
+					<TouchableOpacity 
+						style={[styles.primaryButton, { borderColor: theme.primary, borderWidth:1, backgroundColor:theme.card}]} 
+						activeOpacity={0.8}
+						onPress={() => Linking.openURL(REPOSITORY_URL)}
+					>
+						<Ionicons name="star" size={20} color={theme.primary} style={{ marginRight: 10 }} />
+						<Text style={[styles.primaryButtonText, {color:theme.primary}]}>Star this project</Text>
 					</TouchableOpacity>
 				</Animatable.View>
 			</ScrollView>

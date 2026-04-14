@@ -566,9 +566,9 @@ export default function HomeTab({ route, navigation }) {
 								</View>
 						  </View>
 						  {nextClassInfo.label &&
-								<View style={[styles.metaBadge, { backgroundColor: theme.background + '70', marginTop: 5 }]}>
-								  <Ionicons name="document" size={12} color={theme.secondary} />
-								  <Text style={[styles.metaText, { color: theme.secondary }]} numberOfLines={1}>{nextClassInfo.label}</Text>
+								<View style={[styles.metaBadge, { backgroundColor: theme.error + '20', marginTop: 5 }]}>
+								  <Ionicons name="document" size={12} color={theme.text} />
+								  <Text style={[styles.metaText, { color: theme.text }]} numberOfLines={1}>{nextClassInfo.label}</Text>
 								</View>
 						  }
 						</View>

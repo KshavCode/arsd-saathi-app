@@ -320,9 +320,9 @@ export default function Timetable({ route, navigation }) {
 									</View>
 								)}
 								{existingClass.label && (
-									<View style={[styles.metaBadge, { backgroundColor: theme.background + '70' }]}>
-										<Ionicons name="document" size={12} color={theme.secondary} />
-										<Text style={[styles.metaText, { color: theme.secondary }]} numberOfLines={1}>{existingClass.label}</Text>
+									<View style={[styles.metaBadge, { backgroundColor: theme.error + '20' }]}>
+										<Ionicons name="document" size={12} color={theme.text} />
+										<Text style={[styles.metaText, { color: theme.text }]} numberOfLines={1}>{existingClass.label}</Text>
 									</View>
 								)}
 							</View>
