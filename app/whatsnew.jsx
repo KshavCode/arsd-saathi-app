@@ -13,14 +13,8 @@ const CHANGELOG_DATA = {
     updates: [
         { icon: "notifications", title: "Instant Notice Board", desc: "Never miss announcements now! Get the latest notices delivered straight to your screen with a single tap." },
         { icon: "qr-code", title: "Shareable Timetable", desc: "Still stuck typing out long codes? Experience effortless exporting and importing via QR Codes!" },
-        { icon: "pricetag", title: "Custom Labels", desc: "Got a test next week? Edit the timetable and stick a custom label right on that slot." },
-        { icon: "layers", title: "Stacked Layout", desc: "Experience a smoother, faster, and much more organized interface with our rebuilt architecture." },
-        { icon: "color-palette", title: "16 Color Themes", desc: "Make the college companion your own! Introducing 9 Light and 7 Dark premium themes to match your vibe." },
-        { icon: "heart", title: "Support Page", desc: "Show your love! A dedicated page to help fund server costs and our upcoming Play Store launch." }
     ],
     fixes: [
-        { title: "Scraper Duplication", desc: "Fixed a bug where the attendance scraper would run twice on login errors." },
-        { title: "PDF Export Alignment", desc: "Fixed table layout buckling when exporting 2-hour spanning classes." },
         { title: "Mentor Name Parsing", desc: "Resolved crashes caused by missing parentheses in faculty names." }
     ]
 };
@@ -50,7 +44,7 @@ const UpdateItem = ({ item, theme, delay, isFix = false }) => (
     </Animatable.View>
 );
 
-const DATA_URL = "https://raw.githubusercontent.com/username/repo/main/data.json";
+const DATA_URL = "https://raw.githubusercontent.com/KshavCode/arsd-saathi-app/refs/heads/dev-1.6.0/message.json";
 
 export default function WhatsNewTab({ navigation }) {
     const { theme } = useTheme();
@@ -89,7 +83,7 @@ export default function WhatsNewTab({ navigation }) {
                     >
                         <View style={styles.textContainer}>
                             <Text style={[styles.itemTitle, { color: theme.error }]}>Message From The Devs</Text>
-                            <Text style={[styles.itemDesc, { color: theme.secondary }]}>Test 123</Text>
+                            <Text style={[styles.itemDesc, { color: theme.secondary }]}>{data.message}</Text>
                         </View>
                     </View>
                 }
