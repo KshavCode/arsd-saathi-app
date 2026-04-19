@@ -15,6 +15,7 @@ import Notice from './notice';
 import Predictor from './predictor';
 import Support from './support';
 import Timetable from './timetable';
+import Whatsnew from './whatsnew';
 
 import { ThemeContext, ThemeProvider } from '@/context/ThemeContext';
 
@@ -99,6 +100,7 @@ function StackContent() {
           <Stack.Screen name="Predictor" component={Predictor} initialParams={homeParams} />
           <Stack.Screen name="Timetable" component={Timetable} initialParams={homeParams} />
           <Stack.Screen name="Support" component={Support} initialParams={homeParams} />
+          <Stack.Screen name="Whatsnew" component={Whatsnew} initialParams={homeParams} />
 
       </Stack.Navigator>
     );
