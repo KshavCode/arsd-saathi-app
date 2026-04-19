@@ -1,7 +1,7 @@
 ## 📲 Download
-[![Latest Release](https://img.shields.io/github/v/release/KshavCode/arsd-saathi-app?include_prereleases&label=Latest%20APK&color=blue)](https://github.com/KshavCode/arsd-saathi-app/releases/latest)
+[![Latest Release](https://img.shields.io/github/v/release/KshavCode/arsd-saathi-app?&label=Latest%20APK&color=blue)](https://github.com/KshavCode/arsd-saathi-app/releases/latest)
 
-READ [TERMS & CONDITIONS](https://github.com/KshavCode/arsd-saathi-app/blob/master/TERMS.md) and [PRIVACY POLICY](https://github.com/KshavCode/arsd-saathi-app/blob/master/PRIVACY.md) for usage of ArsdSaathi
+READ [TERMS & CONDITIONS](https://github.com/KshavCode/arsd-saathi-app/blob/master/TERMS.md) and [PRIVACY POLICY](https://github.com/KshavCode/arsd-saathi-app/blob/master/PRIVACY.md) before using ArsdSaathi!
 
 ---
 
@@ -68,10 +68,11 @@ The app is currently available as a direct APK download for Android devices.
 ## 📖 How to Use
 
 1.  **Login:** Enter your credentials as is, like how you enter on the student portal.
-2.  **Sync:** Once logged in, the app will ensure to retrieve your data automatically once in 2 days!
-3.  **Dashboard:** You will see your **Attendance Summary**, **Subject-wise Breakdown**, and various other features which can help in easing up your college life.
-4. **Accessibility:** App is optimized for screen readers as well, hence supporting differently-abled fellow classmates equally.
-4.  **Logout:** Go to **Profile > Logout** to clear your data from the device.
+2.  **Password:** If you forgot your password, kindly visit the admin office.
+3.  **Sync:** Once logged in, the app will ensure to retrieve your data automatically once in 2 days!
+4.  **Dashboard:** You will see your **Attendance Summary**, **Subject-wise Breakdown**, and various other features which can help in easing up your college life.
+5. **Accessibility:** App is optimized for screen readers as well, hence supporting differently-abled fellow classmates equally.
+6.  **Logout:** Go to **Profile > Logout** to clear your data from the device.
 
 ---
 

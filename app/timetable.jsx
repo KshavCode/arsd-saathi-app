@@ -4,6 +4,8 @@ import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Linking from 'expo-linking';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
 import LZString from 'lz-string';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, ScrollView, Share, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -12,6 +14,7 @@ import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { titleCase } from 'title-case';
+
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -282,6 +285,118 @@ export default function Timetable({ route, navigation }) {
 		}
 	};
 
+	// PDF
+	const exportToPDF = async () => {
+    const activeSlots = new Set();
+    
+    DAYS.forEach((_, index) => {
+      const dayClasses = timetable[index] || [];
+      dayClasses.forEach(c => {
+        const startIndex = TIME_SLOTS.indexOf(c.slot);
+        if (startIndex > -1) {
+          for (let i = 0; i < (c.duration || 1); i++) {
+            if (TIME_SLOTS[startIndex + i]) {
+              activeSlots.add(TIME_SLOTS[startIndex + i]);
+            }
+          }
+        }
+      });
+    });
+
+    const usedTimeSlots = TIME_SLOTS.filter(slot => activeSlots.has(slot));
+
+    if (usedTimeSlots.length === 0) {
+      Toast.show({position: 'bottom', bottomOffset:70, type:'error', text1:"Empty Timetable!", text2: 'Add classes before exporting.'});
+      return;
+    }
+
+
+    // --- GENERATE TABLE ROWS ---
+    const tableRows = DAYS.map((dayName, index) => {
+      const dayClasses = timetable[index] || [];
+      let skipNext = false;
+
+      const classesHtml = usedTimeSlots.map((slot) => {
+        if (skipNext) {
+          skipNext = false;
+          return ''; 
+        }
+
+        const c = dayClasses.find(item => item.slot === slot);
+        
+        if (c) {
+          if (c.duration === 2) skipNext = true;
+          
+          const bgColor = c.type === 'PR' ? '#E8F5E9' : '#E3F2FD'; 
+          const typeColor = c.type === 'PR' ? '#2E7D32' : '#1565C0'; 
+          
+          return `
+            <td colspan="${c.duration || 1}" style="padding: 8px 4px; border: 1px solid #ddd; text-align: center; background-color: ${bgColor}; vertical-align: top;">
+              <div style="font-weight: 800; font-size: 10px; color: #333; word-break: break-word; line-height: 1.2; margin-bottom: 4px;">
+                ${c.subject}
+              </div>
+              <div style="color: #666; font-size: 9px; margin-bottom: 2px;">
+                Rm: ${c.room || '-'}
+              </div>
+              <div style="font-weight: 800; font-size: 9px; color: ${typeColor};">
+                ${c.type}
+              </div>
+            </td>`;
+        }
+
+        return `<td style="padding: 8px 4px; border: 1px solid #ddd; text-align: center; color: #ddd; vertical-align: middle;">-</td>`;
+      }).join('');
+
+      return `
+        <tr>
+          <td style="padding: 8px 4px; border: 1px solid #ddd; font-weight: bold; background: #f9f9f9; text-align: center; color: #333; font-size: 11px;">
+            ${dayName}
+          </td>
+          ${classesHtml}
+        </tr>`;
+    }).join('');
+
+    // --- BUILD THE HTML ---
+    const htmlContent = `
+      <html>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 15px; background-color: #fff; }
+            h1 { color: #800000; text-align: center; margin-bottom: 5px; font-size: 22px; }
+            p { color: #555; font-size: 11px; margin-top: 0; margin-bottom: 20px; }
+            table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+            th { background-color: #800000; color: white; padding: 10px 4px; font-size: 10px; text-align: center; border: 1px solid #660000; word-wrap: break-word; }
+          </style>
+        </head>
+        <body>
+          <h1>Weekly Timetable</h1>
+          <p style="text-align: center;">Generated using <b>ArsdSaathi</b></p>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 8%;">Day</th>
+                ${usedTimeSlots.map(s => `<th>${s}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRows}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+  		try {
+			const { uri } = await Print.printToFileAsync({ html: htmlContent });
+			Toast.show({position: 'bottom', bottomOffset:70, type:'success', text1:"Success!", text2: `File has been saved to ${uri}`, props: {borderColor: theme.error, bg: theme.card, text1Color: theme.error, text2Color: theme.secondary}})
+			console.log('File has been saved to:', uri);
+			await Sharing.shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf' });
+		} catch (error) {
+			Toast.show({position: 'bottom', bottomOffset:70, type:'error', text1:"Could not generate the PDF!", text2: 'Please try again later.', props: {borderColor: theme.error, bg: theme.card, text1Color: theme.error, text2Color: theme.secondary}})
+			console.log(error)
+		}
+	}
+
 	const renderSlots = (isEditMode) => {
 		let skipNext = false;
 
@@ -426,6 +541,21 @@ export default function Timetable({ route, navigation }) {
 								</TouchableOpacity>
 							</View>
 						</View>
+
+						<View style={[styles.formCard, { backgroundColor: theme.card }]}>
+							<View style={[styles.iconCircle, { backgroundColor: theme.background + '70' }]}>
+								<Ionicons name="qr-code-outline" size={32} color={theme.primary} />
+							</View>
+							<Text style={[styles.shareTitle, { color: theme.text }]}>Share Timetable</Text>
+							<Text style={[styles.shareDesc, { color: theme.secondary }]}>Let other ArsdSaathi users import your timetable.</Text>
+							<View style={{ flexDirection: 'row', gap: 10, width: '100%' }}>
+								<TouchableOpacity style={[styles.primaryButton, { backgroundColor: theme.primary, flex: 1 }]} onPress={exportToPDF} activeOpacity={0.8}>
+									<Ionicons name="share-outline" size={18} color={theme.background} style={{ marginRight: 8 }} />
+									<Text style={[styles.primaryButtonText, {color:theme.background}]}>PDF</Text>
+								</TouchableOpacity>
+							</View>
+						</View>
+
 						<View style={[styles.formCard, { backgroundColor: theme.card, marginTop: 10 }]}>
 							<Text style={[styles.inputLabel, { color: theme.secondary, width: '100%' }]}>Paste Link / Code</Text>
 							<TextInput

@@ -45,7 +45,7 @@ export default function HomeTab({ route, navigation }) {
 	const [userData, setUserData] = useState({ name: "Loading...", rollNo: "...", enrollmentNumber: "..." });
 	const [savedCredentials, setSavedCredentials] = useState(null);
 	const [isSyncing, setIsSyncing] = useState(false);
-	const [lastSynced, setLastSynced] = useState("Never");
+	const [nextSync, setNextSync] = useState("Never");
 	const [nextClassInfo, setNextClassInfo] = useState(null);
 	// Modal States
 	const [showUpdateModal, setShowUpdateModal] = useState(false);
@@ -149,7 +149,7 @@ export default function HomeTab({ route, navigation }) {
 		const mentor = mentorRaw ? JSON.parse(mentorRaw) : null;
 
 		if (timestampRaw) {
-			setLastSynced(formatTimestamp(timestampRaw));
+			setNextSync(formatTimestamp(Number(timestampRaw)+(2 * 24 * 60 * 60 * 1000)));
 		}
 
 		if (creds) setSavedCredentials(creds);
@@ -485,7 +485,7 @@ export default function HomeTab({ route, navigation }) {
 					</View>
 					<View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 4 }} >
 					   <Ionicons name="time-outline" size={12} color={theme.secondary} importantForAccessibility="no-hide-descendants" />
-					   <Text style={{ fontSize: 12, color: theme.secondary, fontWeight: '500' }} accessibilityLabel={`Last synced: ${lastSynced}`}>Last synced: {lastSynced}</Text>
+					   <Text style={{ fontSize: 12, color: theme.secondary, fontWeight: '500' }} accessibilityLabel={`Next Sync on: ${nextSync}`}>Next Sync on: {nextSync}</Text>
 					</View>
 				</View>
 		
