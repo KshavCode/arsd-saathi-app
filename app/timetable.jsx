@@ -335,10 +335,10 @@ export default function Timetable({ route, navigation }) {
               <div style="font-weight: 800; font-size: 10px; color: #333; word-break: break-word; line-height: 1.2; margin-bottom: 4px;">
                 ${c.subject}
               </div>
-              <div style="color: #666; font-size: 9px; margin-bottom: 2px;">
-                Rm: ${c.room || '-'}
+              <div style="color: #666; font-size: 10px; margin-bottom: 2px;">
+                <b>Room: ${c.room || ''}</b>
               </div>
-              <div style="font-weight: 800; font-size: 9px; color: ${typeColor};">
+              <div style="font-weight: 800; font-size: 10px; color: ${typeColor};">
                 ${c.type}
               </div>
             </td>`;
@@ -375,7 +375,7 @@ export default function Timetable({ route, navigation }) {
           <table>
             <thead>
               <tr>
-                <th style="width: 8%;">Day</th>
+                <th style="width: 5%;">Day</th>
                 ${usedTimeSlots.map(s => `<th>${s}</th>`).join('')}
               </tr>
             </thead>
@@ -526,7 +526,17 @@ export default function Timetable({ route, navigation }) {
 					</View>
 				)}
 				{activeTab === 'share' && (
-					<View style={{ gap: 20, height:600 }}>
+					<View style={{ gap: 20, height:900 }}>
+
+						<View style={[styles.formCard, { backgroundColor: theme.card }]}>
+							<View style={{ flexDirection: 'row', width: '100%' }}>
+								<TouchableOpacity style={[styles.primaryButton, { backgroundColor: theme.primary, flex: 1 }]} onPress={exportToPDF} activeOpacity={0.8}>
+									<Ionicons name="download-outline" size={18} color={theme.background} style={{ marginRight: 8 }} />
+									<Text style={[styles.primaryButtonText, {color:theme.background}]}>Download as PDF</Text>
+								</TouchableOpacity>
+							</View>
+						</View>
+
 						{/* Export Card */}
 						<View style={[styles.formCard, { backgroundColor: theme.card }]}>
 							<View style={[styles.iconCircle, { backgroundColor: theme.background + '70' }]}>
@@ -538,20 +548,6 @@ export default function Timetable({ route, navigation }) {
 								<TouchableOpacity style={[styles.primaryButton, { backgroundColor: theme.primary, flex: 1 }]} onPress={handleExport} activeOpacity={0.8}>
 									<Ionicons name="share-outline" size={18} color={theme.background} style={{ marginRight: 8 }} />
 									<Text style={[styles.primaryButtonText, {color:theme.background}]}>Export</Text>
-								</TouchableOpacity>
-							</View>
-						</View>
-
-						<View style={[styles.formCard, { backgroundColor: theme.card }]}>
-							<View style={[styles.iconCircle, { backgroundColor: theme.background + '70' }]}>
-								<Ionicons name="qr-code-outline" size={32} color={theme.primary} />
-							</View>
-							<Text style={[styles.shareTitle, { color: theme.text }]}>Share Timetable</Text>
-							<Text style={[styles.shareDesc, { color: theme.secondary }]}>Let other ArsdSaathi users import your timetable.</Text>
-							<View style={{ flexDirection: 'row', gap: 10, width: '100%' }}>
-								<TouchableOpacity style={[styles.primaryButton, { backgroundColor: theme.primary, flex: 1 }]} onPress={exportToPDF} activeOpacity={0.8}>
-									<Ionicons name="share-outline" size={18} color={theme.background} style={{ marginRight: 8 }} />
-									<Text style={[styles.primaryButtonText, {color:theme.background}]}>PDF</Text>
 								</TouchableOpacity>
 							</View>
 						</View>
