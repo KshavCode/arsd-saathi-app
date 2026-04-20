@@ -15,9 +15,6 @@ const FaqItem = ({ item, theme, delay }) => (
         useNativeDriver
         style={[styles.itemCard, { backgroundColor: theme.card, borderColor: theme.borderColor }]}
     >
-        <View style={[styles.iconBox, { backgroundColor: theme.primary + '15' }]}>
-            <Ionicons name="help" size={24} color={theme.primary} />
-        </View>
         <View style={styles.textContainer}>
             <Text style={[styles.itemTitle, { color: theme.text }]}>{item.question}</Text>
             <Text style={[styles.itemDesc, { color: theme.secondary }]}>{item.answer}</Text>
