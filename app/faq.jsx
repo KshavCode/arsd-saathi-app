@@ -160,5 +160,5 @@ const styles = StyleSheet.create({
     itemTitle: { fontSize: 16, fontWeight: '700', marginBottom: 6 },
     itemDesc: { fontSize: 14,lineHeight: 22,fontWeight: '500' },
     footerLegal: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 12 },
-    footerLink: { fontSize: 13, fontWeight: '700', textDecorationLine: 'underline' }
+    footerLink: { fontSize: 15, fontWeight: '700', textDecorationLine: 'underline' }
 });
