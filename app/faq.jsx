@@ -2,8 +2,9 @@ import Header from '@/components/Header';
 import { DEV_MESSAGE_URL, FAQ_URL } from '@/constants/links';
 import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import * as Linking from 'expo-linking';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -21,6 +22,13 @@ const FaqItem = ({ item, theme, delay }) => (
         </View>
     </Animatable.View>
 );
+
+const handleFeedback = () => {
+    const email = "arsdsaathi.help@gmail.com";
+    const subject = `FAQ Suggestion`;
+    const body = "Question: \nAnswer: ";
+    Linking.openURL(`mailto:${email}?subject=${subject}&body=${body}`);
+};
 
 export default function FaqTab({ navigation }) {
     const { theme } = useTheme();
@@ -97,6 +105,16 @@ export default function FaqTab({ navigation }) {
                         </View>
                     )
                 )}
+                <Animatable.View 
+                    animation="fadeInDown"
+                    duration={600}
+                    delay={1000}
+                    useNativeDriver
+                    style={[styles.footerLegal, {marginTop: 30}]}>
+                    <TouchableOpacity style={styles.footerItem} onPress={() => handleFeedback()} accessibilityRole="link" accessibilityHint="Email for FAQ suggestions." hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+                        <Text style={[styles.footerLink, { color: theme.footer }]}>I want to suggest a question!</Text>
+                    </TouchableOpacity>
+                </Animatable.View>
             </ScrollView>
         </SafeAreaView>
     );
@@ -161,5 +179,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         lineHeight: 22,
         fontWeight: '500',
-    }
+    },
+    footerLegal: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 12 },
+	footerLegalText: { fontSize: 11, fontWeight: '500' }
 });

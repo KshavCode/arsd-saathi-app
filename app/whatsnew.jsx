@@ -1,25 +1,14 @@
 import Header from '@/components/Header';
+import { UPDATES_DATA } from '@/constants/changelog';
 import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import Constants from 'expo-constants';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const CHANGELOG_DATA = {
-    version: Constants.expoConfig.version,
-    date: "April 2026",
-    updates: [
-        { icon: "notifications", title: "Instant Notice Board", desc: "Never miss announcements now! Get the latest notices delivered straight to your screen with a single tap." },
-        { icon: "qr-code", title: "Shareable Timetable", desc: "Still stuck typing out long codes? Experience effortless exporting and importing via QR Codes!" },
-    ],
-    fixes: [
-        { title: "Mentor Name Parsing", desc: "Resolved crashes caused by missing parentheses in faculty names." }
-    ]
-};
 
-const UpdateItem = ({ item, theme, delay, isFix = false }) => (
+const UpdateItem = ({ item, theme, delay }) => (
     <Animatable.View 
         animation="fadeInUp" 
         duration={600} 
@@ -27,23 +16,12 @@ const UpdateItem = ({ item, theme, delay, isFix = false }) => (
         useNativeDriver
         style={[styles.itemCard, { backgroundColor: theme.card, borderColor: theme.borderColor }]}
     >
-        <View style={[
-            styles.iconBox, 
-            { backgroundColor: theme.primary + '15' }
-        ]}>
-            <Ionicons 
-                name={isFix ? "build-outline" : item.icon} 
-                size={22} 
-                color={theme.primary} 
-            />
-        </View>
         <View style={styles.textContainer}>
             <Text style={[styles.itemTitle, { color: theme.text }]}>{item.title}</Text>
             <Text style={[styles.itemDesc, { color: theme.secondary }]}>{item.desc}</Text>
         </View>
     </Animatable.View>
 );
-
 
 export default function WhatsNewTab({ navigation }) {
     const { theme } = useTheme();
@@ -59,8 +37,8 @@ export default function WhatsNewTab({ navigation }) {
                 {/* --- HEADER BADGE --- */}
                 <View style={styles.versionHeader}>
                     <View style={styles.versionTextContainer}>
-                        <Text style={[styles.versionTitle, { color: theme.text }]}>Version {CHANGELOG_DATA.version}</Text>
-                        <Text style={[styles.versionDate, { color: theme.secondary }]}>{CHANGELOG_DATA.date}</Text>
+                        <Text style={[styles.versionTitle, { color: theme.text }]}>Version {UPDATES_DATA.version}</Text>
+                        <Text style={[styles.versionDate, { color: theme.secondary }]}>{UPDATES_DATA.date}</Text>
                     </View>
                     <View style={[styles.badge, { backgroundColor: theme.primary + '20' }]}>
                         <Text style={[styles.badgeText, { color: theme.primary }]}>LATEST</Text>
@@ -74,7 +52,7 @@ export default function WhatsNewTab({ navigation }) {
                 </Animatable.View>
 
                 <View style={styles.listContainer}>
-                    {CHANGELOG_DATA.updates.map((update, index) => (
+                    {UPDATES_DATA.updates.map((update, index) => (
                         <UpdateItem 
                             key={`update-${index}`} 
                             item={update} 
@@ -87,11 +65,11 @@ export default function WhatsNewTab({ navigation }) {
                 {/* --- FIXES SECTION --- */}
                 <Animatable.View animation="fadeIn" delay={800} useNativeDriver style={[styles.sectionHeader, { marginTop: 20 }]}>
                     <Ionicons name="bug" size={20} color={theme.error} style={{ marginRight: 8 }}/>
-                    <Text style={[styles.sectionTitle, { color: theme.text }]}>Bug Fixes & Polish</Text>
+                    <Text style={[styles.sectionTitle, { color: theme.text }]}>Fixes</Text>
                 </Animatable.View>
 
                 <View style={styles.listContainer}>
-                    {CHANGELOG_DATA.fixes.map((fix, index) => (
+                    {UPDATES_DATA.fixes.map((fix, index) => (
                         <UpdateItem 
                             key={`fix-${index}`} 
                             item={fix} 
@@ -101,7 +79,6 @@ export default function WhatsNewTab({ navigation }) {
                         />
                     ))}
                 </View>
-
             </ScrollView>
         </SafeAreaView>
     );

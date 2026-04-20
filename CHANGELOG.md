@@ -1,27 +1,17 @@
-# ArsdSaathi v1.5.1 is now available!
+# ArsdSaathi v1.5.0 is now available!
 
-## v1.5.1 - 10 April 2026
-### 🔍 Fixes
-- **Spelling Corrections**: Sentences with minor grammatical errors have been corrected.
-- **Website layout**: ArsdSaathi now supports the new login system adopted by the college portal which requires a password to sign in.
-- **Update Check**: Update modal now spawns even on the login page other than home page in case for future bug fixes.
+## 💫 What's New?
+- **What's New**: Missing on new updates? Get to know all the changes at just one screen!
+- **FAQs**: Most common questions that freshers might ask, will be answered here! Also, the developer team will use this feature to announce and communicate with the community.
+- **Timetable PDF**: Exporting now allows you to download your timetable in a clean PDF format.
+- **4 New Themes**: Enjoy 10 sets of light and dark modes each.
+- **Next Sync**: Rebranded 'Last Synced' for letting students know the main reason to use ArsdSaathi.
 
-## v1.5.0 - 8 April 2026
-### 💫 Added
-- Notice Board
-- QR Timetable Sharing
-- Custom label for subjects in timetable
-- Compact and organized layout
-- 16 new themes
-- Support page for raising funds
 
-### 🔍 Fixes
-- Spelling Corrections
-- Notification configurations incomplete code
-- Cleaner and optimized app icon
-- Brief white flash during navigation in dark mode
-- Smoother transitions across the app
-- Dashboard Updates regarding next class
+## 🔍 Fixes
+- **Star the Project**: Now users can support alternatively by creating an account on Github and 'star' the repository.
+- **Forgot Password**: List of steps to try if a student forgot his/her password is now enlisted on the login page.
+
 
 ## 📦 How to Install
 1. Download the attached .apk file below.
@@ -32,7 +22,7 @@
 ## 🔒 Security & Verification
 To verify the integrity of this APK, you can compare the SHA-256 checksum:
 ```bash
-a03ce708d80e95b174c77ec2c4c4931945d9e444a9d38c83b175ce1216e83128
+...
 ```
 
 🚩 Issues

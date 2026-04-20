@@ -1,10 +1,38 @@
 [
     {
+        "question": "What if I forget my password?",
+        "answer": "1. Try your first name in CAPITALS as the password.\n2. Visit the admin office for this query."
+    },
+    {
+        "question": "I lost my ID card, what should I do?",
+        "answer": "1. Don't panic, share a lost & found message to all whatsapp groups possible.\n2. If still not found, then file an FIR at your nearest police station.\n3. A duplicate card will be issued from the office upon payment of ₹100 along with the FIR."
+    },
+    {
+        "question": "Some of my details are incorrect on the ArsdSaathi App, what should I do?",
+        "answer": "1. Kindly double check your information by logging onto the student portal.\n2. If details are wrong on the student portal, then report this issue in the admin office.\n3. Once details on the portal gets updated, re-login on the app\n4. If details are wrong only on ArsdSaathi, report the issue.\n"
+    },
+    {
         "question": "What is ArsdSaathi?",
         "answer": "It is an unofficial student-developed app, created to help ARSDians get their data in a compact and organized manner!"
     },
     {
-        "question": "What if I forget my password?",
-        "answer": "1. Try your first name in CAPITALS as the password.\n2. Visit the admin office for this query."
+        "question": "What is my college email and password?",
+        "answer": "1. Your email id is `YOUR_ROLL_NO@arsd.du.ac.in` (38XXX@arsd.du.ac.in).\n2. The password is `YOUR_ROLL_NUMBER@YOUR_FIRSTNAME_IN_CAPITALS` (38XXX@ABC)"
+    },
+    {
+        "question": "When is ArsdSaathi releasing on Play Store and App Store?",
+        "answer": "An amount of money is required to publish an app to the Play Store ($25) and App Store ($99/year). Therefore, we are in for donations and would be happy if you can contribute any sort of amount."
+    },
+    {
+        "question": "What is this github link for downloading ArsdSaathi?",
+        "answer": "GitHub is a popular platform where developers can store, manage and distribute their projects. It is completely safe and the reason ArsdSaathi is only for Android phones right now is because this system allow installation from external sources."
+    },
+    {
+        "question": "How can I contact the developers for issues and feedbacks?",
+        "answer": "On the home page, there is an email link to 'Report an Issue' at the bottom of your screen."
+    },
+    {
+        "question": "Can I trust the developers with my information?",
+        "answer": "This is just an app created by a student to help thousands of other students. We do not store your data anywhere, its saved locally on your device."
     }
 ]
