@@ -2,7 +2,7 @@ import Header from '@/components/Header';
 import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Constants from 'expo-constants';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -44,18 +44,9 @@ const UpdateItem = ({ item, theme, delay, isFix = false }) => (
     </Animatable.View>
 );
 
-const DATA_URL = "https://raw.githubusercontent.com/KshavCode/arsd-saathi-app/refs/heads/dev-1.6.0/message.json";
 
 export default function WhatsNewTab({ navigation }) {
     const { theme } = useTheme();
-    const [data, setData] = useState(null);
-
-    useEffect(() => {
-        fetch(DATA_URL + "?t=" + Date.now())
-            .then(res => res.json())
-            .then(json => setData(json))
-            .catch(err => console.log(err));
-    }, []);
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
@@ -75,18 +66,6 @@ export default function WhatsNewTab({ navigation }) {
                         <Text style={[styles.badgeText, { color: theme.primary }]}>LATEST</Text>
                     </View>
                 </View>
-
-                {/* --- MESSAGE FROM DEVS SECTION --- */}
-                { data &&
-                    <View 
-                        style={[styles.itemCard, { backgroundColor: theme.card, borderColor: theme.borderColor, marginBottom:10 }]}
-                    >
-                        <View style={styles.textContainer}>
-                            <Text style={[styles.itemTitle, { color: theme.error }]}>Message From The Devs</Text>
-                            <Text style={[styles.itemDesc, { color: theme.secondary }]}>{data.message}</Text>
-                        </View>
-                    </View>
-                }
 
                 {/* --- FEATURES SECTION --- */}
                 <Animatable.View animation="fadeIn" delay={200} useNativeDriver style={styles.sectionHeader}>

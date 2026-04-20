@@ -9,6 +9,7 @@ import Toast from 'react-native-toast-message';
 import Attendance from './attendance';
 import Details from './basic';
 import Faculty from './faculty';
+import Faq from './faq';
 import Home from './home';
 import Login from './index';
 import Notice from './notice';
@@ -100,6 +101,7 @@ function StackContent() {
           <Stack.Screen name="Predictor" component={Predictor} initialParams={homeParams} />
           <Stack.Screen name="Timetable" component={Timetable} initialParams={homeParams} />
           <Stack.Screen name="Support" component={Support} initialParams={homeParams} />
+          <Stack.Screen name="Faq" component={Faq} initialParams={homeParams} />
           <Stack.Screen name="Whatsnew" component={Whatsnew} initialParams={homeParams} />
 
       </Stack.Navigator>

@@ -34,3 +34,7 @@ export const CHANGELOG_URL = "https://github.com/KshavCode/arsd-saathi-app/blob/
 export const GENERATE_PASSWORD_URL = "https://www.arsdcollege.in/Internet/Student/Login_Password_Generator.aspx"
 
 export const REPOSITORY_URL = "https://github.com/KshavCode/arsd-saathi-app"
+
+export const FAQ_URL = "https://raw.githubusercontent.com/KshavCode/arsd-saathi-app/refs/heads/dev-1.6.0/faq.json";
+
+export const DEV_MESSAGE_URL = "https://raw.githubusercontent.com/KshavCode/arsd-saathi-app/refs/heads/dev-1.6.0/message.json";
