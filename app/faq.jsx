@@ -15,8 +15,10 @@ const FaqItem = ({ item, theme, delay }) => (
         delay={delay} 
         useNativeDriver
         style={[styles.itemCard, { backgroundColor: theme.card, borderColor: theme.borderColor }]}
+        accessible={true}
+        accessibilityLabel={`Question: ${item.question}. Answer: ${item.answer}`}
     >
-        <View style={styles.textContainer}>
+        <View style={styles.textContainer} importantForAccessibility="no-hide-descendants">
             <Text style={[styles.itemTitle, { color: theme.text }]}>{item.question}</Text>
             <Text style={[styles.itemDesc, { color: theme.secondary }]}>{item.answer}</Text>
         </View>
@@ -70,8 +72,10 @@ export default function FaqTab({ navigation }) {
                         duration={600}
                         useNativeDriver
                         style={[styles.devCard, { backgroundColor: theme.error + '10', borderColor: theme.error + '30' }]}
+                        accessible={true}
+                        accessibilityLabel={`Message From The Developers: ${devMessage.message}`}
                     >
-                        <View style={styles.textContainer}>
+                        <View style={styles.textContainer} importantForAccessibility="no-hide-descendants">
                             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
                                 <Ionicons name="megaphone" size={18} color={theme.error} style={{ marginRight: 6 }} />
                                 <Text style={[styles.itemTitle, { color: theme.error, marginBottom: 0 }]}>Message From The Devs</Text>
@@ -81,10 +85,23 @@ export default function FaqTab({ navigation }) {
                     </Animatable.View>
                 }
 
+                {/* --- FAQ SECTION HEADER --- */}
+                <Animatable.View 
+                    animation="fadeIn" 
+                    delay={200} 
+                    useNativeDriver 
+                    style={styles.sectionHeader}
+                    accessible={true}
+                    accessibilityRole="header"
+                >
+                    <Ionicons name="chatbubbles" size={20} color={theme.primary} style={{ marginRight: 8 }} importantForAccessibility="no" />
+                    <Text style={[styles.sectionTitle, { color: theme.text }]}>Frequently Asked Questions</Text>
+                </Animatable.View>
+
                 {/* --- FAQ LIST --- */}
                 { loading ? (
                     <View style={{ marginTop: 40, alignItems: 'center' }}>
-                        <ActivityIndicator size="large" color={theme.primary} />
+                        <ActivityIndicator size="large" color={theme.primary} accessibilityLabel="Loading FAQs" />
                     </View>
                 ) : (
                     faqData && faqData.length > 0 ? (
@@ -99,19 +116,28 @@ export default function FaqTab({ navigation }) {
                             ))}
                         </View>
                     ) : (
-                        <View style={{ marginTop: 40, alignItems: 'center' }}>
-                            <Ionicons name="folder-open-outline" size={40} color={theme.secondary} />
-                            <Text style={{ color: theme.secondary, marginTop: 10, fontWeight: '500' }}>No FAQs available right now.</Text>
+                        <View style={{ marginTop: 40, alignItems: 'center' }} accessible={true} accessibilityLabel="No FAQs available right now.">
+                            <Ionicons name="folder-open-outline" size={40} color={theme.secondary} importantForAccessibility="no" />
+                            <Text style={{ color: theme.secondary, marginTop: 10, fontWeight: '500' }} importantForAccessibility="no">No FAQs available right now.</Text>
                         </View>
                     )
                 )}
+                
                 <Animatable.View 
                     animation="fadeInDown"
                     duration={600}
                     delay={1000}
                     useNativeDriver
-                    style={[styles.footerLegal, {marginTop: 30}]}>
-                    <TouchableOpacity style={styles.footerItem} onPress={() => handleFeedback()} accessibilityRole="link" accessibilityHint="Email for FAQ suggestions." hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+                    style={[styles.footerLegal, {marginTop: 30}]}
+                >
+                    <TouchableOpacity 
+                        style={styles.footerItem} 
+                        onPress={handleFeedback} 
+                        accessibilityRole="link" 
+                        accessibilityLabel="Suggest a new FAQ question via email"
+                        accessibilityHint="Opens your email app to send a suggestion." 
+                        hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+                    >
                         <Text style={[styles.footerLink, { color: theme.footer }]}>I want to suggest a question!</Text>
                     </TouchableOpacity>
                 </Animatable.View>
@@ -122,64 +148,17 @@ export default function FaqTab({ navigation }) {
 
 const styles = StyleSheet.create({
     container: { flex: 1, paddingHorizontal: 16, paddingTop: 10 },
-    
-    sectionHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 15,
-        paddingHorizontal: 8,
-    },
-    sectionTitle: { 
-        fontSize: 18, 
-        fontWeight: '800', 
-        letterSpacing: 0.5
-    },
 
-    listContainer: {
-        gap: 12, 
-    },
-    itemCard: {
-        flexDirection: 'row',
-        padding: 16,
-        borderRadius: 20,
-        borderWidth: 1,
-        alignItems: 'flex-start', 
-        elevation: 1,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.03,
-        shadowRadius: 4,
-    },
-    devCard: {
-        flexDirection: 'row',
-        padding: 16,
-        borderRadius: 20,
-        borderWidth: 1,
-        alignItems: 'flex-start', 
-        marginBottom: 25,
-    },
-    iconBox: {
-        width: 44,
-        height: 44,
-        borderRadius: 14,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: 16,
-    },
-    textContainer: {
-        flex: 1,
-        justifyContent: 'center',
-    },
-    itemTitle: {
-        fontSize: 16,
-        fontWeight: '700',
-        marginBottom: 6,
-    },
-    itemDesc: {
-        fontSize: 14,
-        lineHeight: 22,
-        fontWeight: '500',
-    },
+    sectionHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 15, paddingHorizontal: 8 },
+    sectionTitle: { fontSize: 18, fontWeight: '800', letterSpacing: 0.5 },
+
+    listContainer: {gap: 12 },
+    itemCard: { flexDirection: 'row', padding: 16, borderRadius: 20, borderWidth: 1, alignItems: 'flex-start',  elevation: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.03, shadowRadius: 4},
+    devCard: { flexDirection: 'row', padding: 16, borderRadius: 20, borderWidth: 1, alignItems: 'flex-start',  marginBottom: 25 },
+    iconBox: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginRight: 16 },
+    textContainer: { flex: 1, justifyContent: 'center' },
+    itemTitle: { fontSize: 16, fontWeight: '700', marginBottom: 6 },
+    itemDesc: { fontSize: 14,lineHeight: 22,fontWeight: '500' },
     footerLegal: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 12 },
-	footerLegalText: { fontSize: 11, fontWeight: '500' }
+    footerLink: { fontSize: 13, fontWeight: '700', textDecorationLine: 'underline' }
 });
