@@ -35,6 +35,6 @@ export const GENERATE_PASSWORD_URL = "https://www.arsdcollege.in/Internet/Studen
 
 export const REPOSITORY_URL = "https://github.com/KshavCode/arsd-saathi-app"
 
-export const FAQ_URL = "https://raw.githubusercontent.com/KshavCode/arsd-saathi-app/refs/heads/dev-1.6.0/faq.json";
+export const FAQ_URL = "https://raw.githubusercontent.com/KshavCode/arsd-saathi-app/master/faq.json";
 
-export const DEV_MESSAGE_URL = "https://raw.githubusercontent.com/KshavCode/arsd-saathi-app/refs/heads/dev-1.6.0/message.json";
+export const DEV_MESSAGE_URL = "https://raw.githubusercontent.com/KshavCode/arsd-saathi-app/master/message.json";
