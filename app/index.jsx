@@ -61,7 +61,7 @@ export default function Login({ navigation }) {
 
     const handleError = (errorMsg) => {
         setIsScraping(false);
-        Alert.alert("Connection Failed", "Could not verify details. Please check your credentials, internet connection or the server might be busy.");
+        Alert.alert("Connection Failed", "Possible reasons:\n1. Wrong credentials\n2. Poor internet connection\n3. Student portal is down");
     };
 
       // --- AUTOMATIC UPDATE CHECK ---
@@ -290,6 +290,11 @@ export default function Login({ navigation }) {
                             </Text>
                         </TouchableOpacity>
                     </View>
+                    <Text style={[styles.textStyle, {marginTop:40, marginLeft:30, fontWeight:'bold'}]}>Forgot Your Password?</Text>
+                    <Text style={[styles.textStyle, { paddingHorizontal:30, fontSize:13 }]}>1. Try your first name in CAPITALS as the password.</Text>
+                    <Text style={[styles.textStyle, { paddingHorizontal:30, fontSize:13 }]}>2. Visit the admin office regarding the query.</Text>
+                    <Text></Text>
+                    <Text style={[styles.textStyle, { paddingHorizontal:30, fontSize:13 }]}>Since this is a student-developed unofficial app, a student needs to visit the admin office for issues related to modification / verification of details.</Text>
                 </ScrollView>
             </KeyboardAvoidingView>
         </View>
@@ -337,4 +342,6 @@ const styles = StyleSheet.create({
 	  qrModalContent: { padding: 30, borderRadius: 30, alignItems: 'center', width: '100%', maxWidth: 350 },
 	  primaryButton: { paddingVertical: 13, borderRadius: 16, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', marginTop: 10 },
 	  primaryButtonText: { fontSize: 16, fontWeight: '800' },
+
+      textStyle: { fontSize: 15, textAlign: 'justify' }
 });

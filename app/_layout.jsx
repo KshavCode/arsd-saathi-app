@@ -73,11 +73,11 @@ function StackContent() {
     verifySession();
   }, []);
 
-    const currentBackgroundColor = isDarkMode ? Colors.dark.background : Colors.pinkish.background;
+    const currentBackgroundColor = isDarkMode ? Colors.lostInBlue.background : Colors.Default.background;
     if (!isAppReady) {
       return (
         <View style={{ flex: 1, backgroundColor: currentBackgroundColor, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color={isDarkMode ? Colors.dark.primary : Colors.pinkish.primary} />
+          <ActivityIndicator size="large" color={isDarkMode ? Colors.lostInBlue.primary : Colors.Default.primary} />
         </View>
       );
     }
