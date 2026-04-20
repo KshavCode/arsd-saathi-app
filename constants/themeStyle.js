@@ -39,17 +39,17 @@ export const Colors = {
     error: "#DC2626",
   },
 
-  moonLight: {
-    primary: "#4c3f91",
-    secondary: "#6d5bd0",
-    background: "#f5f3ff",
-    text: "#1a009c",
-    card: "#ede9fe",
-    iconBg: "#ddd6fe",
-    separator: "#c4b5fd",
-    footer: "#4c3f91",
+  pikaChew: {
+    primary: "#e9ba00",
+    secondary: "#5c3613",
+    background: "#fffdeb",
+    text: "#000000",
+    card: "#fffad1",
+    iconBg: "#fffad1",
+    separator: "#f1ebb8",
+    footer: "#FF6B6B",
     success: "#16A34A",
-    error: "#DC2626",
+    error: "#e92929"
   },
 
   dragonFruit: {
@@ -61,6 +61,18 @@ export const Colors = {
     iconBg: "#e0e7ff",
     separator: "#fde68a",
     footer: "#f24793",
+    success: "#16A34A",
+    error: "#DC2626",
+  },
+
+  devilMayLie: {
+    primary: "#4aaca5",
+    secondary: "#a84343",
+    background: "#F5F7F8",
+    text: "#495E57",
+    card: "#ececec",
+    separator: "#dddddd",
+    footer: "#495E57",
     success: "#16A34A",
     error: "#DC2626",
   },
@@ -131,6 +143,19 @@ export const Colors = {
     borderColor: "#2E3A52",
   },
 
+  blackPink: {
+    primary: "#db71ac",
+    secondary: "#ffabdc",
+    background: "#050505",
+    text: "#EAEAF0",
+    card: "#0E0E11",
+    iconBg: "#141418",
+    separator: "#1F1F24",
+    footer: "#C4B5FD",
+    success: "#49c978",
+    error: "#FB7185"
+  },
+
   darkCharcoal: {
     primary: "#e5e7eb",
     secondary: "#9ca3af",
@@ -170,6 +195,19 @@ export const Colors = {
     error: "#ec5c5c",
   },
 
+  gengR: {
+    primary: "#c363ec",
+    secondary: "#d5b3ff",
+    background: "#181e31",
+    text: "#c3cdd6",
+    card: "#0E0E11",
+    iconBg: "#2f395c",
+    separator: "#1F1F24",
+    footer: "#C4B5FD",
+    success: "#49c978",
+    error: "#FB7185"
+  },
+
   moonNight: {
     primary: "#93c5fd",
     secondary: "#c4b5fd",
@@ -196,6 +234,19 @@ export const Colors = {
     error: "#ec5c5c",
   },
 
+  woodenPlank: {
+    primary: "#bd9ca0",
+    secondary: "#eeb28d",
+    background: "#1f0e21",
+    text: "#E8EAED",
+    card: "#291305",
+    iconBg: "#291305",
+    separator: "#4e2207",
+    footer: "#FF6B6B",
+    success: "#66BB6A",
+    error: "#EF5350"
+  },
+
   deepCyan: {
     primary: "#69e6bc",
     secondary: "#5fd6e6",
@@ -207,5 +258,5 @@ export const Colors = {
     footer: "#71f8d0",
     success: "#49c978",
     error: "#ec5c5c",
-  },
+  }
 };
