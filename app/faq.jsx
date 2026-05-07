@@ -1,5 +1,5 @@
 import Header from '@/components/Header';
-import { DEV_MESSAGE_URL, FAQ_URL } from '@/constants/links';
+import { FAQ_URL } from '@/constants/links';
 import { useTheme } from '@/hooks/useTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Linking from 'expo-linking';
@@ -34,16 +34,11 @@ const handleFeedback = () => {
 
 export default function FaqTab({ navigation }) {
     const { theme } = useTheme();
-    const [devMessage, setDevMessage] = useState(null);
+
     const [faqData, setFaqData] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch(DEV_MESSAGE_URL + "?t=" + Date.now())
-            .then(res => res.json())
-            .then(json => setDevMessage(json))
-            .catch(err => console.log("Dev Message Fetch Error: ", err));
-
         fetch(FAQ_URL + "?t=" + Date.now())
             .then(res => res.json())
             .then(json => {
@@ -65,25 +60,6 @@ export default function FaqTab({ navigation }) {
                 showsVerticalScrollIndicator={false}
             >
 
-                {/* --- MESSAGE FROM DEVS SECTION --- */}
-                { devMessage &&
-                    <Animatable.View 
-                        animation="fadeInDown"
-                        duration={600}
-                        useNativeDriver
-                        style={[styles.devCard, { backgroundColor: theme.error + '10', borderColor: theme.error + '30' }]}
-                        accessible={true}
-                        accessibilityLabel={`Message From The Developers: ${devMessage.message}`}
-                    >
-                        <View style={styles.textContainer} importantForAccessibility="no-hide-descendants">
-                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-                                <Ionicons name="megaphone" size={18} color={theme.error} style={{ marginRight: 6 }} />
-                                <Text style={[styles.itemTitle, { color: theme.error, marginBottom: 0 }]}>Message From The Devs</Text>
-                            </View>
-                            <Text style={[styles.itemDesc, { color: theme.secondary }]}>{devMessage.message}</Text>
-                        </View>
-                    </Animatable.View>
-                }
 
                 {/* --- FAQ SECTION HEADER --- */}
                 <Animatable.View 
@@ -148,15 +124,10 @@ export default function FaqTab({ navigation }) {
 
 const styles = StyleSheet.create({
     container: { flex: 1, paddingHorizontal: 16, paddingTop: 10 },
-
     sectionHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 15, paddingHorizontal: 8 },
     sectionTitle: { fontSize: 18, fontWeight: '800', letterSpacing: 0.5 },
-
     listContainer: {gap: 12 },
     itemCard: { flexDirection: 'row', padding: 16, borderRadius: 20, borderWidth: 1, alignItems: 'flex-start',  elevation: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.03, shadowRadius: 4},
-    devCard: { flexDirection: 'row', padding: 16, borderRadius: 20, borderWidth: 1, alignItems: 'flex-start',  marginBottom: 25 },
-    iconBox: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginRight: 16 },
-    textContainer: { flex: 1, justifyContent: 'center' },
     itemTitle: { fontSize: 16, fontWeight: '700', marginBottom: 6 },
     itemDesc: { fontSize: 14,lineHeight: 22,fontWeight: '500' },
     footerLegal: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 12 },

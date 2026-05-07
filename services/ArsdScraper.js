@@ -1,10 +1,20 @@
+import { WEBSITE_JSON_URL } from '@/constants/links';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 
 const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
   const webViewRef = useRef(null);
+  const [websiteLinks, setWebsiteLinks] = useState({})
+  useEffect(() => {
+    fetch(WEBSITE_JSON_URL + "?t=" + Date.now())
+      .then(res => res.json())
+              .then(json => setWebsiteLinks(json))
+              .catch(err => console.log("Link Fetch Error: ", err));
+      }, []);
+    
+  console.log(websiteLinks)
 
   const runScraping = `
     // For stopping HTML to load extra resources (boost speed)
@@ -114,7 +124,8 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
           sendData("data_basic", profile);
           
           setTimeout(() => {
-            window.location.href = "https://www.arsdcollege.in/Internet/Student/Mentor_Details.aspx";
+            window.location.href = "${websiteLinks.STUDENT_MENTOR_DETAILS_URL}";
+
           }, 800);
         });
       }
@@ -133,7 +144,7 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
           sendData("data_mentor", mentorData);
 
           setTimeout(() => {
-            window.location.href = "https://www.arsdcollege.in/Internet/Student/Attendance_Report_Monthly.aspx";
+            window.location.href = "${websiteLinks.STUDENT_ATTENDANCE_DETAILS_URL}";
           }, 800);
         });
       }
@@ -235,7 +246,7 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
                 sessionStorage.removeItem('TEMP_TE_DATA'); // Clean up
 
                 setTimeout(() => {
-                    window.location.href = "https://www.arsdcollege.in/Internet/Student/Check_Student_Faculty_Details.aspx";
+                    window.location.href = "${websiteLinks.STUDENT_FACULTY_DETAILS_URL}";
                 }, 800);
             }
         } else {
@@ -270,7 +281,7 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
       else if (url.includes("Home.aspx") || document.body.innerText.includes("Welcome")) {
         sessionStorage.removeItem("login_attempted");
         log("Retrieving data...");
-        window.location.href = "https://www.arsdcollege.in/Internet/Student/STD_Basic_Details.aspx";
+        window.location.href = "${websiteLinks.STUDENT_BASIC_DETAILS_URL}";
       }
 
     })();
@@ -316,7 +327,7 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
     <View style={styles.hiddenContainer}>
       <WebView
         ref={webViewRef}
-        source={{ uri: 'https://www.arsdcollege.in/Internet/Student/Login.aspx' }}
+        source={{ uri: websiteLinks.STUDENT_PORTAL_URL }}
         injectedJavaScript={runScraping}
         mixedContentMode="always"
         javaScriptEnabled={true}

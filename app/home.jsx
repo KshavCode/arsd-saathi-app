@@ -1,4 +1,4 @@
-import { APP_LINK, CHANGELOG_URL, FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, LIBRARY_URL, PRIVACY_URL, SAMARTH_URL, SHIVAM_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
+import { APP_LINK, CHANGELOG_URL, DEV_MESSAGE_URL, FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, LIBRARY_URL, PRIVACY_URL, SAMARTH_URL, SHIVAM_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
 import { Colors } from '@/constants/themeStyle';
 import { useTheme } from '@/hooks/useTheme';
 import ArsdScraper from '@/services/ArsdScraper';
@@ -44,6 +44,7 @@ export default function HomeTab({ route, navigation }) {
 	const {theme, themeName, setThemeName, isDark} = useTheme()
 	const [userData, setUserData] = useState({ name: "Loading...", rollNo: "...", enrollmentNumber: "..." });
 	const [savedCredentials, setSavedCredentials] = useState(null);
+	const [devMessage, setDevMessage] = useState(null);
 	const [isSyncing, setIsSyncing] = useState(false);
 	const [nextSync, setNextSync] = useState("Never");
 	const [nextClassInfo, setNextClassInfo] = useState(null);
@@ -203,6 +204,13 @@ export default function HomeTab({ route, navigation }) {
 		initialize();
   }, [validateDataStructure, loadData]);
 
+  useEffect(() => {
+	fetch(DEV_MESSAGE_URL + "?t=" + Date.now())
+	.then(res => res.json())
+	.then(json => setDevMessage(json))
+	.catch(err => console.log("Dev Message Fetch Error: ", err));
+  }, []);
+
   const requiresSync = route.params?.requiresSync;
   useEffect(() => {
 		if (requiresSync) setIsSyncing(true);
@@ -221,7 +229,6 @@ export default function HomeTab({ route, navigation }) {
 	  setIsSyncing(false);
 	  console.warn("Background sync failed:", errorMsg);
   };
-
 
   const handleLogout = () => {
 	  setShowLogoutModal(true)
@@ -256,6 +263,7 @@ export default function HomeTab({ route, navigation }) {
   };
 
   const isAttendanceLow = Number(userData.percent_attendance) < 67;
+
 
   return (
 		<SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
@@ -509,6 +517,25 @@ export default function HomeTab({ route, navigation }) {
 					</TouchableOpacity>
 				</View>
 			</View>
+			{/* --- MESSAGE FROM DEVS SECTION --- */}
+			{ devMessage && devMessage.show &&
+				<Animatable.View 
+					animation="fadeInDown"
+					duration={600}
+					useNativeDriver
+					style={[styles.devCard, { backgroundColor: theme.error + '10', borderColor: theme.error + '30' }]}
+					accessible={true}
+					accessibilityLabel={`Message From The Developers: ${devMessage.message}`}
+				>
+					<View style={styles.textContainer} importantForAccessibility="no-hide-descendants">
+						<View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+							<Ionicons name="megaphone" size={18} color={theme.error} style={{ marginRight: 6 }} />
+							<Text style={[styles.devMessageTitle, { color: theme.error, marginBottom: 0 }]}>Message From The Devs</Text>
+						</View>
+						<Text style={[styles.devMessageDesc, { color: theme.secondary }]}>{devMessage.message}</Text>
+					</View>
+				</Animatable.View>
+			}
 		
 			{/* Dashboard */}
 			<View style={[styles.heroContainer, { backgroundColor: theme.card, borderColor: theme.primary+'50' }]}>
@@ -679,6 +706,13 @@ const styles = StyleSheet.create({
 	greeting: { fontSize: 14, fontWeight: '600', letterSpacing: 0.5, textTransform: 'uppercase' },
 	username: { fontSize: 28, fontWeight: '900', letterSpacing: -0.5 },
 
+	// Announcement
+	devCard: { flexDirection: 'row', padding: 16, borderRadius: 20, borderWidth: 1, alignItems: 'flex-start',  marginBottom: 25 },
+    iconBox: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginRight: 16 },
+    textContainer: { flex: 1, justifyContent: 'center' },
+	devMessageTitle: { fontSize: 16, fontWeight: '700', marginBottom: 6 },
+    devMessageDesc: { fontSize: 14,lineHeight: 22,fontWeight: '500' },
+	
 	// Dashboard
 	heroContainer: { borderRadius: 24, padding: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 12, elevation: 4, marginBottom: 20, borderWidth: 1, overflow:'hidden' },
 	heroMainRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
