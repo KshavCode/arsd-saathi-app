@@ -1,14 +1,13 @@
-import { APP_LINK, CHANGELOG_URL, DEV_MESSAGE_URL, FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, LIBRARY_URL, PRIVACY_URL, SAMARTH_URL, SHIVAM_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
+import { ADS_URL, APP_LINK, CHANGELOG_URL, DEV_MESSAGE_URL, FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, LIBRARY_URL, PRIVACY_URL, SAMARTH_URL, SHIVAM_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
 import { Colors } from '@/constants/themeStyle';
 import { useTheme } from '@/hooks/useTheme';
 import ArsdScraper from '@/services/ArsdScraper';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckBox from 'expo-checkbox';
-import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Modal, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Image, Modal, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import QRCode from 'react-native-qrcode-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -39,12 +38,26 @@ const GridActionButton = ({ title, icon, onPress, theme, isDestructive, accessib
   	</TouchableOpacity>
 );
 
+// Ads Button
+const AdButton = ({ image, link }) => (
+	<TouchableOpacity
+		style={[styles.adsCard]}
+		onPress={()=>Linking.openURL(link)}
+		activeOpacity={0.6}
+		accessibilityRole="button"
+		accessibilityHint= "Redirect's to sponsor's website"
+	>
+		<Image style={styles.adsImage} importantForAccessibility="no-hide-descendants" source={{uri: image}} />
+  	</TouchableOpacity>
+);
+
 // --- Main Screen ---
 export default function HomeTab({ route, navigation }) {
 	const {theme, themeName, setThemeName, isDark} = useTheme()
 	const [userData, setUserData] = useState({ name: "Loading...", rollNo: "...", enrollmentNumber: "..." });
 	const [savedCredentials, setSavedCredentials] = useState(null);
 	const [devMessage, setDevMessage] = useState(null);
+	const [ads, setAds] = useState(null);
 	const [isSyncing, setIsSyncing] = useState(false);
 	const [nextSync, setNextSync] = useState("Never");
 	const [nextClassInfo, setNextClassInfo] = useState(null);
@@ -56,21 +69,22 @@ export default function HomeTab({ route, navigation }) {
 	const [showThemeModal, setShowThemeModal] = useState(false);
 	const [showQRModal, setShowQRModal] = useState(false);
 
+
   // --- AUTOMATIC UPDATE CHECK ---
   useEffect(() => {
 		const checkForUpdates = async () => {
 			try {
-				const currentVersion = Constants.expoConfig.version;
-				const response = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest');
-				if (!response.ok) return;
-				const data = await response.json();
-				const latestVersion = data.tag_name.replace('v', '');
+				// const currentVersion = Constants.expoConfig.version;
+				// const response = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest');
+				// if (!response.ok) return;
+				// const data = await response.json();
+				// const latestVersion = data.tag_name.replace('v', '');
 
-				if (latestVersion !== currentVersion) {
-					const downloadUrl = data.assets?.[0]?.browser_download_url || data.html_url;
-					setUpdateInfo({ version: latestVersion, url: downloadUrl });
-					setShowUpdateModal(true);
-				}
+				// if (latestVersion !== currentVersion) {
+				// 	const downloadUrl = data.assets?.[0]?.browser_download_url || data.html_url;
+				// 	setUpdateInfo({ version: latestVersion, url: downloadUrl });
+				// 	setShowUpdateModal(true);
+				// }
 		  } 
 			catch (error) {
 				console.log("Auto-update check failed:", error);
@@ -209,7 +223,12 @@ export default function HomeTab({ route, navigation }) {
 	.then(res => res.json())
 	.then(json => setDevMessage(json))
 	.catch(err => console.log("Dev Message Fetch Error: ", err));
-  }, []);
+
+	fetch(ADS_URL + "?t=" + Date.now())
+	.then(res => res.json())
+	.then(json => setAds(json))
+	.catch(err => console.log("Ads Fetch Error: ", err));
+  }, []); 
 
   const requiresSync = route.params?.requiresSync;
   useEffect(() => {
@@ -616,6 +635,23 @@ export default function HomeTab({ route, navigation }) {
 					<GridActionButton title="FAQs" icon="chatbubbles" onPress={() => navigation.navigate("Faq")} theme={theme} />
 					<GridActionButton title="Logout" icon="log-out-outline" onPress={handleLogout} isDestructive={true} theme={theme} accessibilityHint="Opens confirmation dialog to securely log out"/>
 				</View>
+
+				{/* Sponsord Buttons */}
+				{ads &&
+					<>
+						<Text style={[styles.sectionHeader, { color: theme.text, marginTop: 10 }]} accessibilityRole="header" accessibilityLabel='Our Sponsors'>Sponsored</Text>
+						<FlatList
+    						data={ads}
+    						renderItem={({ item }) => (
+    						  <AdButton url={item.posterUrl} link={item.targetLink} />
+    						)} 
+    						keyExtractor={item => item.posterUrl}
+    						horizontal 
+    						showsHorizontalScrollIndicator={true}
+  						/>
+					</>
+				}
+				
 			
 				{/* Footer Section */}
 				<View style={[styles.footerContainer, { backgroundColor: theme.card }]}>
@@ -742,6 +778,10 @@ const styles = StyleSheet.create({
 	gridActionCard: { width: '22%', padding: 5, borderRadius: 20, alignItems: 'center', justifyContent: 'center'},
 	gridActionIconCtx: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
 	gridActionText: { fontSize: 12, fontWeight: '700', textAlign: 'center' },
+	
+	// Ads
+	adsCard: { padding: 5, alignItems: 'center', justifyContent: 'center'},
+	adsImage: { width: 150, height:150, padding: 5, alignItems: 'center', justifyContent: 'center'},
 
 	// Footer Block
 	footerContainer: { borderRadius: 24, padding: 20, marginTop: 30, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
