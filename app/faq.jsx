@@ -60,20 +60,6 @@ export default function FaqTab({ navigation }) {
                 showsVerticalScrollIndicator={false}
             >
 
-
-                {/* --- FAQ SECTION HEADER --- */}
-                <Animatable.View 
-                    animation="fadeIn" 
-                    delay={200} 
-                    useNativeDriver 
-                    style={styles.sectionHeader}
-                    accessible={true}
-                    accessibilityRole="header"
-                >
-                    <Ionicons name="chatbubbles" size={20} color={theme.primary} style={{ marginRight: 8 }} importantForAccessibility="no" />
-                    <Text style={[styles.sectionTitle, { color: theme.text }]}>Frequently Asked Questions</Text>
-                </Animatable.View>
-
                 {/* --- FAQ LIST --- */}
                 { loading ? (
                     <View style={{ marginTop: 40, alignItems: 'center' }}>

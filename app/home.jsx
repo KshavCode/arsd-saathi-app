@@ -15,6 +15,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { titleCase } from 'title-case';
 
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
 const handleFeedback = () => {
 	const email = "arsdsaathi.help@gmail.com";
 	const subject = `ArsdSaathi Feedback`;
@@ -222,7 +230,7 @@ export default function HomeTab({ route, navigation }) {
 
 	fetch(ADS_URL + "?t=" + Date.now())
 	.then(res => res.json())
-	.then(json => setAds(json))
+	.then(json => setAds(shuffle(json)))
 	.catch(err => console.log("Ads Fetch Error: ", err));
   }, []); 
 
@@ -278,7 +286,6 @@ export default function HomeTab({ route, navigation }) {
   };
 
   const isAttendanceLow = Number(userData.percent_attendance) < 67;
-
 
   return (
 		<SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>

@@ -2,12 +2,13 @@ import Constants from 'expo-constants';
 
 export const UPDATES_DATA = {
     version: Constants.expoConfig.version,
-    date: "April 2026",
+    date: "May 2026",
     updates: [
+        { title: "Advertisements", desc: "Businesses, Cafes, PGs, Societies can now advertise to reach 2K+ students with ArsdSaathi!" },
         { title: "Timetable to PDF", desc: "Exporting now allows you to download your timetable in a clean PDF format." },
         { title: "Next Sync", desc: "Rebranded 'Last Synced' for letting students know the main reason to use ArsdSaathi." },
-        { title: "What's New Page", desc: "Missing on new updates? Get to know all the changes at just one screen!" },
-        { title: "FAQs Page", desc: "Most common questions that freshers might ask, will be answered here! Also, the developers will use this feature to announce and communicate with the community." },
+        { title: "What's New Page", desc: "Missing on the new update? Get to know all the changes at just one screen!" },
+        { title: "FAQs Page", desc: "Common questions would be answered here." },
         { title: "4 New Themes", desc: "Enjoy 10 sets of light and dark modes each." },
     ],
     fixes: [
