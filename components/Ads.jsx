@@ -11,7 +11,7 @@ const ITEM_SPACING = (width - ITEM_WIDTH) / 2;
 const handleSponsor = () => {
     const email = "arsdsaathi.help@gmail.com";
     const subject = encodeURIComponent("Partnership Inquiry: ArsdSaathi Campus Advertising");
-    const body = encodeURIComponent(`Hello ArsdSaathi Team,\n\nI am interested in advertising my business on your platform. Here are my details:\n\nBusiness Name: [Enter Name]\nType of Business: [e.g., Cafe, PG]\nPreferred Duration: [1 Week / 1 Month]\n\nRegards,\n[Your Name]`);
+    const body = encodeURIComponent(`Hello ArsdSaathi Team,\n\nI am interested in advertising my business on your platform. Here are my details:\n\nBusiness Name: [Enter Name]\nType of Business: [e.g., Cafe, PG, Society]\nPreferred Duration: [1 Week / 1 Month]\n\nRegards,\n[Your Name]\n[Designation]`);
     Linking.openURL(`mailto:${email}?subject=${subject}&body=${body}`);
 };
 

@@ -29,12 +29,6 @@ const handleFeedback = () => {
 	const body = "Name: \nRoll Number: \nScreenshots: \n\nIssue/Feedback: ";
 	Linking.openURL(`mailto:${email}?subject=${subject}&body=${body}`);
 };
-const handleSponsor = () => {
-	const email = "arsdsaathi.help@gmail.com";
-	const subject = `Partnership Inquiry: ArsdSaathi Campus Advertising`;
-	const body = `Hello ArsdSaathi Team,\n\nI am interested in advertising my business on your platform. Here are my details:\n\nBusiness Name: [Enter Name]\nType of Business: [e.g., Cafe, PG, Stationery]\nPreferred Ad Duration: [e.g., 1 Week / 1 Month]\nContact Number: [Enter Number]\n\nAdditional Queries/Messages:[Enter here]\n\nRegards,\n[Your Name]\n[Designation]`;
-	Linking.openURL(`mailto:${email}?subject=${subject}&body=${body}`);
-};
 
 // Grid Button
 const GridActionButton = ({ title, icon, onPress, theme, isDestructive, accessibilityHint='' }) => (
@@ -684,11 +678,6 @@ export default function HomeTab({ route, navigation }) {
 					<View style={[styles.footerLegal, {marginTop: 15}]}>
 					  <TouchableOpacity style={styles.footerItem} onPress={() => handleFeedback()} accessibilityRole="link" accessibilityHint="Email the developer's through this link." hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
 						<Text style={[styles.footerLink, { color: theme.footer }]}>Report an Issue?</Text>
-					  </TouchableOpacity>
-					</View>
-					<View style={[styles.footerLegal, {marginTop: 15}]}>
-					  <TouchableOpacity style={styles.footerItem} onPress={() => handleSponsor()} accessibilityRole="link" accessibilityHint="Email the developer's through this link." hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
-						<Text style={[styles.footerLink, { color: theme.footer }]}>Looking to advertise?</Text>
 					  </TouchableOpacity>
 					</View>
 				</View>
