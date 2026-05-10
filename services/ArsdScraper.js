@@ -13,8 +13,6 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
               .then(json => setWebsiteLinks(json))
               .catch(err => console.log("Link Fetch Error: ", err));
       }, []);
-    
-  console.log(websiteLinks)
 
   const runScraping = `
     // For stopping HTML to load extra resources (boost speed)

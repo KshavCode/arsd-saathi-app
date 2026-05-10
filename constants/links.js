@@ -18,4 +18,4 @@ export const REPOSITORY_URL = "https://github.com/KshavCode/arsd-saathi-app"
 export const FAQ_URL = "https://raw.githubusercontent.com/Kshav005/arsd-saathi-json-data/main/faq.json";
 export const DEV_MESSAGE_URL = "https://raw.githubusercontent.com/Kshav005/arsd-saathi-json-data/main/message.json";
 export const WEBSITE_JSON_URL = "https://raw.githubusercontent.com/Kshav005/arsd-saathi-json-data/main/website.json"
-export const ADS_URL = "https://raw.githubusercontent.com/Kshav005/arsd-saathi-json-data/refs/heads/main/ads.json"
+export const ADS_URL = "https://raw.githubusercontent.com/Kshav005/arsd-saathi-json-data/main/ads.json"

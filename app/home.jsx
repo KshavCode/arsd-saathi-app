@@ -1,3 +1,4 @@
+import AdsScroll from '@/components/Ads';
 import { ADS_URL, APP_LINK, CHANGELOG_URL, DEV_MESSAGE_URL, FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, LIBRARY_URL, PRIVACY_URL, SAMARTH_URL, SHIVAM_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
 import { Colors } from '@/constants/themeStyle';
 import { useTheme } from '@/hooks/useTheme';
@@ -7,7 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckBox from 'expo-checkbox';
 import * as Linking from 'expo-linking';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Image, Modal, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, ScrollView, Share, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import QRCode from 'react-native-qrcode-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,6 +19,12 @@ const handleFeedback = () => {
 	const email = "arsdsaathi.help@gmail.com";
 	const subject = `ArsdSaathi Feedback`;
 	const body = "Name: \nRoll Number: \nScreenshots: \n\nIssue/Feedback: ";
+	Linking.openURL(`mailto:${email}?subject=${subject}&body=${body}`);
+};
+const handleSponsor = () => {
+	const email = "arsdsaathi.help@gmail.com";
+	const subject = `Partnership Inquiry: ArsdSaathi Campus Advertising`;
+	const body = `Hello ArsdSaathi Team,\n\nI am interested in advertising my business on your platform. Here are my details:\n\nBusiness Name: [Enter Name]\nType of Business: [e.g., Cafe, PG, Stationery]\nPreferred Ad Duration: [e.g., 1 Week / 1 Month]\nContact Number: [Enter Number]\n\nAdditional Queries/Messages:[Enter here]\n\nRegards,\n[Your Name]\n[Designation]`;
 	Linking.openURL(`mailto:${email}?subject=${subject}&body=${body}`);
 };
 
@@ -38,18 +45,7 @@ const GridActionButton = ({ title, icon, onPress, theme, isDestructive, accessib
   	</TouchableOpacity>
 );
 
-// Ads Button
-const AdButton = ({ image, link }) => (
-	<TouchableOpacity
-		style={[styles.adsCard]}
-		onPress={()=>Linking.openURL(link)}
-		activeOpacity={0.6}
-		accessibilityRole="button"
-		accessibilityHint= "Redirect's to sponsor's website"
-	>
-		<Image style={styles.adsImage} importantForAccessibility="no-hide-descendants" source={{uri: image}} />
-  	</TouchableOpacity>
-);
+
 
 // --- Main Screen ---
 export default function HomeTab({ route, navigation }) {
@@ -233,7 +229,7 @@ export default function HomeTab({ route, navigation }) {
   const requiresSync = route.params?.requiresSync;
   useEffect(() => {
 		if (requiresSync) setIsSyncing(true);
-  }, [requiresSync]);
+  }, [requiresSync]); 
 
   const handleSyncCompletion = async (status) => {
 	  if (status === 'DONE') {
@@ -621,6 +617,11 @@ export default function HomeTab({ route, navigation }) {
 				  </TouchableOpacity>
 				)}
 				</View>
+
+				{/* Sponsord Buttons */}
+				{ads &&
+					<AdsScroll data={ads} />
+				}
 			
 				{/* Grid Buttons */}
 				<Text style={[styles.sectionHeader, { color: theme.text, marginTop: 10 }]} accessibilityRole="header" accessibilityLabel='Quick Actions'>Quick Actions</Text>
@@ -635,23 +636,6 @@ export default function HomeTab({ route, navigation }) {
 					<GridActionButton title="FAQs" icon="chatbubbles" onPress={() => navigation.navigate("Faq")} theme={theme} />
 					<GridActionButton title="Logout" icon="log-out-outline" onPress={handleLogout} isDestructive={true} theme={theme} accessibilityHint="Opens confirmation dialog to securely log out"/>
 				</View>
-
-				{/* Sponsord Buttons */}
-				{ads &&
-					<>
-						<Text style={[styles.sectionHeader, { color: theme.text, marginTop: 10 }]} accessibilityRole="header" accessibilityLabel='Our Sponsors'>Sponsored</Text>
-						<FlatList
-    						data={ads}
-    						renderItem={({ item }) => (
-    						  <AdButton url={item.posterUrl} link={item.targetLink} />
-    						)} 
-    						keyExtractor={item => item.posterUrl}
-    						horizontal 
-    						showsHorizontalScrollIndicator={true}
-  						/>
-					</>
-				}
-				
 			
 				{/* Footer Section */}
 				<View style={[styles.footerContainer, { backgroundColor: theme.card }]}>
@@ -693,6 +677,11 @@ export default function HomeTab({ route, navigation }) {
 					<View style={[styles.footerLegal, {marginTop: 15}]}>
 					  <TouchableOpacity style={styles.footerItem} onPress={() => handleFeedback()} accessibilityRole="link" accessibilityHint="Email the developer's through this link." hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
 						<Text style={[styles.footerLink, { color: theme.footer }]}>Report an Issue?</Text>
+					  </TouchableOpacity>
+					</View>
+					<View style={[styles.footerLegal, {marginTop: 15}]}>
+					  <TouchableOpacity style={styles.footerItem} onPress={() => handleSponsor()} accessibilityRole="link" accessibilityHint="Email the developer's through this link." hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+						<Text style={[styles.footerLink, { color: theme.footer }]}>Looking to advertise?</Text>
 					  </TouchableOpacity>
 					</View>
 				</View>
@@ -778,10 +767,6 @@ const styles = StyleSheet.create({
 	gridActionCard: { width: '22%', padding: 5, borderRadius: 20, alignItems: 'center', justifyContent: 'center'},
 	gridActionIconCtx: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
 	gridActionText: { fontSize: 12, fontWeight: '700', textAlign: 'center' },
-	
-	// Ads
-	adsCard: { padding: 5, alignItems: 'center', justifyContent: 'center'},
-	adsImage: { width: 150, height:150, padding: 5, alignItems: 'center', justifyContent: 'center'},
 
 	// Footer Block
 	footerContainer: { borderRadius: 24, padding: 20, marginTop: 30, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
