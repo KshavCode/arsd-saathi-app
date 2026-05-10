@@ -620,7 +620,7 @@ export default function HomeTab({ route, navigation }) {
 				</View>
 
 				{/* Sponsord Buttons */}
-				{ads &&
+				{ads && ads.length > 0 &&
 					<AdsScroll data={ads} />
 				}
 			

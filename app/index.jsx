@@ -1,4 +1,5 @@
-import { CHANGELOG_URL, GENERATE_PASSWORD_URL, PRIVACY_URL, TERMS_URL } from '@/constants/links';
+import AdsScroll from '@/components/Ads';
+import { ADS_URL, CHANGELOG_URL, GENERATE_PASSWORD_URL, PRIVACY_URL, TERMS_URL } from '@/constants/links';
 import { Colors } from "@/constants/themeStyle";
 import ArsdScraper from '@/services/ArsdScraper';
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -11,6 +12,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from 'react-native-toast-message';
 
 const { height } = Dimensions.get("window");
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
 
 const handleFeedback = () => {
     const email = "arsdsaathi.help@gmail.com";
@@ -26,8 +35,9 @@ export default function Login({ navigation }) {
     const [consentGiven, setConsentGiven] = useState(false);
     const [isScraping, setIsScraping] = useState(false);
     const [progressMsg, setProgressMsg] = useState("");
+    const [ads, setAds] = useState(null)
     const [showUpdateModal, setShowUpdateModal] = useState(false);
-	  const [updateInfo, setUpdateInfo] = useState({ version: '', url: '' });
+    const [updateInfo, setUpdateInfo] = useState({ version: '', url: '' });
 
     // --- Connect button disabled
     const isReadyToSync = roll.length > 0 && fullName.length > 0 && passw.length > 0 && consentGiven;
@@ -60,15 +70,15 @@ export default function Login({ navigation }) {
     };
 
     const handleError = (errorMsg) => {
-        setIsScraping(false);
-        Alert.alert("Connection Failed", "Possible reasons:\n1. Wrong credentials\n2. Poor internet connection\n3. Student portal is down");
+      setIsScraping(false);
+      Alert.alert("Connection Failed", "Possible reasons:\n1. Wrong credentials\n2. Poor internet connection\n3. Student portal is down");
     };
 
-      // --- AUTOMATIC UPDATE CHECK ---
+  // --- AUTOMATIC UPDATE CHECK ---
   useEffect(() => {
 		const checkForUpdates = async () => {
 			try {
-				const currentVersion = Constants.expoConfig.version;
+			  const currentVersion = Constants.expoConfig.version;
 				const response = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest');
 				if (!response.ok) return;
 				const data = await response.json();
@@ -87,11 +97,17 @@ export default function Login({ navigation }) {
 	checkForUpdates();
 	}, []);
 
+  useEffect(() => {
+    fetch(ADS_URL + "?t=" + Date.now())
+    .then(res => res.json())
+    .then(json => setAds(shuffle(json)))
+    .catch(err => console.log("Ads Fetch Error: ", err));
+    }, []); 
+
 
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" />
-
             {/* --- UPDATE MODAL --- */}
 		        <Modal
 			      	animationType="fade"
@@ -160,6 +176,52 @@ export default function Login({ navigation }) {
 			      	</TouchableOpacity>
 		        </Modal>
 
+            {/* --- SCRAPING MODAL --- */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={isScraping}
+                statusBarTranslucent={true}
+                navigationBarTranslucent={true}
+            >
+                <View style={styles.scrapeModalBackdrop}>
+                    <View style={[styles.scrapeModalContent, { backgroundColor: Colors.Default.card }]}>
+
+                        {/* Ads */}
+                        {ads && ads.length > 0 && (
+                            <View style={{ width: '110%', marginBottom: 20 }}>
+                                <AdsScroll data={ads} />
+                            </View>
+                        )}
+
+                        {/* Loader */}
+                        <View style={styles.loadingState}>
+                            <ActivityIndicator
+                                size="large"
+                                color={Colors.Default.primary}
+                            />
+
+                            <Text style={styles.loadingText}>
+                                {progressMsg}
+                            </Text>
+                        </View>
+                      
+                        {/* Hidden Scraper */}
+                        <ArsdScraper
+                            credentials={{
+                                name: fullName,
+                                rollNo: roll,
+                                passw: passw
+                            }}
+                            onProgress={setProgressMsg}
+                            onFinish={handleCompletion}
+                            onError={handleError}
+                        />
+                    </View>
+                </View>
+            </Modal>
+
+            
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -253,27 +315,19 @@ export default function Login({ navigation }) {
                             )}
 
                             <View style={styles.actionArea}>
-                                {isScraping ? (
-                                    <View style={styles.loadingState} accessible={true} accessibilityLabel={`Loading. ${progressMsg}`}>
-                                        <ActivityIndicator size="large" color={Colors.Default.primary} />
-                                        <Text style={styles.loadingText} importantForAccessibility="no">{progressMsg}</Text>
-                                        <ArsdScraper credentials={{ name: fullName, rollNo: roll, passw: passw }} onProgress={setProgressMsg} onFinish={handleCompletion} onError={handleError} />
-                                    </View>
-                                ) : (
-                                    <TouchableOpacity
-                                        style={[styles.loginButton, !isReadyToSync && styles.disabledButton]}
-                                        onPress={handleLogin}
-                                        disabled={!isReadyToSync}
-                                        activeOpacity={0.8}
-                                        accessibilityRole="button"
-                                        accessibilityState={{ disabled: !isReadyToSync }}
-                                        accessibilityLabel="Connect and Sync"
-                                        accessibilityHint={!isReadyToSync ? "Please fill all fields and check the consent box to continue" : "Submits your credentials to securely sync your college data"}
-                                    >
-                                        <Text style={styles.loginButtonText} importantForAccessibility="no">Connect & Sync</Text>
-                                        <Ionicons name="arrow-forward" size={20} color="#FFF" importantForAccessibility="no" />
-                                    </TouchableOpacity>
-                                )}
+                              <TouchableOpacity
+                                style={[styles.loginButton, !isReadyToSync && styles.disabledButton]}
+                                onPress={handleLogin}
+                                disabled={!isReadyToSync}
+                                activeOpacity={0.8}
+                                accessibilityRole="button"
+                                accessibilityState={{ disabled: !isReadyToSync }}
+                                accessibilityLabel="Connect and Sync"
+                                accessibilityHint={!isReadyToSync ? "Please fill all fields and check the consent box to continue" : "Submits your credentials to securely sync your college data"}
+                              >
+                                <Text style={styles.loginButtonText} importantForAccessibility="no">Connect & Sync</Text>
+                                <Ionicons name="arrow-forward" size={20} color="#FFF" importantForAccessibility="no" />
+                              </TouchableOpacity>
                             </View>
                         </View>
 
@@ -322,11 +376,11 @@ const styles = StyleSheet.create({
     loginButton: { backgroundColor: Colors.Default.primary, flexDirection: "row", alignItems: "center", justifyContent: "center", height: 50, borderRadius: 12, elevation: 4 },
     disabledButton: { backgroundColor: "#a5a5a5", elevation: 0 },
     loginButtonText: { color: "#FFF", fontSize: 16, fontWeight: "600", marginRight: 8 },
-    loadingState: { alignItems: "center", gap: 8 },
-    loadingText: { fontSize: 13, color: "#4F46E5", fontWeight: "600" },
+    loadingState: { alignItems: "center", justifyContent: 'center', gap: 12, width: '100%', paddingVertical: 10 },
+    loadingText: { fontSize: 14, color: Colors.Default.primary, fontWeight: "700", textAlign: 'center'},
     footerText: { textAlign: "center", fontSize: 12 },
 
-    // Modal
+  // Modal
 	modalOverlay: { ...StyleSheet.absoluteFillObject, justifyContent: 'center', alignItems: 'center', padding: 5 },
 	modalContent: { width: '90%', borderRadius: 24, padding: 24, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 20, elevation: 15 },
 	modalIconContainer: { width: 70, height: 70, borderRadius: 35, alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
@@ -342,5 +396,25 @@ const styles = StyleSheet.create({
 	qrModalContent: { padding: 30, borderRadius: 30, alignItems: 'center', width: '100%', maxWidth: 350 },
 	primaryButton: { paddingVertical: 13, borderRadius: 16, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', marginTop: 10 },
 	primaryButtonText: { fontSize: 16, fontWeight: '800' },
-    textStyle: { fontSize: 15, textAlign: 'justify' }
+  textStyle: { fontSize: 15, textAlign: 'justify' },
+  scrapeModalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+},
+
+scrapeModalContent: {
+    width: '100%',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+},
 });
