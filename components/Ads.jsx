@@ -20,7 +20,7 @@ export const compareDate = (dateStr) => {
 };
 
 const AdCard = React.memo(({ item, theme }) => {
-    const isLastCard = !item.targetLink;
+    const isLastCard = !item.by;
 
     return (
         <View style={[styles.adsCard, { width: ITEM_WIDTH }]}>
@@ -95,7 +95,7 @@ export default function AdsScroll({ data }) {
     const renderItem = useCallback(({ item }) => <AdCard item={item} theme={theme} />, [theme]);
     const keyExtractor = useCallback((item, index) => item.posterUrl || index.toString(), []);
 
-    if (activeAds.length === 0) return null; // Hide completely if no active ads
+    if (activeAds.length === 0) return null;
 
     return (
         <View style={styles.container}>
