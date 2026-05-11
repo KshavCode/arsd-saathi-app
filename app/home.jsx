@@ -374,7 +374,7 @@ export default function HomeTab({ route, navigation }) {
 							{/* Modal Text */}
 							<Text style={[styles.modalTitle, { color: theme.text }]} accessibilityRole="header">Update Available!</Text>
 							<Text style={[styles.modalText, { color: theme.secondary }]}>
-							  Version {updateInfo.version} is ready. We&apos;ve crushed some bugs and added improvements to keep your app running smoothly.
+							  Version {updateInfo.version} is here with bug fixes and improvements!
 							</Text>
 					
 							{/* Modal Action Buttons */}
@@ -389,8 +389,7 @@ export default function HomeTab({ route, navigation }) {
 									accessibilityLabel="Update Now"
 									accessibilityHint="Downloads the updated application by redirecting to the download link"
 							  >
-								<Ionicons name="download-outline" size={18} color={theme.background} style={{marginRight: 6}} importantForAccessibility="no" />
-								<Text style={[styles.modalButtonPrimaryText, {color:theme.background}]} importantForAccessibility="no">Update Now</Text>
+								<Text style={[styles.modalButtonPrimaryText, {color:theme.background}]} importantForAccessibility="no">Download Update</Text>
 							  </TouchableOpacity>
 							  <TouchableOpacity
 									style={[styles.modalButtonSecondary, { borderColor: theme.separator }]}
@@ -399,7 +398,7 @@ export default function HomeTab({ route, navigation }) {
 									accessibilityLabel="What's New"
 									accessibilityHint="Redirects to the new updates information of the application"
 							  >
-									<Text style={[styles.modalButtonSecondaryText, { color: theme.text }]} importantForAccessibility="no">What&apos;s New</Text>
+									<Text style={[styles.modalButtonSecondaryText, { color: theme.text }]} importantForAccessibility="no">Release Notes</Text>
 							  </TouchableOpacity>
 							  <TouchableOpacity
 									style={{ marginTop: 15, paddingVertical: 5 }}
@@ -616,7 +615,7 @@ export default function HomeTab({ route, navigation }) {
 						  }
 						</View>
 				  </TouchableOpacity>
-				)}
+				)} 
 				</View>
 
 				{/* Sponsord Buttons */}
