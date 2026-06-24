@@ -12,9 +12,7 @@ import Faculty from './faculty';
 import Faq from './faq';
 import Home from './home';
 import Login from './index';
-import Notice from './notice';
-import Predictor from './predictor';
-import Support from './support';
+import Notice from './notice';  
 import Timetable from './timetable';
 import Whatsnew from './whatsnew';
 
@@ -98,9 +96,7 @@ function StackContent() {
           <Stack.Screen name="Details" component={Details} initialParams={homeParams} />
           <Stack.Screen name="Faculty" component={Faculty} initialParams={homeParams} />
           <Stack.Screen name="Notice" component={Notice} initialParams={homeParams} />
-          <Stack.Screen name="Predictor" component={Predictor} initialParams={homeParams} />
           <Stack.Screen name="Timetable" component={Timetable} initialParams={homeParams} />
-          <Stack.Screen name="Support" component={Support} initialParams={homeParams} />
           <Stack.Screen name="Faq" component={Faq} initialParams={homeParams} />
           <Stack.Screen name="Whatsnew" component={Whatsnew} initialParams={homeParams} />
 
