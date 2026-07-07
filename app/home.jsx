@@ -1,4 +1,4 @@
-import { APP_LINK, CHANGELOG_URL, DEV_MESSAGE_URL, FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, LIBRARY_URL, PRIVACY_URL, SAMARTH_URL, SHIVAM_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL } from '@/constants/links';
+import { CHANGELOG_URL, DEV_MESSAGE_URL, FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, LIBRARY_URL, PRIVACY_URL, SAMARTH_URL, SHIVAM_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL, FACEBOOK_LINK, INSTAGRAM_LINK, LINKEDIN_LINK, X_LINK, YOUTUBE_LINK } from '@/constants/links';
 import { Colors } from '@/constants/themeStyle';
 import { useTheme } from '@/hooks/useTheme';
 import ArsdScraper from '@/services/ArsdScraper';
@@ -12,7 +12,6 @@ import { ActivityIndicator, Alert, Modal, ScrollView, StatusBar, StyleSheet, Tex
 import * as Animatable from 'react-native-animatable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Toast from 'react-native-toast-message';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH * 0.62; 
@@ -47,7 +46,6 @@ export default function HomeTab({ route, navigation }) {
   const actions = [
     { text: 'Notices', position: 1, icon: 'megaphone', navigate: 'Notice' },
     { text: 'Timetable', position: 2, icon: 'calendar', navigate: 'Timetable' },
-    { text: 'Faculty', position: 4, icon: 'people', navigate: 'Faculty' },
     { text: 'Scholarships', position: 5, icon: 'medal', navigate: 'Scholarship' },
     { text: 'What\'s New', position: 6, icon: 'build', navigate: 'Whatsnew' },
     { text: 'Ask ArsdSaathi', position: 7, icon: 'help-circle', navigate: 'Faq' },
@@ -517,16 +515,43 @@ export default function HomeTab({ route, navigation }) {
           <View style={[styles.footerLegal, {marginTop: 15}]}>
             <TouchableOpacity style={styles.footerItem} onPress={() => handleFeedback()}><Text style={[styles.footerLink, { color: theme.footer }]}>Report an Issue?</Text></TouchableOpacity>
           </View>
+          <View style={{flexDirection:'row', alignItems:'center', justifyContent:'space-evenly', marginTop:20}}>
+            <TouchableOpacity onPress={()=>Linking.openURL(FACEBOOK_LINK)}>
+              <Ionicons name='logo-facebook' size={20} color={theme.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={()=>Linking.openURL(INSTAGRAM_LINK)}>
+              <Ionicons name='logo-instagram' size={20} color={theme.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={()=>Linking.openURL(YOUTUBE_LINK)}>
+              <Ionicons name='logo-youtube' size={20} color={theme.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={()=>Linking.openURL(X_LINK)}>
+              <Ionicons name='logo-x' size={20} color={theme.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={()=>Linking.openURL(LINKEDIN_LINK)}>
+              <Ionicons name='logo-linkedin' size={20} color={theme.primary} />
+            </TouchableOpacity>
+          </View>
         </View>
     
-        <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, marginTop:20}}>
-          <Text style={{ color: theme.secondary, fontSize:15}}>Developed by</Text>
-          <TouchableOpacity onPress={()=>Linking.openURL(KESHAV_URL)}><Text style={{ color: theme.primary, fontWeight: 'bold', fontSize:15 }}>Keshav Pal</Text></TouchableOpacity>
+
+        <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, marginTop:30}}>
+          <Text style={{ color: theme.secondary, fontSize:17}}>Developed by</Text>
+          <TouchableOpacity onPress={()=>Linking.openURL(KESHAV_URL)}><Text style={{ color: theme.primary, fontWeight: 'bold', fontSize:17 }}>Keshav Pal</Text></TouchableOpacity>
         </View>
         <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4}}>
           <Text style={{ color: theme.secondary, fontSize:13}}>with</Text>
           <TouchableOpacity onPress={()=>Linking.openURL(SHIVAM_URL)}><Text style={{ color: theme.primary, fontWeight: 'bold', fontSize:13 }}>Shivam Yadav</Text></TouchableOpacity>
         </View>
+        
+        <View style={[styles.heroDivider, { backgroundColor: theme.separator+'A0' }]} />
+
+        <View style={[{backgroundColor: theme.card, padding: 20, borderRadius: 30}]}>
+          <Text style={[styles.mainCardSubject, { color: theme.text }]}>PRINCIPAL'S NOTE</Text>
+        <View style={[styles.heroDivider, { backgroundColor: theme.secondary+'60', marginTop: 0 }]} />
+          <Text style={[styles.metaText, { color: theme.secondary, textAlign: 'justify' }]}>"A heartfelt welcome to all our students. Our institution prides itself on a legacy of excellence in education, holistic development, and innovation, making it a vibrant place for learners from diverse backgrounds. The College holds the distinction of being accredited with an A++ NAAC grade with a score of 3.77, the highest to date. The College has also attained All India 7th Rank in the NIRF rankings. These accomplishments testify to our commitment to excellence in every aspect of our institution."</Text>
+        </View>
+
       </ScrollView>
       <CustomFAB actions={actions} theme={theme} />
     </SafeAreaView>

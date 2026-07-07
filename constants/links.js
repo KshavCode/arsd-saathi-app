@@ -22,3 +22,10 @@ export const FAQ_URL = "https://raw.githubusercontent.com/Kshav005/arsd-saathi-j
 export const DEV_MESSAGE_URL = "https://raw.githubusercontent.com/Kshav005/arsd-saathi-json-data/main/message.json";
 export const WEBSITE_JSON_URL = "https://raw.githubusercontent.com/Kshav005/arsd-saathi-json-data/main/website.json"
 export const HELPDESK_JSON_URL = "https://raw.githubusercontent.com/Kshav005/arsd-saathi-json-data/main/helpdesk.json"
+
+// Social Links
+export const FACEBOOK_LINK = "https://www.facebook.com/share/1BgSTVqEyi/"
+export const INSTAGRAM_LINK = "https://www.instagram.com/_arsdcollege_?igsh=MTVscGV3Z204cGtoNg=="
+export const LINKEDIN_LINK = "https://www.linkedin.com/school/atma-ram-sanatan-dharma-college/"
+export const YOUTUBE_LINK = "https://youtube.com/@arsdcollegeuniversityofdel4142?si=8ltT2SdiBh94JtuZ"
+export const X_LINK = "https://x.com/arsdcollegedu"

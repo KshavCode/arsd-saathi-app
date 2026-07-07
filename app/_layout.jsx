@@ -7,8 +7,7 @@ import { ActivityIndicator, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 import Attendance from './attendance';
-import Details from './basic';
-import Faculty from './faculty';
+import Details from './details';
 import Faq from './faq';
 import Home from './home';
 import Login from './index';
@@ -96,7 +95,6 @@ function StackContent() {
           <Stack.Screen name="Home" component={Home} initialParams={homeParams} />
           <Stack.Screen name="Attendance" component={Attendance} initialParams={homeParams} />        
           <Stack.Screen name="Details" component={Details} initialParams={homeParams} />
-          <Stack.Screen name="Faculty" component={Faculty} initialParams={homeParams} />
           <Stack.Screen name="Helpdesk" component={HelpDesk} initialParams={homeParams} />
           <Stack.Screen name="Notice" component={Notice} initialParams={homeParams} />
           <Stack.Screen name="Timetable" component={Timetable} initialParams={homeParams} />
