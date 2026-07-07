@@ -25,7 +25,6 @@ const FacultyCard = ({ data, theme, delay }) => {
       duration={500}
       useNativeDriver
     >
-      {/* --- Header: Teacher Identity --- */}
       <View style={styles.cardHeader} importantForAccessibility="no-hide-descendants">
         <View style={styles.headerTextCtx}>
           <Text style={[styles.teacherName, { color: theme.text }]}>

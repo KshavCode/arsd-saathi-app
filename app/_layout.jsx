@@ -15,6 +15,8 @@ import Login from './index';
 import Notice from './notice';  
 import Timetable from './timetable';
 import Whatsnew from './whatsnew';
+import HelpDesk from './helpdesk';
+import Scholarship from './scholarship';
 
 import { ThemeContext, ThemeProvider } from '@/context/ThemeContext';
 
@@ -95,11 +97,12 @@ function StackContent() {
           <Stack.Screen name="Attendance" component={Attendance} initialParams={homeParams} />        
           <Stack.Screen name="Details" component={Details} initialParams={homeParams} />
           <Stack.Screen name="Faculty" component={Faculty} initialParams={homeParams} />
+          <Stack.Screen name="Helpdesk" component={HelpDesk} initialParams={homeParams} />
           <Stack.Screen name="Notice" component={Notice} initialParams={homeParams} />
           <Stack.Screen name="Timetable" component={Timetable} initialParams={homeParams} />
           <Stack.Screen name="Faq" component={Faq} initialParams={homeParams} />
+          <Stack.Screen name="Scholarship" component={Scholarship} initialParams={homeParams} />
           <Stack.Screen name="Whatsnew" component={Whatsnew} initialParams={homeParams} />
-
       </Stack.Navigator>
     );
 }

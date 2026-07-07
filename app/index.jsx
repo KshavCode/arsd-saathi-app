@@ -15,116 +15,112 @@ const { height } = Dimensions.get("window");
 const handleFeedback = () => Linking.openURL(`mailto:arsdsaathi.help@gmail.com?subject=ArsdSaathi Feedback&body=Name: \nRoll Number: \nScreenshots: \n\nIssue/Feedback: `);
 
 export default function Login({ navigation }) {
-    const [roll, setRoll] = useState(""); 
-    const [fullName, setFullName] = useState(""); 
-    const [passw, setPassw] = useState("");
-    const [consentGiven, setConsentGiven] = useState(false); 
-    const [isScraping, setIsScraping] = useState(false);
-    const [progressMsg, setProgressMsg] = useState(""); 
-    const [showUpdateModal, setShowUpdateModal] = useState(false);
-    const [devMessage, setDevMessage] = useState(null); 
-    const [updateInfo, setUpdateInfo] = useState({ version: '', url: '' });
+  const [roll, setRoll] = useState(""); 
+  const [fullName, setFullName] = useState(""); 
+  const [passw, setPassw] = useState("");
+  const [consentGiven, setConsentGiven] = useState(false); 
+  const [isScraping, setIsScraping] = useState(false);
+  const [progressMsg, setProgressMsg] = useState(""); 
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [devMessage, setDevMessage] = useState(null); 
+  const [updateInfo, setUpdateInfo] = useState({ version: '', url: '' });
 
-    const isReadyToSync = roll.length > 0 && fullName.length > 0 && passw.length > 0 && consentGiven;
-
+  const isReadyToSync = roll.length > 0 && fullName.length > 0 && passw.length > 0 && consentGiven;
     const handleLogin = () => {
-        Keyboard.dismiss();
-        if (!roll || !fullName || !passw) return Toast.show({position: 'bottom', bottomOffset:70, type:'success', text1:'Missing Fields!', text2: 'Please fill in all details.', props: {borderColor: Colors.Default.error, bg: Colors.Default.card, text1Color: Colors.Default.error, text2Color: Colors.Default.secondary}});
-        setProgressMsg("Connecting to ARSD Portal..."); setIsScraping(true);
+      Keyboard.dismiss();
+      if (!roll || !fullName || !passw) return Toast.show({position: 'bottom', bottomOffset:70, type:'success', text1:'Missing Fields!', text2: 'Please fill in all details.', props: {borderColor: Colors.Default.error, bg: Colors.Default.card, text1Color: Colors.Default.error, text2Color: Colors.Default.secondary}});
+      setProgressMsg("Connecting to ARSD Portal..."); setIsScraping(true);
     };
 
     const handleCompletion = async (status) => {
-        if (status === "DONE") {
-            setProgressMsg("Sync Complete!"); const now = Date.now().toString();
-            await AsyncStorage.multiSet([["LOGIN_TIMESTAMP", now], ["DATA_TIMESTAMP", now]]);
-            setTimeout(() => { setIsScraping(false); navigation.reset({ index: 0, routes: [{ name: "Home" }] }); }, 800);
-        }
+      if (status === "DONE") {
+        setProgressMsg("Sync Complete!"); const now = Date.now().toString();
+        await AsyncStorage.multiSet([["LOGIN_TIMESTAMP", now], ["DATA_TIMESTAMP", now]]);
+        setTimeout(() => { setIsScraping(false); navigation.reset({ index: 0, routes: [{ name: "Home" }] }); }, 800);
+      }
     };
 
     const handleError = () => { setIsScraping(false); Alert.alert("Connection Failed", "Possible reasons:\n1. Wrong credentials\n2. Poor internet\n3. Portal down"); };
 
     useEffect(() => {
-        const checkForUpdates = async () => {
-            try {
-                const res = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest'); if (!res.ok) return;
-                const data = await res.json(); const latestVersion = data.tag_name.replace('v', '');
-                if (latestVersion !== Constants.expoConfig.version) { setUpdateInfo({ version: latestVersion, url: data.assets?.[0]?.browser_download_url || data.html_url }); setShowUpdateModal(true); }
-            } catch (err) { console.log("Update check failed:", err); }
-        }; checkForUpdates();
+      const checkForUpdates = async () => {
+        try {
+          const res = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest'); if (!res.ok) return;
+          const data = await res.json(); const latestVersion = data.tag_name.replace('v', '');
+          if (latestVersion !== Constants.expoConfig.version) { setUpdateInfo({ version: latestVersion, url: data.assets?.[0]?.browser_download_url || data.html_url }); setShowUpdateModal(true); }
+        } catch (err) { console.log("Update check failed:", err); }
+      }; checkForUpdates();
     }, []);
 
-    useEffect(() => { fetch(DEV_MESSAGE_URL + "?t=" + Date.now()).then(res => res.json()).then(setDevMessage).catch(console.log); }, []);
+    useEffect(() => { 
+      fetch(DEV_MESSAGE_URL + "?t=" + Date.now())
+      .then(res => res.json())
+      .then(setDevMessage).catch(console.log); 
+    }, []);
 
     return (
-        <View style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#F4F7FC" />
-
-            <Modal animationType="fade" transparent visible={showUpdateModal} onRequestClose={() => setShowUpdateModal(false)} statusBarTranslucent>
-                <TouchableOpacity style={styles.modalBackdrop} onPressOut={()=>setShowUpdateModal(false)} activeOpacity={1}>
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalIconBox}><Ionicons name="rocket" size={32} color={Colors.Default.primary} /></View>
-                        <Text style={styles.modalTitle}>Update Available!</Text>
-                        <Text style={styles.modalText}>Version {updateInfo.version} is ready with bug fixes and improvements.</Text>
-                        <TouchableOpacity style={styles.btnPrimary} onPress={() => { Linking.openURL(updateInfo.url); setShowUpdateModal(false); }}><Ionicons name="download-outline" size={18} color="#FFF" style={{marginRight: 6}} /><Text style={styles.btnTextLight}>Update Now</Text></TouchableOpacity>
-                        <TouchableOpacity style={styles.btnSecondary} onPress={() => Linking.openURL(CHANGELOG_URL)}><Text style={styles.btnTextDark}>What&apos;s New</Text></TouchableOpacity>
-                        <TouchableOpacity style={{marginTop: 15, padding: 5}} onPress={() => setShowUpdateModal(false)}><Text style={styles.textMuted}>Not Now</Text></TouchableOpacity>
-                    </View>
+      <View style={styles.container}>
+        <StatusBar barStyle="dark-content" backgroundColor="#F4F7FC" />
+        <Modal animationType="fade" transparent visible={showUpdateModal} onRequestClose={() => setShowUpdateModal(false)} statusBarTranslucent>
+          <TouchableOpacity style={styles.modalBackdrop} onPressOut={()=>setShowUpdateModal(false)} activeOpacity={1}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalIconBox}><Ionicons name="rocket" size={32} color={Colors.Default.primary} /></View>
+              <Text style={styles.modalTitle}>Update Available!</Text>
+              <Text style={styles.modalText}>Version {updateInfo.version} is ready with bug fixes and improvements.</Text>
+              <TouchableOpacity style={styles.btnPrimary} onPress={() => { Linking.openURL(updateInfo.url); setShowUpdateModal(false); }}><Ionicons name="download-outline" size={18} color="#FFF" style={{marginRight: 6}} /><Text style={styles.btnTextLight}>Update Now</Text></TouchableOpacity>
+              <TouchableOpacity style={styles.btnSecondary} onPress={() => Linking.openURL(CHANGELOG_URL)}><Text style={styles.btnTextDark}>What&apos;s New</Text></TouchableOpacity>
+              <TouchableOpacity style={{marginTop: 15, padding: 5}} onPress={() => setShowUpdateModal(false)}><Text style={styles.textMuted}>Not Now</Text></TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+          <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <SafeAreaView>
+              <View style={styles.heroSection}>
+                <View style={styles.logoWrapper}>
+                  <Image source={require("../assets/images/icon.png")} style={styles.logo} resizeMode="contain" />
+                </View>
+              </View>
+              {devMessage && devMessage.show && (
+                <View style={styles.devCard}>
+                  <Ionicons name="megaphone" size={20} color={Colors.Default.error} style={{marginRight: 10}} />
+                  <View style={{flex: 1}}><Text style={styles.devTitle}>Developer Note</Text><Text style={styles.devDesc}>{devMessage.message}</Text></View>
+                </View>
+              )}
+              <View style={styles.formCard}>
+                <View style={styles.inputWrap}><Ionicons name="id-card-outline" size={20} color="#8E9EAF" style={styles.inputIcon}/><TextInput style={styles.input} placeholder="Roll No. (23/380XX)" placeholderTextColor="#8E9EAF" value={roll} onChangeText={setRoll} autoCapitalize="none" /></View>
+                <View style={styles.inputWrap}><Ionicons name="person-outline" size={20} color="#8E9EAF" style={styles.inputIcon}/><TextInput style={styles.input} placeholder="Full Name (As on ID Card)" placeholderTextColor="#8E9EAF" value={fullName} onChangeText={setFullName} /></View>
+                <View style={styles.inputWrap}><Ionicons name="key-outline" size={20} color="#8E9EAF" style={styles.inputIcon}/><TextInput style={styles.input} placeholder="Portal Password" placeholderTextColor="#8E9EAF" value={passw} onChangeText={setPassw} keyboardType="default" secureTextEntry/></View>
+                <TouchableOpacity style={{marginBottom: 15, marginLeft:10, marginTop:-10}} onPress={() => Linking.openURL(GENERATE_PASSWORD_URL)}><Text style={styles.linkText}>Generate Password?</Text></TouchableOpacity>
+                {!isScraping && (
+                  <TouchableOpacity style={styles.consentWrap} onPress={() => setConsentGiven(!consentGiven)} activeOpacity={0.7}>
+                    <Ionicons name={consentGiven ? "checkmark-circle" : "ellipse-outline"} size={22} color={consentGiven ? Colors.Default.primary : "#CBD5E1"} style={{marginRight: 10}} />
+                    <Text style={styles.consentText}>I agree to the <Text style={styles.linkText} onPress={()=>Linking.openURL(TERMS_URL)}>Terms</Text> & <Text style={styles.linkText} onPress={()=>Linking.openURL(PRIVACY_URL)}>Privacy</Text></Text>
+                  </TouchableOpacity>
+                )}
+                <View style={styles.actionWrap}>
+                  {isScraping ? (
+                    <View style={styles.loaderWrap}><ActivityIndicator size="large" color={Colors.Default.primary} /><Text style={styles.loaderText}>{progressMsg}</Text><ArsdScraper credentials={{ name: fullName, rollNo: roll, passw: passw }} onProgress={setProgressMsg} onFinish={handleCompletion} onError={handleError} /></View>
+                  ) : (
+                    <TouchableOpacity style={[styles.submitBtn, !isReadyToSync && {backgroundColor: '#CBD5E1', elevation: 0}]} onPress={handleLogin} disabled={!isReadyToSync}>
+                      <Text style={styles.submitText}>Connect Account</Text><Ionicons name="arrow-forward" size={20} color="#FFF" />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+              <View style={styles.helpSection}>
+                <Text style={styles.helpTitle}>Login Issues?</Text>
+                <Text style={styles.helpText}>• Try your FIRST NAME IN CAPITALS as the password.</Text>
+                <Text style={styles.helpText}>• Visit the admin office for portal modifications.</Text>
+                <TouchableOpacity onPress={handleFeedback} style={styles.bugBtn}>
+                  <Ionicons name="bug-outline" size={16} color="#64748B" />
+                  <Text style={styles.bugText}>Report an Issue</Text>
                 </TouchableOpacity>
-            </Modal>
-
-            <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
-                <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-                    
-                    <SafeAreaView>
-                        <View style={styles.heroSection}>
-                            <View style={styles.logoWrapper}>
-                                <Image source={require("../assets/images/icon.png")} style={styles.logo} resizeMode="contain" />
-                            </View>
-                        </View>
-
-
-                        {devMessage && devMessage.show && (
-                            <View style={styles.devCard}>
-                                <Ionicons name="megaphone" size={20} color={Colors.Default.error} style={{marginRight: 10}} />
-                                <View style={{flex: 1}}><Text style={styles.devTitle}>Developer Note</Text><Text style={styles.devDesc}>{devMessage.message}</Text></View>
-                            </View>
-                        )}
-
-                        <View style={styles.formCard}>
-                            <View style={styles.inputWrap}><Ionicons name="id-card-outline" size={20} color="#8E9EAF" style={styles.inputIcon}/><TextInput style={styles.input} placeholder="Roll No. (23/380XX)" placeholderTextColor="#8E9EAF" value={roll} onChangeText={setRoll} autoCapitalize="none" /></View>
-                            <View style={styles.inputWrap}><Ionicons name="person-outline" size={20} color="#8E9EAF" style={styles.inputIcon}/><TextInput style={styles.input} placeholder="Full Name (As on ID Card)" placeholderTextColor="#8E9EAF" value={fullName} onChangeText={setFullName} /></View>
-                            <View style={styles.inputWrap}><Ionicons name="key-outline" size={20} color="#8E9EAF" style={styles.inputIcon}/><TextInput style={styles.input} placeholder="Portal Password" placeholderTextColor="#8E9EAF" value={passw} onChangeText={setPassw} keyboardType="default" secureTextEntry/></View>
-
-                            <TouchableOpacity style={{marginBottom: 15, marginLeft:10, marginTop:-10}} onPress={() => Linking.openURL(GENERATE_PASSWORD_URL)}><Text style={styles.linkText}>Generate Password?</Text></TouchableOpacity>
-
-                            {!isScraping && (
-                                <TouchableOpacity style={styles.consentWrap} onPress={() => setConsentGiven(!consentGiven)} activeOpacity={0.7}>
-                                    <Ionicons name={consentGiven ? "checkmark-circle" : "ellipse-outline"} size={22} color={consentGiven ? Colors.Default.primary : "#CBD5E1"} style={{marginRight: 10}} />
-                                    <Text style={styles.consentText}>I agree to the <Text style={styles.linkText} onPress={()=>Linking.openURL(TERMS_URL)}>Terms</Text> & <Text style={styles.linkText} onPress={()=>Linking.openURL(PRIVACY_URL)}>Privacy</Text></Text>
-                                </TouchableOpacity>
-                            )}
-
-                            <View style={styles.actionWrap}>
-                                {isScraping ? (
-                                    <View style={styles.loaderWrap}><ActivityIndicator size="large" color={Colors.Default.primary} /><Text style={styles.loaderText}>{progressMsg}</Text><ArsdScraper credentials={{ name: fullName, rollNo: roll, passw: passw }} onProgress={setProgressMsg} onFinish={handleCompletion} onError={handleError} /></View>
-                                ) : (
-                                    <TouchableOpacity style={[styles.submitBtn, !isReadyToSync && {backgroundColor: '#CBD5E1', elevation: 0}]} onPress={handleLogin} disabled={!isReadyToSync}>
-                                        <Text style={styles.submitText}>Connect Account</Text><Ionicons name="arrow-forward" size={20} color="#FFF" />
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-                        </View>
-
-                        <View style={styles.helpSection}>
-                            <Text style={styles.helpTitle}>Login Issues?</Text>
-                            <Text style={styles.helpText}>• Try your FIRST NAME IN CAPITALS as the password.</Text>
-                            <Text style={styles.helpText}>• Visit the admin office for portal modifications.</Text>
-                            <TouchableOpacity onPress={handleFeedback} style={styles.bugBtn}><Ionicons name="bug-outline" size={16} color="#64748B" /><Text style={styles.bugText}>Report an Issue</Text></TouchableOpacity>
-                        </View>
-                    </SafeAreaView>
-                </ScrollView>
-            </KeyboardAvoidingView>
-        </View>
+              </View>
+            </SafeAreaView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </View>
     );
 }
 
