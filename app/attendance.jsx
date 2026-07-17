@@ -14,6 +14,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Header from '@/components/Header';
+import OfflineBanner from '@/components/NoInternet';
 import { useTheme } from '@/hooks/useTheme';
 
 // ==========================================
@@ -118,7 +119,7 @@ export default function AttendanceScreen({ navigation }) {
       ) : (
         <PredictView fullData={fullData} selectedSubject={selectedSubject} />
       )}
-      
+      <OfflineBanner />
     </SafeAreaView>
   );
 }

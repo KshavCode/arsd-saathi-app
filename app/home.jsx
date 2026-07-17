@@ -12,6 +12,7 @@ import { ActivityIndicator, Alert, Modal, ScrollView, StatusBar, StyleSheet, Tex
 import * as Animatable from 'react-native-animatable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import OfflineBanner from '@/components/NoInternet';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH * 0.62; 
@@ -553,6 +554,7 @@ export default function HomeTab({ route, navigation }) {
         </View>
 
       </ScrollView>
+      <OfflineBanner />
       <CustomFAB actions={actions} theme={theme} />
     </SafeAreaView>
   );

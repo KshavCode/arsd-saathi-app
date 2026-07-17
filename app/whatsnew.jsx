@@ -6,6 +6,7 @@ import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import OfflineBanner from '@/components/NoInternet';
 
 const UpdateItem = ({ item, theme, delay, isFix }) => (
   <Animatable.View 
@@ -94,6 +95,7 @@ export default function WhatsNewTab({ navigation }) {
           ))}
         </View>
       </ScrollView>
+      <OfflineBanner />
     </SafeAreaView>
   );
 }

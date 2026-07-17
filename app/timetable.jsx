@@ -14,6 +14,7 @@ import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { titleCase } from 'title-case';
+import OfflineBanner from '@/components/NoInternet';
 
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -449,18 +450,19 @@ export default function Timetable({ route, navigation }) {
 			else {
 				if (!isEditMode) return null;
 				return (
-					<TouchableOpacity
+					<View
 						key={time}
-						style={[styles.emptySlot, { borderColor: theme.secondary, backgroundColor: 'transparent' }]}
-						onPress={() => handleOpenSlot(time)}
-						activeOpacity={0.5}
+						style={[styles.emptySlot, { backgroundColor: 'transparent' }]}
 					>
-						<Text style={{ color: theme.secondary, fontWeight: '600' }}>{time}</Text>
-						<View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-							<Ionicons name="add-circle-outline" size={20} color={theme.primary} />
+					<Text style={{ color: theme.secondary, fontWeight: '600', fontSize: 18 }}>{time}</Text>
+						<TouchableOpacity 
+							style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }} 
+							onPress={() => handleOpenSlot(time)}
+							activeOpacity={0.5}>
+								<Ionicons name="add-circle-outline" size={20} color={theme.primary} />
 							<Text style={{ color: theme.primary, fontWeight: '600' }}>Add Class</Text>
-						</View>
-					</TouchableOpacity>
+						</TouchableOpacity>
+					</View>
 				);
 			}
 		});
@@ -697,6 +699,7 @@ export default function Timetable({ route, navigation }) {
 					</KeyboardAvoidingView>
 					<Toast config={toastConfig} />
 				</Modal>
+				<OfflineBanner />
 		</SafeAreaView>
 	);
 }
@@ -723,7 +726,7 @@ const styles = StyleSheet.create({
 	metaBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, gap: 5 },
 	metaText: { fontSize: 12, fontWeight: '700', flexShrink: 1 },
 
-	emptySlot: { flexDirection: 'row', padding: 18, borderRadius: 16, borderWidth: 2, borderStyle: 'dashed', marginBottom: 12, justifyContent: 'space-between', alignItems: 'center' },
+	emptySlot: { flexDirection: 'row', paddingHorizontal: 18, paddingVertical:10, justifyContent: 'space-between', alignItems: 'center' },
 	emptyCard: { padding: 40, borderRadius: 24, alignItems: 'center', marginTop: 20 },
 
 	formCard: { padding: 20, borderRadius: 24, shadowColor: '#000', shadowOpacity: 0.05, elevation: 2, alignItems: 'center' },

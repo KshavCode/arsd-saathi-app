@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '@/components/Header';
 import { useTheme } from '@/hooks/useTheme';
 import { data } from '@/constants/scholarship_list';
+import OfflineBanner from '@/components/NoInternet';
 
 // Calculate precise card width based on screen width
 const { width } = Dimensions.get('window');
@@ -54,6 +55,7 @@ export default function ScholarshipTab({ navigation }) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       />
+      <OfflineBanner />
     </SafeAreaView>
   );
 }

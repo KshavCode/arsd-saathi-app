@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Dimensions, Image, Keyboard, KeyboardAvoidingView, Modal, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from 'react-native-toast-message';
+import OfflineBanner from '@/components/NoInternet';
 
 const { height } = Dimensions.get("window");
 
@@ -120,6 +121,7 @@ export default function Login({ navigation }) {
             </SafeAreaView>
           </ScrollView>
         </KeyboardAvoidingView>
+        <OfflineBanner />
       </View>
     );
 }

@@ -3,8 +3,9 @@ import { ScrollView, StyleSheet, Text, View, TouchableOpacity, Linking, Alert, A
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Header from '@/components/Header';
-import { HELPDESK_JSON_URL } from '@/constants/links';
 import { useTheme } from '@/hooks/useTheme';
+import { helpdesk_list } from '@/constants/helpdesk_list';
+import OfflineBanner from '@/components/NoInternet';
 
 export default function HelpdeskTab({ navigation }) {
   const { theme } = useTheme();
@@ -13,9 +14,7 @@ export default function HelpdeskTab({ navigation }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(HELPDESK_JSON_URL);
-        const json = await response.json();
-        setData(json);
+        setData(helpdesk_list);
       } 
 			catch (error) {
         console.error("Failed to fetch helpdesk data:", error);
@@ -58,12 +57,9 @@ export default function HelpdeskTab({ navigation }) {
                       {/* Left Side: Text Info */}
                       <View style={styles.infoContainer}>
                         <View style={styles.titleHeader}>
-                          <Text style={[styles.inchargeText, { color: theme.text }]} numberOfLines={1}>{item.incharge}</Text>
-                          <View style={styles.primary}>
-                            <Text style={styles.categoryText}>{item.category}</Text>
-                          </View>
+                          <Text style={[styles.categoryText, { color: theme.primary }]}>{item.category}</Text>
                         </View>
-                        <Text style={[styles.locationText, { color: theme.primary }]}>{item.location}</Text>
+                          <Text style={[styles.inchargeText, { color: theme.text }]} numberOfLines={1}>{item.incharge}</Text>
                       </View>
                       {/* Right Side: Compact Action Button */}
                       <TouchableOpacity 
@@ -82,6 +78,7 @@ export default function HelpdeskTab({ navigation }) {
             </View>
           )}
         </ScrollView>
+        <OfflineBanner />
       </SafeAreaView>
     );
 }
@@ -95,10 +92,8 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, paddingHorizontal: 16},
   infoContainer: { flex: 1, paddingRight: 16 },
   titleHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 2 },
-  inchargeText: { fontSize: 15, fontWeight: '600', marginRight: 8 },
-  categoryBadge: { backgroundColor: '#F2F2F7', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  categoryText: { fontSize: 10, fontWeight: '700', color: '#8E8E93', textTransform: 'uppercase' },
-  locationText: { fontSize: 13, fontWeight: '400' },
+  categoryText: { fontSize: 15, fontWeight: '600', marginRight: 8 },
+  inchargeText: { fontSize: 13, fontWeight: '400' },
   callButton: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   divider: {height: StyleSheet.hairlineWidth } // Uses the thinnest possible line on the devicemarginLeft: 16, // Indents the divider to align with the text, a common native design pattern
 });

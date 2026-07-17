@@ -1,12 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { 
-  ActivityIndicator, 
-  Modal, 
-  ScrollView, 
-  StyleSheet, 
-  Text, 
-  TouchableOpacity, 
-  View 
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View 
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Animatable from 'react-native-animatable';
@@ -14,6 +7,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Header from '@/components/Header';
+import OfflineBanner from '@/components/NoInternet';
 import { useTheme } from '@/hooks/useTheme';
 
 
@@ -128,7 +122,7 @@ export default function AttendanceScreen({ navigation }) {
       ) : (
         <FacultyView />
       )}
-      
+      <OfflineBanner />
     </SafeAreaView>
   );
 }

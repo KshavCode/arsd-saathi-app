@@ -8,7 +8,7 @@ import { ActivityIndicator, FlatList, Linking, Platform, RefreshControl, StyleSh
 import * as Animatable from 'react-native-animatable';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
-
+import OfflineBanner from '@/components/NoInternet';
 
 const NoticeCard = React.memo(({ item, theme, delay }) => (
   <Animatable.View
@@ -268,6 +268,7 @@ export default function Notices({ navigation}) {
           renderItem={renderItem}
         />
       )}
+      <OfflineBanner />
     </SafeAreaView>
   );
 }
