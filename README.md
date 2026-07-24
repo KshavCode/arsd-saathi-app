@@ -8,7 +8,7 @@ READ [TERMS & CONDITIONS](https://github.com/KshavCode/arsd-saathi-app/blob/mast
 # ArsdSaathi 🎓
 **Your College Companion**
 
-ArsdSaathi is an unofficial mobile application designed specifically for students of **Atma Ram Sanatan Dharma (ARSD) College**. It provides a seamless, mobile-friendly interface to access the college portal, allowing students to sync their attendance, view their profile, and stay updated without navigating the legacy website every time.
+ArsdSaathi is an official mobile application designed specifically for students of **Atma Ram Sanatan Dharma (ARSD) College**. It provides a seamless, mobile-friendly interface to access the college portal, allowing students to sync their attendance, view their profile, and stay updated without navigating the legacy website every time.
 It utilizes a secure, client-side scraping architecture to fetch data directly from the college portal, ensuring user privacy and zero server costs. All the information is stored locally and retrieved occassionally to focus on both offline-first approach and prevent server overload!
 
 ---

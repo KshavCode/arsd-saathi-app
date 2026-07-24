@@ -13,7 +13,7 @@ export const Colors = {
     borderColor: '#F1F5F9'
   },
 
-  pinkish: {
+  Sakura: {
     primary: "#cd4e9c",
     secondary: "#da7ab5",
     background: "#ffffff",
@@ -26,7 +26,7 @@ export const Colors = {
     error: "#DC2626",
   },
 
-  charcoal: {
+  Ashes: {
     primary: "#5c5b5b",
     secondary: "#858484",
     background: "#ffffff",
@@ -39,7 +39,7 @@ export const Colors = {
     error: "#DC2626",
   },
 
-  pikaChew: {
+  Pikachu: {
     primary: "#e9ba00",
     secondary: "#5c3613",
     background: "#fffdeb",
@@ -52,7 +52,7 @@ export const Colors = {
     error: "#e92929"
   },
 
-  dragonFruit: {
+  DragonFruit: {
     primary: "#f24793",
     secondary: "#70a96c",
     background: "#f8fafc",
@@ -65,7 +65,7 @@ export const Colors = {
     error: "#DC2626",
   },
 
-  devilMayLie: {
+  FrostFire: {
     primary: "#4aaca5",
     secondary: "#a84343",
     background: "#F5F7F8",
@@ -77,7 +77,7 @@ export const Colors = {
     error: "#DC2626",
   },
 
-  seaSick: {
+  SeaSick: {
     primary: "#396a98",
     secondary: "#6b8fb2",
     background: "#ffffff",
@@ -90,7 +90,7 @@ export const Colors = {
     footer: "#396a98",
   },
 
-  purplePlace: {
+  PurplePlace: {
     primary: "#9a66f1",
     secondary: "#7c3aed",
     background: "#f5f3ff",
@@ -103,7 +103,7 @@ export const Colors = {
     error: "#DC2626",
   },
 
-  sunsetGlow: {
+  SunsetGlow: {
     primary: "#fb923c",
     secondary: "#ff6f08",
     background: "#fff2e2",
@@ -116,7 +116,7 @@ export const Colors = {
     error: "#DC2626",
   },
 
-  helloYellow: {
+  HelloYellow: {
     primary: "#45474B",
     secondary: "#495E57",
     background: "#F5F7F8",
@@ -129,7 +129,7 @@ export const Colors = {
   },
 
   // --- DARK THEMES ---
-  lostInBlue: {
+  LostInBlue: {
     primary: "#60A5FA",
     secondary: "#94A3B8",
     background: "#0F172A",
@@ -143,7 +143,7 @@ export const Colors = {
     borderColor: "#2E3A52",
   },
 
-  blackPink: {
+  BlackPink: {
     primary: "#db71ac",
     secondary: "#ffabdc",
     background: "#050505",
@@ -156,7 +156,7 @@ export const Colors = {
     error: "#FB7185"
   },
 
-  darkCharcoal: {
+  DarkAshes: {
     primary: "#e5e7eb",
     secondary: "#9ca3af",
     background: "#1f2933",
@@ -169,7 +169,7 @@ export const Colors = {
     error: "#ec5c5c",
   },
 
-  darkYell: {
+  Voltage: {
     primary: "#facc15",
     secondary: "#fb923c",
     background: "#0f172a",
@@ -182,7 +182,7 @@ export const Colors = {
     error: "#ec5c5c",
   },
 
-  goDarkGreen: {
+  GoDarkGreen: {
     primary: "#86efac",
     secondary: "#4ade80",
     background: "#052e16",
@@ -195,7 +195,7 @@ export const Colors = {
     error: "#ec5c5c",
   },
 
-  gengR: {
+  Gengar: {
     primary: "#c363ec",
     secondary: "#d5b3ff",
     background: "#181e31",
@@ -208,7 +208,7 @@ export const Colors = {
     error: "#FB7185"
   },
 
-  moonNight: {
+  MoonNight: {
     primary: "#93c5fd",
     secondary: "#c4b5fd",
     background: "#0f172a",
@@ -221,7 +221,7 @@ export const Colors = {
     error: "#ec5c5c",
   },
 
-  hacksAttacks: {
+  "Hacked!": {
     primary: "#4ade80",
     secondary: "#22c55e",
     background: "#020617",
@@ -234,7 +234,7 @@ export const Colors = {
     error: "#ec5c5c",
   },
 
-  woodenPlank: {
+  PineWood: {
     primary: "#bd9ca0",
     secondary: "#eeb28d",
     background: "#1f0e21",
@@ -247,7 +247,7 @@ export const Colors = {
     error: "#EF5350"
   },
 
-  deepCyan: {
+  Matrix: {
     primary: "#69e6bc",
     secondary: "#5fd6e6",
     background: "#0a1c16",

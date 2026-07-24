@@ -1,22 +1,23 @@
 # ArsdSaathi v1.5.0 is now available!
 
 ## 💫 What's New?
-- **What's New**: Missing on new updates? Get to know all the changes at just one screen!
-- **FAQs**: Most common questions that freshers might ask, will be answered here! Also, the developer team will use this feature to announce and communicate with the community.
-- **Timetable PDF**: Exporting now allows you to download your timetable in a clean PDF format.
-- **4 New Themes**: Enjoy 10 sets of light and dark modes each.
-- **Next Sync**: Rebranded 'Last Synced' for letting students know the main reason to use ArsdSaathi.
+- **Brand New Layout**: ArsdSaathi 2.0 now features simpler navigation and a more organized layout for an improved user experience.
+- **Chatbot**: Meet your companion, ArsdSaathi, for quick answers to your queries on admissions, facilities, examinations, and more.
+- **More Information**: You can now access information on scholarships offered by the institution. Additionally, important contact details for various committees are available to provide immediate assistance whenever required.
+- **4 New Themes**: Enjoy 10 light themes and 10 dark themes to personalize your experience.
+- **Synchronization**: 'Last Synced' has been rebranded to better communicate the primary purpose of using ArsdSaathi, along with a 'Swipe Down to Reload' feature.
 
 
 ## 🔍 Fixes
-- **Star the Project**: Now users can support alternatively by creating an account on Github and 'star' the repository.
-- **Forgot Password**: List of steps to try if a student forgot his/her password is now enlisted on the login page.
+- **Notices**: Updated the screen to reflect recent changes to the website.
+- **Forgot Password**: The login page now includes a list of steps to help students recover a forgotten password.
+- **No Internet**: The app now displays a floating banner when your device loses its internet connection.
 
 
 ## 📦 How to Install
 1. Download the attached .apk file below.
 2. Install the file on your Android device.
-3. Since the app is unofficial, allow "Install from Unknown Sources" if prompted by your device.
+3. Allow "Install from Unknown Sources" if prompted by your device.
 4. Log in once and enjoy your synced dashboard!
 
 ## 🔒 Security & Verification
