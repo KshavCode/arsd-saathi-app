@@ -10,7 +10,7 @@ import OfflineBanner from '@/components/NoInternet';
 import { NOTICES_URL } from '@/constants/links';
 import { useTheme } from '@/hooks/useTheme';
 
-const TIMEOUT_MS = 10000; // 10 seconds timeout limit
+const TIMEOUT_MS = 10000;
 
 // Notice Card Component
 const NoticeCard = React.memo(({ item, theme, delay }) => (
@@ -102,29 +102,45 @@ export default function Notices({ navigation }) {
           const data = [];
           const prevYear = (new Date().getFullYear() - 1).toString(); 
           let hitOldNotice = false;
-          const rows = document.querySelectorAll('.notice-item'); 
+          
+          // Select all notice card anchors directly
+          const rows = document.querySelectorAll('a.notice-card'); 
           
           for (let row of rows) {
-            const linkTag = row.querySelector('.notice-text a');
-            const dateBadge = row.querySelector('.date-badge');
-            if (!linkTag || !dateBadge) continue;
-
-            const title = linkTag.innerText.trim();
-            const url = linkTag.href;
+            const titleTag = row.querySelector('.notice-title');
+            const dateBadge = row.querySelector('.date-block');
+            
+            if (!titleTag || !dateBadge) continue;
+  
+            const title = titleTag.innerText.trim();
+            const url = row.href; // row is the <a> element
             const date = dateBadge.innerText.trim();
             
-            if (date && date.includes(prevYear)) { hitOldNotice = true; break; }
-            if (title && url) data.push({ id: title, title: title, url: url, date: date || "New" });
+            if (date && date.includes(prevYear)) { 
+              hitOldNotice = true; 
+              break; 
+            }
+            
+            if (title && url) {
+              data.push({ id: title, title: title, url: url, date: date || "New" });
+            }
           }
           
           const nextBtn = document.querySelector('.dt-paging-button.next');
           const isNextDisabled = nextBtn ? (nextBtn.classList.contains('disabled') || nextBtn.getAttribute('aria-disabled') === 'true') : true;
           
-          window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'SCRAPE_RESULT', data: data, hasMore: !isNextDisabled && !hitOldNotice }));
-        } catch (err) { window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ERROR', message: err.message })); }
+          window.ReactNativeWebView.postMessage(JSON.stringify({ 
+            type: 'SCRAPE_RESULT', 
+            data: data, 
+            hasMore: !isNextDisabled && !hitOldNotice 
+          }));
+        } catch (err) { 
+          window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ERROR', message: err.message })); 
+        }
       }
-
+  
       setTimeout(scrapeCurrentPage, 800);
+      
       const handleFetchNext = function(event) { 
         if (event.data === 'FETCH_NEXT') { 
           const nextBtn = document.querySelector('.dt-paging-button.next'); 
@@ -134,6 +150,7 @@ export default function Notices({ navigation }) {
           } 
         } 
       };
+      
       document.addEventListener('message', handleFetchNext);
       window.addEventListener('message', handleFetchNext);
     })();
