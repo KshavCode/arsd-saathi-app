@@ -1,8 +1,9 @@
-import { CHANGELOG_URL, DEV_MESSAGE_URL, GENERATE_PASSWORD_URL, PRIVACY_URL, TERMS_URL } from '@/constants/links';
+import { CHANGELOG_URL, DEV_MESSAGE_URL, GENERATE_PASSWORD_URL, PRIVACY_URL, TERMS_URL, FOOTER_JSON_URL } from '@/constants/links';
 import { Colors } from "@/constants/themeStyle";
 import ArsdScraper from '@/services/ArsdScraper';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import NetInfo from '@react-native-community/netinfo';
 import Constants from 'expo-constants';
 import * as Linking from "expo-linking";
 import { useEffect, useState } from "react";
@@ -25,14 +26,52 @@ export default function Login({ navigation }) {
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [devMessage, setDevMessage] = useState(null); 
   const [updateInfo, setUpdateInfo] = useState({ version: '', url: '' });
+  const [isOffline, setIsOffline] = useState(false);
+  const [footerLinks, setFooterLinks] = useState({})
 
   const isReadyToSync = roll.length > 0 && fullName.length > 0 && passw.length > 0 && consentGiven;
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     Keyboard.dismiss();
-    if (!roll || !fullName || !passw) return Toast.show({position: 'top', topOffset:50, type:'success', text1:'Missing Fields!', text2: 'Please fill in all details.', props: {borderColor: Colors.Default.error, bg: Colors.Default.card, text1Color: Colors.Default.error, text2Color: Colors.Default.secondary}});
+    
+    if (!roll || !fullName || !passw) {
+      return Toast.show({
+        position: 'top', 
+        topOffset: 50, 
+        type: 'success', 
+        text1: 'Missing Fields!', 
+        text2: 'Please fill in all details.', 
+        props: {
+          borderColor: Colors.Default.error, 
+          bg: Colors.Default.card, 
+          text1Color: Colors.Default.error, 
+          text2Color: Colors.Default.secondary
+        }
+      });
+    }
+    if (isOffline) {
+      Alert.alert("No Internet Connection", "Please check your network settings and try again.");
+      return;
+    }
+    const netState = await NetInfo.fetch();
+    if (!netState.isConnected) {
+      setIsOffline(true);
+      Alert.alert("No Internet Connection", "Please check your network settings and try again.");
+      return;
+    }
+
     setProgressMsg("Connecting to ARSD Portal..."); 
     setIsScraping(true);
+
+    const scrapingTimeout = setTimeout(() => {
+      if (isScraping) {
+        setIsScraping(false);
+        Alert.alert("Connection Timeout", "The portal is taking too long to respond or network is unstable.");
+      }
+    }, 20000);
+
+    // Store timeout reference if needed to clear it on completion/error
+    // (Make sure to call clearTimeout(scrapingTimeout) inside handleCompletion and handleError)
   };
 
   const handleCompletion = async (status) => {
@@ -50,6 +89,14 @@ export default function Login({ navigation }) {
   };
 
   useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsOffline(state.isConnected === false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
     const checkForUpdates = async () => {
       try {
         const res = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest'); 
@@ -63,6 +110,33 @@ export default function Login({ navigation }) {
       } catch (err) { console.log("Update check failed:", err); }
     }; 
     checkForUpdates();
+  }, []);
+
+  useEffect(() => {
+    const loadFooterLinks = async () => {
+      try {
+        const res = await fetch(FOOTER_JSON_URL + "?t=" + Date.now(), { timeout: 5000 });
+        
+        if (res.ok) {
+          const json = await res.json();
+          setFooterLinks(json);
+          await AsyncStorage.setItem("FOOTER_LINK", JSON.stringify(json));
+          return;
+        }
+        throw new Error("Network fetch failed");
+      } catch (err) {
+        try {
+          const cachedLinks = await AsyncStorage.getItem("FOOTER_LINK");
+          if (cachedLinks) {
+            setFooterLinks(JSON.parse(cachedLinks));
+          }
+        } catch (cacheErr) {
+          console.log("Failed to load link cache:", cacheErr);
+        }
+      }
+    };
+
+    loadFooterLinks();
   }, []);
 
   useEffect(() => { 
@@ -161,6 +235,49 @@ export default function Login({ navigation }) {
                 <Text style={styles.bugText} importantForAccessibility="no">Report an Issue</Text>
               </TouchableOpacity>
             </View>
+      <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, marginTop:20}}>
+          <Text style={{ color: Colors.Default.secondary, fontSize:17}}>Developed by</Text>
+          <TouchableOpacity onPress={()=>Linking.openURL(footerLinks.KESHAV_URL)} accessibilityRole="link" style={{flexDirection: 'row', gap: 4,  alignItems: "center"}}>
+            <Text style={{ color: Colors.Default.primary, fontWeight: 'bold', fontSize:17 }}>Keshav Pal</Text>
+            <Ionicons name="information-circle" size={13} color={Colors.Default.primary} />
+          </TouchableOpacity>
+        </View>
+        <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4}}>
+          <Text style={{ color: Colors.Default.secondary, fontSize:13}}>with</Text>
+          <TouchableOpacity onPress={()=>Linking.openURL(footerLinks.SHIVAM_URL)} accessibilityRole="link" style={{flexDirection: 'row', gap: 2,  alignItems: "center"}}>
+            <Text style={{ color: Colors.Default.primary, fontWeight: 'bold', fontSize:13 }}>Shivam Yadav</Text>
+            <Ionicons name="information-circle" size={13} color={Colors.Default.primary} />
+          </TouchableOpacity>
+        </View>
+        {/* Footer Section */}
+        <View style={[styles.footerContainer, { backgroundColor: Colors.Default.card, marginTop: 30 }]}>
+          <View style={styles.footerGrid}>
+            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(footerLinks.STUDENT_PORTAL_URL)} accessibilityRole="link"><Text style={[styles.footerLink, { color: Colors.Default.footer }]}>Official Portal</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(footerLinks.SAMARTH_URL)} accessibilityRole="link"><Text style={[styles.footerLink, { color: Colors.Default.footer }]}>Samarth eGov</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(footerLinks.FEES_PORTAL_URL)} accessibilityRole="link"><Text style={[styles.footerLink, { color: Colors.Default.footer }]}>Fee Payment</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(footerLinks.FEE_STRUCTURE_URL)} accessibilityRole="link"><Text style={[styles.footerLink, { color: Colors.Default.footer }]}>Fee Structure</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(footerLinks.LIBRARY_URL)} accessibilityRole="link"><Text style={[styles.footerLink, { color: Colors.Default.footer }]}>Library</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(footerLinks.SOCIETIES_URL)} accessibilityRole="link"><Text style={[styles.footerLink, { color: Colors.Default.footer }]}>Societies</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(footerLinks.HANDBOOK_URL)} accessibilityRole="link"><Text style={[styles.footerLink, { color: Colors.Default.footer }]}>Handbook</Text></TouchableOpacity>
+          </View>
+          <View style={[styles.footerDivider, { backgroundColor: Colors.Default.separator }]} />
+          <View style={styles.footerLegal}>
+            <TouchableOpacity onPress={() => Linking.openURL(footerLinks.TERMS_URL)} accessibilityRole="link"><Text style={[styles.footerLegalText, { color: Colors.Default.footer }]}>Terms & Conditions</Text></TouchableOpacity>
+            <Text style={{color: Colors.Default.separator}} importantForAccessibility="no">•</Text>
+            <TouchableOpacity onPress={() => Linking.openURL(footerLinks.PRIVACY_URL)} accessibilityRole="link"><Text style={[styles.footerLegalText, { color: Colors.Default.footer }]}>Privacy Policy</Text></TouchableOpacity>
+          </View>
+          <View style={[styles.footerLegal, {marginTop: 15}]}>
+            <TouchableOpacity style={styles.footerItem} onPress={() => handleFeedback()} accessibilityRole="button"><Text style={[styles.footerLink, { color: Colors.Default.footer }]}>Report an Issue?</Text></TouchableOpacity>
+          </View>
+          <View style={{flexDirection:'row', alignItems:'center', justifyContent:'space-evenly', marginTop:20}}>
+            <TouchableOpacity onPress={()=>Linking.openURL(footerLinks.FACEBOOK_LINK)} accessibilityRole="link" accessibilityLabel="Facebook"><Ionicons name='logo-facebook' size={20} color={Colors.Default.primary} importantForAccessibility="no" /></TouchableOpacity>
+            <TouchableOpacity onPress={()=>Linking.openURL(footerLinks.INSTAGRAM_LINK)} accessibilityRole="link" accessibilityLabel="Instagram"><Ionicons name='logo-instagram' size={20} color={Colors.Default.primary} importantForAccessibility="no" /></TouchableOpacity>
+            <TouchableOpacity onPress={()=>Linking.openURL(footerLinks.YOUTUBE_LINK)} accessibilityRole="link" accessibilityLabel="YouTube"><Ionicons name='logo-youtube' size={20} color={Colors.Default.primary} importantForAccessibility="no" /></TouchableOpacity>
+            <TouchableOpacity onPress={()=>Linking.openURL(footerLinks.X_LINK)} accessibilityRole="link" accessibilityLabel="X, formerly Twitter"><Ionicons name='logo-x' size={20} color={Colors.Default.primary} importantForAccessibility="no" /></TouchableOpacity>
+            <TouchableOpacity onPress={()=>Linking.openURL(footerLinks.LINKEDIN_LINK)} accessibilityRole="link" accessibilityLabel="LinkedIn"><Ionicons name='logo-linkedin' size={20} color={Colors.Default.primary} importantForAccessibility="no" /></TouchableOpacity>
+          </View>
+        </View>
+
           </SafeAreaView>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -204,5 +321,13 @@ const styles = StyleSheet.create({
   btnTextLight: { fontSize: 16, fontWeight: '700', color: "#FFF" },
   btnSecondary: { width: '100%', paddingVertical: 15, borderRadius: 16, borderWidth: 1.5, borderColor: "#E2E8F0", alignItems: 'center', justifyContent: 'center' },
   btnTextDark: { fontSize: 15, fontWeight: '700', color: "#334155" },
-  textMuted: { color: "#94A3B8", fontSize: 14, fontWeight: '600' }
+  textMuted: { color: "#94A3B8", fontSize: 14, fontWeight: '600' },
+
+  footerContainer: { borderRadius: 24, padding: 20, marginTop: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
+  footerGrid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: 15 },
+  footerItem: { width: '50%', alignItems: 'center' },
+  footerLink: { fontSize: 12, fontWeight: '600', textAlign: 'center' },
+  footerDivider: { height: 1, width: '100%', marginVertical: 16 },
+  footerLegal: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 12 },
+  footerLegalText: { fontSize: 11, fontWeight: '500' },
 });

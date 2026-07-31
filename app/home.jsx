@@ -1,4 +1,4 @@
-import { CHANGELOG_URL, DEV_MESSAGE_URL, FEE_STRUCTURE_URL, FEES_PORTAL_URL, HANDBOOK_URL, KESHAV_URL, LIBRARY_URL, PRIVACY_URL, SAMARTH_URL, SHIVAM_URL, SOCIETIES_URL, STUDENT_PORTAL_URL, TERMS_URL, FACEBOOK_LINK, INSTAGRAM_LINK, LINKEDIN_LINK, X_LINK, YOUTUBE_LINK } from '@/constants/links';
+import { CHANGELOG_URL, DEV_MESSAGE_URL, FOOTER_JSON_URL } from '@/constants/links';
 import { Colors } from '@/constants/themeStyle';
 import { useTheme } from '@/hooks/useTheme';
 import ArsdScraper from '@/services/ArsdScraper';
@@ -35,6 +35,8 @@ export default function HomeTab({ route, navigation }) {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [deleteTimetable, setDeleteTimetable] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const [isLicenseExpired, setIsLicenseExpired] = useState(false);
+  const [footerLinks, setFooterLinks] = useState({})
   const requiresSync = route.params?.requiresSync;
   
   const actions = [
@@ -155,6 +157,31 @@ export default function HomeTab({ route, navigation }) {
     } catch (error) { console.error("Error loading Dashboard data:", error); }
   }, []);
 
+  const checkDevMessageAndLicense = useCallback(async () => {
+    try {
+      const res = await fetch(DEV_MESSAGE_URL + "?t=" + Date.now());
+      const json = await res.json();
+      setDevMessage(json);
+
+      if (json && json.licenseEnd) {
+        const expirationTime = new Date(json.licenseEnd).getTime();
+
+        if (!isNaN(expirationTime)) {
+          if (Date.now() > expirationTime) {
+            setIsLicenseExpired(true);
+          } else {
+            setIsLicenseExpired(false);
+          }
+        }
+      } else {
+        // If licenseEnd key is removed, unblock the app
+        setIsLicenseExpired(false);
+      }
+    } catch (err) {
+      console.log("Dev Message Fetch Error: ", err);
+    }
+  }, []);
+
   const validateDataStructure = useCallback(async () => {
     try {
       const attRaw = await AsyncStorage.getItem('ATTENDANCE_DATA');
@@ -169,7 +196,55 @@ export default function HomeTab({ route, navigation }) {
   }, [navigation]);
 
   useEffect(() => { const initialize = async () => { await validateDataStructure(); await loadData(); }; initialize(); }, [validateDataStructure, loadData]);
-  useEffect(() => { fetch(DEV_MESSAGE_URL + "?t=" + Date.now()).then(res => res.json()).then(json => setDevMessage(json)).catch(err => console.log("Dev Message Fetch Error: ", err)); }, []);
+
+  useEffect(() => {
+    const loadFooterLinks = async () => {
+      try {
+        const res = await fetch(FOOTER_JSON_URL + "?t=" + Date.now(), { timeout: 5000 });
+        
+        if (res.ok) {
+          const json = await res.json();
+          setFooterLinks(json);
+          await AsyncStorage.setItem("FOOTER_LINK", JSON.stringify(json));
+          return;
+        }
+        throw new Error("Network fetch failed");
+      } catch (err) {
+        try {
+          const cachedLinks = await AsyncStorage.getItem("FOOTER_LINK");
+          if (cachedLinks) {
+            setFooterLinks(JSON.parse(cachedLinks));
+          }
+        } catch (cacheErr) {
+          console.log("Failed to load link cache:", cacheErr);
+        }
+      }
+    };
+
+    loadFooterLinks();
+  }, []);
+
+  useEffect(() => {
+    checkDevMessageAndLicense();
+  }, [checkDevMessageAndLicense]);
+  
+  useEffect(() => { 
+    fetch(DEV_MESSAGE_URL + "?t=" + Date.now())
+      .then(res => res.json())
+      .then(json => {
+        setDevMessage(json);
+        // Safely check for license expiration
+        if (json && json.licenseEnd) {
+          const expirationTime = new Date(json.licenseEnd).getTime();
+          if (!isNaN(expirationTime) && Date.now() > expirationTime) {
+            setIsLicenseExpired(true);
+          }
+        }
+      })
+      .catch(err => console.log("Dev Message Fetch Error: ", err)); 
+  }, []);
+
+
   useEffect(() => { if (requiresSync) setIsSyncing(true); }, [requiresSync]);
 
   const handleSyncCompletion = async (status) => {
@@ -198,10 +273,15 @@ export default function HomeTab({ route, navigation }) {
   
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    try { setIsSyncing(true); await loadData(); await validateDataStructure(); } 
+    try { 
+      await checkDevMessageAndLicense(); // Checks for license updates on swipe-down
+      setIsSyncing(true); 
+      await loadData(); 
+      await validateDataStructure(); 
+    } 
     catch (error) { console.error("Failed to refresh dashboard:", error); } 
     finally { setRefreshing(false); }
-  }, [loadData, validateDataStructure]);
+  }, [loadData, validateDataStructure, checkDevMessageAndLicense]);
 
   const isAttendanceLow = Number(userData.percent_attendance) < 67;
 
@@ -277,8 +357,47 @@ export default function HomeTab({ route, navigation }) {
           </View>
         </TouchableOpacity>
       </Modal>
+
+      {/* LICENSE EXPIRED BLOCKING MODAL */}
+      <Modal 
+        animationType="fade" 
+        transparent={true} 
+        visible={isLicenseExpired} 
+        onRequestClose={() => {}} // Empty function blocks android back button
+        statusBarTranslucent={true} 
+        accessibilityViewIsModal={true}
+      >
+        <View style={styles.blockingModalBackdrop}>
+          <View style={[styles.blockingModalContent, { backgroundColor: theme.card }]}>
+            <View style={[styles.modalIconContainer, { backgroundColor: theme.error + '20' }]}>
+              <Ionicons name="lock-closed" size={36} color={theme.error} />
+            </View>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>License Expired</Text>
+            <Text style={[styles.modalText, { color: theme.secondary, marginBottom: 10 }]}>
+              Your access to this application has expired. Please contact the administrator and renew the license to continue using ArsdSaathi.
+            </Text>
+            <TouchableOpacity 
+              style={[styles.modalButtonPrimary, { backgroundColor: theme.primary, marginTop: 20 }]} 
+              onPress={handleFeedback}
+            >
+              <Ionicons name="mail-outline" size={18} color={theme.background} style={{marginRight: 6}} />
+              <Text style={[styles.modalButtonPrimaryText, {color: theme.background}]}>Contact Support</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.modalButtonSecondary, { borderColor: theme.primary, marginTop: 10 }]} 
+              onPress={checkDevMessageAndLicense}
+            >
+              <Text style={[styles.modalButtonSecondaryText, { color: theme.text }]}>Check Again</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
                             
-      {isSyncing && savedCredentials && <ArsdScraper credentials={savedCredentials} onProgress={(msg) => console.log("Background Sync:", msg)} onFinish={handleSyncCompletion} onError={handleSyncError} />}
+      {/* 
+        FIXED HERE: Removed `licenseEnd` from the condition. 
+        It now only checks if the user is actively syncing, has credentials, and isn't blocked by the license.
+      */}
+      {isSyncing && savedCredentials && !isLicenseExpired && <ArsdScraper credentials={savedCredentials} onProgress={(msg) => console.log("Background Sync:", msg)} onFinish={handleSyncCompletion} onError={handleSyncError} />}
       
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.primary]} tintColor={theme.primary} />}>
         {/* Header Section */}
@@ -407,39 +526,45 @@ export default function HomeTab({ route, navigation }) {
         {/* Footer Section */}
         <View style={[styles.footerContainer, { backgroundColor: theme.card }]}>
           <View style={styles.footerGrid}>
-            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(STUDENT_PORTAL_URL)} accessibilityRole="link"><Text style={[styles.footerLink, { color: theme.footer }]}>Official Portal</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(SAMARTH_URL)} accessibilityRole="link"><Text style={[styles.footerLink, { color: theme.footer }]}>Samarth eGov</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(FEES_PORTAL_URL)} accessibilityRole="link"><Text style={[styles.footerLink, { color: theme.footer }]}>Fee Payment</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(FEE_STRUCTURE_URL)} accessibilityRole="link"><Text style={[styles.footerLink, { color: theme.footer }]}>Fee Structure</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(LIBRARY_URL)} accessibilityRole="link"><Text style={[styles.footerLink, { color: theme.footer }]}>Library</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(SOCIETIES_URL)} accessibilityRole="link"><Text style={[styles.footerLink, { color: theme.footer }]}>Societies</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(HANDBOOK_URL)} accessibilityRole="link"><Text style={[styles.footerLink, { color: theme.footer }]}>Handbook</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(footerLinks.STUDENT_PORTAL_URL)} accessibilityRole="link"><Text style={[styles.footerLink, { color: theme.footer }]}>Official Portal</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(footerLinks.SAMARTH_URL)} accessibilityRole="link"><Text style={[styles.footerLink, { color: theme.footer }]}>Samarth eGov</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(footerLinks.FEES_PORTAL_URL)} accessibilityRole="link"><Text style={[styles.footerLink, { color: theme.footer }]}>Fee Payment</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(footerLinks.FEE_STRUCTURE_URL)} accessibilityRole="link"><Text style={[styles.footerLink, { color: theme.footer }]}>Fee Structure</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(footerLinks.LIBRARY_URL)} accessibilityRole="link"><Text style={[styles.footerLink, { color: theme.footer }]}>Library</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(footerLinks.SOCIETIES_URL)} accessibilityRole="link"><Text style={[styles.footerLink, { color: theme.footer }]}>Societies</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.footerItem} onPress={() => Linking.openURL(footerLinks.HANDBOOK_URL)} accessibilityRole="link"><Text style={[styles.footerLink, { color: theme.footer }]}>Handbook</Text></TouchableOpacity>
           </View>
           <View style={[styles.footerDivider, { backgroundColor: theme.separator }]} />
           <View style={styles.footerLegal}>
-            <TouchableOpacity onPress={() => Linking.openURL(TERMS_URL)} accessibilityRole="link"><Text style={[styles.footerLegalText, { color: theme.footer }]}>Terms & Conditions</Text></TouchableOpacity>
+            <TouchableOpacity onPress={() => Linking.openURL(footerLinks.TERMS_URL)} accessibilityRole="link"><Text style={[styles.footerLegalText, { color: theme.footer }]}>Terms & Conditions</Text></TouchableOpacity>
             <Text style={{color: theme.separator}} importantForAccessibility="no">•</Text>
-            <TouchableOpacity onPress={() => Linking.openURL(PRIVACY_URL)} accessibilityRole="link"><Text style={[styles.footerLegalText, { color: theme.footer }]}>Privacy Policy</Text></TouchableOpacity>
+            <TouchableOpacity onPress={() => Linking.openURL(footerLinks.PRIVACY_URL)} accessibilityRole="link"><Text style={[styles.footerLegalText, { color: theme.footer }]}>Privacy Policy</Text></TouchableOpacity>
           </View>
           <View style={[styles.footerLegal, {marginTop: 15}]}>
             <TouchableOpacity style={styles.footerItem} onPress={() => handleFeedback()} accessibilityRole="button"><Text style={[styles.footerLink, { color: theme.footer }]}>Report an Issue?</Text></TouchableOpacity>
           </View>
           <View style={{flexDirection:'row', alignItems:'center', justifyContent:'space-evenly', marginTop:20}}>
-            <TouchableOpacity onPress={()=>Linking.openURL(FACEBOOK_LINK)} accessibilityRole="link" accessibilityLabel="Facebook"><Ionicons name='logo-facebook' size={20} color={theme.primary} importantForAccessibility="no" /></TouchableOpacity>
-            <TouchableOpacity onPress={()=>Linking.openURL(INSTAGRAM_LINK)} accessibilityRole="link" accessibilityLabel="Instagram"><Ionicons name='logo-instagram' size={20} color={theme.primary} importantForAccessibility="no" /></TouchableOpacity>
-            <TouchableOpacity onPress={()=>Linking.openURL(YOUTUBE_LINK)} accessibilityRole="link" accessibilityLabel="YouTube"><Ionicons name='logo-youtube' size={20} color={theme.primary} importantForAccessibility="no" /></TouchableOpacity>
-            <TouchableOpacity onPress={()=>Linking.openURL(X_LINK)} accessibilityRole="link" accessibilityLabel="X, formerly Twitter"><Ionicons name='logo-x' size={20} color={theme.primary} importantForAccessibility="no" /></TouchableOpacity>
-            <TouchableOpacity onPress={()=>Linking.openURL(LINKEDIN_LINK)} accessibilityRole="link" accessibilityLabel="LinkedIn"><Ionicons name='logo-linkedin' size={20} color={theme.primary} importantForAccessibility="no" /></TouchableOpacity>
+            <TouchableOpacity onPress={()=>Linking.openURL(footerLinks.FACEBOOK_LINK)} accessibilityRole="link" accessibilityLabel="Facebook"><Ionicons name='logo-facebook' size={20} color={theme.primary} importantForAccessibility="no" /></TouchableOpacity>
+            <TouchableOpacity onPress={()=>Linking.openURL(footerLinks.INSTAGRAM_LINK)} accessibilityRole="link" accessibilityLabel="Instagram"><Ionicons name='logo-instagram' size={20} color={theme.primary} importantForAccessibility="no" /></TouchableOpacity>
+            <TouchableOpacity onPress={()=>Linking.openURL(footerLinks.YOUTUBE_LINK)} accessibilityRole="link" accessibilityLabel="YouTube"><Ionicons name='logo-youtube' size={20} color={theme.primary} importantForAccessibility="no" /></TouchableOpacity>
+            <TouchableOpacity onPress={()=>Linking.openURL(footerLinks.X_LINK)} accessibilityRole="link" accessibilityLabel="X, formerly Twitter"><Ionicons name='logo-x' size={20} color={theme.primary} importantForAccessibility="no" /></TouchableOpacity>
+            <TouchableOpacity onPress={()=>Linking.openURL(footerLinks.LINKEDIN_LINK)} accessibilityRole="link" accessibilityLabel="LinkedIn"><Ionicons name='logo-linkedin' size={20} color={theme.primary} importantForAccessibility="no" /></TouchableOpacity>
           </View>
         </View>
     
         <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, marginTop:30}}>
           <Text style={{ color: theme.secondary, fontSize:17}}>Developed by</Text>
-          <TouchableOpacity onPress={()=>Linking.openURL(KESHAV_URL)} accessibilityRole="link"><Text style={{ color: theme.primary, fontWeight: 'bold', fontSize:17 }}>Keshav Pal</Text></TouchableOpacity>
+          <TouchableOpacity onPress={()=>Linking.openURL(footerLinks.KESHAV_URL)} accessibilityRole="link" style={{flexDirection: 'row', gap: 4,  alignItems: "center"}}>
+            <Text style={{ color: theme.primary, fontWeight: 'bold', fontSize:17 }}>Keshav Pal</Text>
+            <Ionicons name="information-circle" size={13} color={theme.primary} />
+          </TouchableOpacity>
         </View>
         <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4}}>
           <Text style={{ color: theme.secondary, fontSize:13}}>with</Text>
-          <TouchableOpacity onPress={()=>Linking.openURL(SHIVAM_URL)} accessibilityRole="link"><Text style={{ color: theme.primary, fontWeight: 'bold', fontSize:13 }}>Shivam Yadav</Text></TouchableOpacity>
+          <TouchableOpacity onPress={()=>Linking.openURL(footerLinks.SHIVAM_URL)} accessibilityRole="link" style={{flexDirection: 'row', gap: 2,  alignItems: "center"}}>
+            <Text style={{ color: theme.primary, fontWeight: 'bold', fontSize:13 }}>Shivam Yadav</Text>
+            <Ionicons name="information-circle" size={13} color={theme.primary} />
+          </TouchableOpacity>
         </View>
         
         <View style={[styles.heroDivider, { backgroundColor: theme.separator+'A0' }]} />
@@ -503,6 +628,7 @@ const styles = StyleSheet.create({
   metaText: { fontSize: 12, fontWeight: '700' },
   paginationIndicatorRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 14, gap: 6 },
   pagerDot: { height: 6, borderRadius: 3 },
+  
   footerContainer: { borderRadius: 24, padding: 20, marginTop: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
   footerGrid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: 15 },
   footerItem: { width: '50%', alignItems: 'center' },
@@ -510,6 +636,7 @@ const styles = StyleSheet.create({
   footerDivider: { height: 1, width: '100%', marginVertical: 16 },
   footerLegal: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 12 },
   footerLegalText: { fontSize: 11, fontWeight: '500' },
+
   modalListContainer: { width: '100%', borderRadius: 16, borderWidth: 1, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 10, elevation: 10 },
   modalListHeader: { fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase', padding: 16 },
   dropdownItem: { paddingVertical: 16, paddingHorizontal: 20, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap:5 },
@@ -521,4 +648,6 @@ const styles = StyleSheet.create({
   fabMiniIcon: { width: 40, height: 40, borderRadius: 22, justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
   fabMain: { width: 50, height: 50, borderRadius: 30, justifyContent: 'center', alignItems: 'center', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 6 },
   backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0, 0, 0, 0.6)', zIndex: 998, elevation: 10 },
+  blockingModalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+  blockingModalContent: { width: '90%', borderRadius: 24, padding: 24, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.3, shadowRadius: 20, elevation: 20 },
 });
