@@ -7,3 +7,4 @@ export const FAQ_URL = "https://raw.githubusercontent.com/Kshav005/arsd-saathi-j
 export const DEV_MESSAGE_URL = "https://raw.githubusercontent.com/Kshav005/arsd-saathi-json-data/main/message.json";
 export const WEBSITE_JSON_URL = "https://raw.githubusercontent.com/Kshav005/arsd-saathi-json-data/main/website.json"
 export const FOOTER_JSON_URL = "https://raw.githubusercontent.com/Kshav005/arsd-saathi-json-data/main/footer.json"
+export const HELP_EMAIL = "arsdsaathiofficial@arsd.du.ac.in"

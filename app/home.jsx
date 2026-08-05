@@ -1,4 +1,4 @@
-import { CHANGELOG_URL, DEV_MESSAGE_URL, FOOTER_JSON_URL } from '@/constants/links';
+import { CHANGELOG_URL, DEV_MESSAGE_URL, FOOTER_JSON_URL, HELP_EMAIL } from '@/constants/links';
 import { Colors } from '@/constants/themeStyle';
 import { useTheme } from '@/hooks/useTheme';
 import ArsdScraper from '@/services/ArsdScraper';
@@ -13,12 +13,13 @@ import * as Animatable from 'react-native-animatable';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import OfflineBanner from '@/components/NoInternet';
 import { titleCase } from 'title-case';
+import Constants from 'expo-constants';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH * 0.62; 
 const CARD_GAP = 14;
 
-const handleFeedback = () => Linking.openURL(`mailto:arsdsaathi.help@gmail.com?subject=ArsdSaathi Feedback&body=Name: \nRoll Number: \nScreenshots: \n\nIssue/Feedback: `);
+const handleFeedback = () => Linking.openURL(`mailto:${HELP_EMAIL}?subject=ArsdSaathi Feedback&body=Name: \nRoll Number: \nScreenshots: \n\nIssue/Feedback: `);
 
 export default function HomeTab({ route, navigation }) {
   const {theme, themeName, setThemeName, isDark} = useTheme();
@@ -196,6 +197,22 @@ export default function HomeTab({ route, navigation }) {
   }, [navigation]);
 
   useEffect(() => { const initialize = async () => { await validateDataStructure(); await loadData(); }; initialize(); }, [validateDataStructure, loadData]);
+
+  useEffect(() => {
+    const checkForUpdates = async () => {
+      try {
+        const res = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest'); 
+        if (!res.ok) return;
+        const data = await res.json(); 
+        const latestVersion = data.tag_name.replace('v', '');
+        if (latestVersion !== Constants.expoConfig.version) { 
+          setUpdateInfo({ version: latestVersion, url: data.assets?.[0]?.browser_download_url || data.html_url }); 
+          setShowUpdateModal(true); 
+        }
+      } catch (err) { console.log("Update check failed:", err); }
+    }; 
+    checkForUpdates();
+  }, []);
 
   useEffect(() => {
     const loadFooterLinks = async () => {
@@ -424,7 +441,7 @@ export default function HomeTab({ route, navigation }) {
         </View>
 
         {/* DEVS MESSAGE */}
-        { devMessage && devMessage.show &&
+        { devMessage && devMessage.showMessage &&
           <Animatable.View animation="fadeInDown" duration={600} useNativeDriver style={[styles.devCard, { backgroundColor: theme.error + '10', borderColor: theme.error + '30' }]} accessible={true} accessibilityRole="alert" accessibilityLabel={`Message from the Devs: ${devMessage.message}`}>
             <View style={styles.textContainer} importantForAccessibility="no-hide-descendants">
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>

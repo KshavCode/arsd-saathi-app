@@ -8,12 +8,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Header from '@/components/Header';
 import OfflineBanner from '@/components/NoInternet';
-import { FAQ_URL } from '@/constants/links';
+import { FAQ_URL, HELP_EMAIL } from '@/constants/links';
 import { useTheme } from '@/hooks/useTheme';
 import { titleCase } from 'title-case';
 
 // Helpers
-const handleFeedback = () => Linking.openURL(`mailto:arsdsaathi.help@gmail.com?subject=FAQ Suggestion&body=Question:`);
+const handleFeedback = () => Linking.openURL(`mailto:${HELP_EMAIL}?subject=FAQ Suggestion&body=Question:`);
 const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 const formatTime = (iso) => iso ? new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
 const getTodayDateString = () => `Today, ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;

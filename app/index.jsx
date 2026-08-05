@@ -1,4 +1,4 @@
-import { CHANGELOG_URL, DEV_MESSAGE_URL, GENERATE_PASSWORD_URL, PRIVACY_URL, TERMS_URL, FOOTER_JSON_URL } from '@/constants/links';
+import { CHANGELOG_URL, DEV_MESSAGE_URL, GENERATE_PASSWORD_URL, FOOTER_JSON_URL, HELP_EMAIL } from '@/constants/links';
 import { Colors } from "@/constants/themeStyle";
 import ArsdScraper from '@/services/ArsdScraper';
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -14,7 +14,7 @@ import OfflineBanner from '@/components/NoInternet';
 
 const { height } = Dimensions.get("window");
 
-const handleFeedback = () => Linking.openURL(`mailto:arsdsaathi.help@gmail.com?subject=ArsdSaathi Feedback&body=Name: \nRoll Number: \nScreenshots: \n\nIssue/Feedback: `);
+const handleFeedback = () => Linking.openURL(`mailto:${HELP_EMAIL}subject=ArsdSaathi Feedback&body=Name: \nRoll Number: \nScreenshots: \n\nIssue/Feedback: `);
 
 export default function Login({ navigation }) {
   const [roll, setRoll] = useState(""); 
@@ -176,7 +176,7 @@ export default function Login({ navigation }) {
               </View>
             </View>
 
-            {devMessage && devMessage.show && (
+            {devMessage && devMessage.showMessage && (
               <View style={styles.devCard} accessible={true} accessibilityRole="alert" accessibilityLabel={`Developer Note: ${devMessage.message}`}>
                 <Ionicons name="megaphone" size={20} color={Colors.Default.error} style={{marginRight: 10}} importantForAccessibility="no" />
                 <View style={{flex: 1}} importantForAccessibility="no-hide-descendants">
