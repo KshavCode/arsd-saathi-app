@@ -10,7 +10,5 @@ export const UPDATES_DATA = {
     fixes: [
         { title: "Notices Screen", desc: "Updated the screen to reflect recent changes to the website." },
         { title: "Fetch Error", desc: "The data fetching is fixed and now working fine." },
-        { title: "Next Sync", desc: "Rebranded 'Last Synced' for letting students know the main reason to use ArsdSaathi." },
-        { title: "Forgot Password", desc: "List of steps to try if a student forgot his/her password are enlisted during the login page." }
     ]
 };
