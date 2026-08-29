@@ -21,7 +21,7 @@
         "foregroundImage": "./assets/images/icon.png"
       },
       "package": "com.keshav.arsdsaathi",
-      "versionCode": 8,
+      "versionCode": 9,
       "intentFilters": [
         {
           "action": "VIEW",

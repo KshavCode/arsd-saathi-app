@@ -108,20 +108,45 @@ export default function Timetable({ route, navigation }) {
   useEffect(() => {
     const initialize = async () => {
       try {
+        let extractedSubjects = [];
+
+        // 1. Attempt to get subjects from Attendance Data
         const attRaw = await AsyncStorage.getItem('ATTENDANCE_DATA');
         if (attRaw) {
           const data = JSON.parse(attRaw);
           const theory = data.theory ? Object.keys(data.theory) : [];
           const practical = data.practical ? Object.keys(data.practical) : [];
-          setAvailableSubjects([...new Set([...theory, ...practical])]);
+          extractedSubjects = [...new Set([...theory, ...practical])];
         }
+
+        // 2. Fetch Faculty Data and apply fallback if Attendance subjects are empty
         const facRaw = await AsyncStorage.getItem('FACULTY_DATA');
-        if (facRaw) setFacultyList(JSON.parse(facRaw));
+        if (facRaw) {
+          const parsedFaculty = JSON.parse(facRaw);
+          setFacultyList(parsedFaculty);
+
+          if (extractedSubjects.length === 0 && Array.isArray(parsedFaculty)) {
+            const facultySubjects = parsedFaculty
+              .map(f => f.PAPER_NAME ? f.PAPER_NAME.trim() : '')
+              .filter(name => name !== '');
+            extractedSubjects = [...new Set(facultySubjects)];
+          }
+        }
+
+        // 3. Set the final subject list (will be empty if both sources lacked subjects)
+        setAvailableSubjects(extractedSubjects);
+
+        // 4. Fetch existing timetable
         const ttRaw = await AsyncStorage.getItem('TIMETABLE_DATA');
         if (ttRaw) setTimetable(JSON.parse(ttRaw));
-      } 
-      catch (error) { console.error(error); } finally { setLoading(false); }
+
+      } catch (error) { 
+        console.error(error); 
+      } finally { 
+        setLoading(false); 
+      }
     };
+
     initialize();
 
     const subscription = Linking.addEventListener('url', ({ url }) => handleImportLink(url));
