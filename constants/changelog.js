@@ -1,11 +1,11 @@
 import Constants from 'expo-constants';
 
 export const UPDATES_DATA = {
-    version: Constants.expoConfig?.version || "2.0",
+    version: Constants.expoConfig?.version || "2.2",
     date: "September 2026",
     updates: [
         { 
-            title: "Fast Login & Background Sync", 
+            title: "Fast Login", 
             desc: "Credentials verify in seconds, routing you straight to your dashboard while details load smoothly in the background." 
         },
         { 

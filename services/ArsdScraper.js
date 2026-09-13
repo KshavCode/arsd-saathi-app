@@ -1,4 +1,4 @@
-import { WEBSITE_JSON_URL, REMOTE_MANIFEST_URL } from "@/constants/links";
+import { REMOTE_MANIFEST_URL, WEBSITE_JSON_URL } from "@/constants/links";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";

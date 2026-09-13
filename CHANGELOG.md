@@ -1,12 +1,12 @@
-# ArsdSaathi v2.0 is now available!
+# ArsdSaathi v2.2 is now available!
 
 ## 💫 What's New?
 
-- **Fast Verified Login & Background Sync**: Instant credential verification on the login screen. Once verified, you land directly on the dashboard while detailed attendance and timetable data load seamlessly in the background.
-- **Today's Schedule Attendance Badges**: Live color-coded attendance badges (Green ≥ 75%, Amber 67–74%, Red < 67% ⚠️) right on your upcoming class cards on the Home screen.
+- **Fast Loading**: Now enjoy smoother and faster login to home screen!
+- **Today's Schedule Attendance Badges**: Live color-coded attendance badges (Green ≥ 75%, Amber 67–74%, Red < 67% ) right on your upcoming class cards on the Home screen.
 - **Full Subject List & Custom Subjects**: The Timetable creator now combines subjects from both attendance and faculty records with smart deduplication. Added an **Add Custom** button for newly registered VAC, SEC, and GE papers.
-- **Tactile Haptic Feedback**: Feel every interaction with native haptic feedback across timetable day selectors, tab switches, attendance predictor steppers, and low attendance alerts.
-- **Play Store Ready Performance**: Under-the-hood battery and memory optimizations with Hermes engine, Proguard code shrinking, and memory leak cleanups.
+- **Haptic Feedback**: Feel every interaction with native haptic feedback across timetable day selectors, tab switches, attendance predictor steppers, and low attendance alerts.
+- **Play Store Ready Performance**: Under-the-hood battery and memory optimizations
 
 ## 🔍 Fixes & Improvements
 
