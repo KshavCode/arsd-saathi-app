@@ -6,7 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from '@react-native-community/netinfo';
 import Constants from 'expo-constants';
 import * as Linking from "expo-linking";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Alert, Dimensions, Image, Keyboard, KeyboardAvoidingView, Modal, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from 'react-native-toast-message';
@@ -21,15 +21,18 @@ export default function Login({ navigation }) {
   const [fullName, setFullName] = useState(""); 
   const [passw, setPassw] = useState("");
   const [consentGiven, setConsentGiven] = useState(false); 
-  const [isScraping, setIsScraping] = useState(false);
-  const [progressMsg, setProgressMsg] = useState(""); 
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [progressMsg, setProgressMsg] = useState("");
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [devMessage, setDevMessage] = useState(null); 
   const [updateInfo, setUpdateInfo] = useState({ version: '', url: '' });
   const [isOffline, setIsOffline] = useState(false);
-  const [footerLinks, setFooterLinks] = useState({})
+  const [footerLinks, setFooterLinks] = useState({});
 
-  const isReadyToSync = roll.length > 0 && fullName.length > 0 && passw.length > 0 && consentGiven;
+  const verificationTimeoutRef = useRef(null);
+  const loginHandledRef = useRef(false);
+
+  const isReadyToSync = roll.length > 0 && fullName.length > 0 && passw.length > 0 && consentGiven && !isVerifying;
 
   const handleLogin = async () => {
     Keyboard.dismiss();
@@ -60,46 +63,68 @@ export default function Login({ navigation }) {
       return;
     }
 
-    setProgressMsg("Connecting to ARSD Portal..."); 
-    setIsScraping(true);
+    loginHandledRef.current = false;
+    setProgressMsg("Connecting to ARSD Portal...");
+    setIsVerifying(true);
 
-    const scrapingTimeout = setTimeout(() => {
-      if (isScraping) {
-        setIsScraping(false);
-        Alert.alert("Connection Timeout", "The portal is taking too long to respond or network is unstable.");
+    if (verificationTimeoutRef.current) clearTimeout(verificationTimeoutRef.current);
+    verificationTimeoutRef.current = setTimeout(() => {
+      if (!loginHandledRef.current) {
+        setIsVerifying(false);
+        Alert.alert("Connection Timeout", "The portal is taking too long to respond. Please check your internet connection or try again.");
       }
-    }, 20000);
-
-    // Store timeout reference if needed to clear it on completion/error
-    // (Make sure to call clearTimeout(scrapingTimeout) inside handleCompletion and handleError)
+    }, 25000);
   };
 
-  const handleCompletion = async (status) => {
-    if (status === "DONE") {
-      setProgressMsg("Sync Complete!"); 
-      const now = Date.now().toString();
-      await AsyncStorage.multiSet([["LOGIN_TIMESTAMP", now], ["DATA_TIMESTAMP", now]]);
-      setTimeout(() => { setIsScraping(false); navigation.reset({ index: 0, routes: [{ name: "Home" }] }); }, 800);
-    }
+  const handleLoginSuccess = async () => {
+    if (loginHandledRef.current) return;
+    loginHandledRef.current = true;
+    if (verificationTimeoutRef.current) clearTimeout(verificationTimeoutRef.current);
+
+    setProgressMsg("Login Verified! Opening Dashboard...");
+    const now = Date.now().toString();
+    const credentials = { name: fullName, rollNo: roll, passw: passw };
+    
+    await AsyncStorage.multiSet([
+      ["USER_CREDENTIALS", JSON.stringify(credentials)],
+      ["LOGIN_TIMESTAMP", now],
+      ["DATA_TIMESTAMP", now]
+    ]);
+    
+    setIsVerifying(false);
+    navigation.reset({ index: 0, routes: [{ name: "Home", params: { requiresSync: true } }] });
   };
 
-  const handleError = () => { 
-    setIsScraping(false); 
-    Alert.alert("Connection Failed", "Possible reasons:\n1. Wrong credentials\n2. Poor internet\n3. Portal down"); 
+  const handleLoginError = (errorMsg) => {
+    if (loginHandledRef.current) return;
+    loginHandledRef.current = true;
+    if (verificationTimeoutRef.current) clearTimeout(verificationTimeoutRef.current);
+
+    setIsVerifying(false);
+    Alert.alert(
+      "Login Failed", 
+      errorMsg || "Invalid credentials or portal is currently down. Please double-check your Roll No, Full Name, and Password."
+    );
   };
+
+  useEffect(() => {
+    return () => {
+      if (verificationTimeoutRef.current) clearTimeout(verificationTimeoutRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
       setIsOffline(state.isConnected === false);
     });
-
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
+    const controller = new AbortController();
     const checkForUpdates = async () => {
       try {
-        const res = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest'); 
+        const res = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest', { signal: controller.signal }); 
         if (!res.ok) return;
         const data = await res.json(); 
         const latestVersion = data.tag_name.replace('v', '');
@@ -107,16 +132,19 @@ export default function Login({ navigation }) {
           setUpdateInfo({ version: latestVersion, url: data.assets?.[0]?.browser_download_url || data.html_url }); 
           setShowUpdateModal(true); 
         }
-      } catch (err) { console.log("Update check failed:", err); }
+      } catch (err) { 
+        if (err.name !== 'AbortError') console.log("Update check failed:", err); 
+      }
     }; 
     checkForUpdates();
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
+    const controller = new AbortController();
     const loadFooterLinks = async () => {
       try {
-        const res = await fetch(FOOTER_JSON_URL + "?t=" + Date.now(), { timeout: 5000 });
-        
+        const res = await fetch(FOOTER_JSON_URL + "?t=" + Date.now(), { timeout: 5000, signal: controller.signal });
         if (res.ok) {
           const json = await res.json();
           setFooterLinks(json);
@@ -125,22 +153,26 @@ export default function Login({ navigation }) {
         }
         throw new Error("Network fetch failed");
       } catch (err) {
+        if (err.name === 'AbortError') return;
         try {
           const cachedLinks = await AsyncStorage.getItem("FOOTER_LINK");
-          if (cachedLinks) {
-            setFooterLinks(JSON.parse(cachedLinks));
-          }
+          if (cachedLinks) setFooterLinks(JSON.parse(cachedLinks));
         } catch (cacheErr) {
           console.log("Failed to load link cache:", cacheErr);
         }
       }
     };
-
     loadFooterLinks();
+    return () => controller.abort();
   }, []);
 
   useEffect(() => { 
-    fetch(DEV_MESSAGE_URL + "?t=" + Date.now()).then(res => res.json()).then(setDevMessage).catch(console.log); 
+    const controller = new AbortController();
+    fetch(DEV_MESSAGE_URL + "?t=" + Date.now(), { signal: controller.signal })
+      .then(res => res.json())
+      .then(setDevMessage)
+      .catch(err => { if (err.name !== 'AbortError') console.log(err); }); 
+    return () => controller.abort();
   }, []);
 
   return (
@@ -158,7 +190,7 @@ export default function Login({ navigation }) {
               <Text style={styles.btnTextLight} importantForAccessibility="no">Update Now</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.btnSecondary} onPress={() => Linking.openURL(CHANGELOG_URL)} accessibilityRole="link" accessibilityLabel="Read what's new in this version">
-              <Text style={styles.btnTextDark}>What's New</Text>
+              <Text style={styles.btnTextDark}>{"What's New"}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={{marginTop: 15, padding: 5}} onPress={() => setShowUpdateModal(false)} accessibilityRole="button" accessibilityLabel="Remind me later">
               <Text style={styles.textMuted}>Not Now</Text>
@@ -203,19 +235,16 @@ export default function Login({ navigation }) {
                 <Text style={styles.linkText} importantForAccessibility="no">Generate Password?</Text>
               </TouchableOpacity>
               
-              {!isScraping && (
-                <TouchableOpacity style={styles.consentWrap} onPress={() => setConsentGiven(!consentGiven)} activeOpacity={0.7} accessibilityRole="checkbox" accessibilityState={{ checked: consentGiven }} accessibilityLabel="I agree to the Terms and Privacy Policy">
-                  <Ionicons name={consentGiven ? "checkmark-circle" : "ellipse-outline"} size={22} color={consentGiven ? Colors.Default.primary : "#CBD5E1"} style={{marginRight: 10}} importantForAccessibility="no" />
-                  <Text style={styles.consentText} importantForAccessibility="no">I agree to the <Text style={styles.linkText} onPress={() => Linking.openURL(TERMS_URL)}>Terms</Text> & <Text style={styles.linkText} onPress={() => Linking.openURL(PRIVACY_URL)}>Privacy</Text></Text>
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity style={styles.consentWrap} onPress={() => setConsentGiven(!consentGiven)} activeOpacity={0.7} accessibilityRole="checkbox" accessibilityState={{ checked: consentGiven }} accessibilityLabel="I agree to the Terms and Privacy Policy">
+                <Ionicons name={consentGiven ? "checkmark-circle" : "ellipse-outline"} size={22} color={consentGiven ? Colors.Default.primary : "#CBD5E1"} style={{marginRight: 10}} importantForAccessibility="no" />
+                <Text style={styles.consentText} importantForAccessibility="no">I agree to the <Text style={styles.linkText} onPress={() => footerLinks.TERMS_URL && Linking.openURL(footerLinks.TERMS_URL)}>Terms</Text> & <Text style={styles.linkText} onPress={() => footerLinks.PRIVACY_URL && Linking.openURL(footerLinks.PRIVACY_URL)}>Privacy</Text></Text>
+              </TouchableOpacity>
               
               <View style={styles.actionWrap}>
-                {isScraping ? (
-                  <View style={styles.loaderWrap} accessible={true} accessibilityLiveRegion="polite" accessibilityState={{ busy: true }} accessibilityLabel={`Sync in progress. ${progressMsg}`}>
-                    <ActivityIndicator size="large" color={Colors.Default.primary} importantForAccessibility="no" />
-                    <Text style={styles.loaderText} importantForAccessibility="no">{progressMsg}</Text>
-                    <ArsdScraper credentials={{ name: fullName, rollNo: roll, passw: passw }} onProgress={setProgressMsg} onFinish={handleCompletion} onError={handleError} />
+                {isVerifying ? (
+                  <View style={[styles.submitBtn, { opacity: 0.9 }]} accessible={true} accessibilityState={{ busy: true }} accessibilityLabel={`Verifying credentials. ${progressMsg}`}>
+                    <ActivityIndicator size="small" color="#FFF" style={{ marginRight: 10 }} />
+                    <Text style={styles.submitText} importantForAccessibility="no">{progressMsg || "Verifying..."}</Text>
                   </View>
                 ) : (
                   <TouchableOpacity style={[styles.submitBtn, !isReadyToSync && {backgroundColor: '#CBD5E1', elevation: 0}]} onPress={handleLogin} disabled={!isReadyToSync} accessibilityRole="button" accessibilityState={{ disabled: !isReadyToSync }} accessibilityLabel="Connect Account" accessibilityHint="Logs you in and syncs your college data">
@@ -224,6 +253,15 @@ export default function Login({ navigation }) {
                   </TouchableOpacity>
                 )}
               </View>
+              {isVerifying && (
+                <ArsdScraper 
+                  credentials={{ name: fullName, rollNo: roll, passw: passw }} 
+                  onProgress={setProgressMsg} 
+                  onLoginSuccess={handleLoginSuccess}
+                  onFinish={handleLoginSuccess}
+                  onError={handleLoginError} 
+                />
+              )}
             </View>
 
             <View style={styles.helpSection} accessible={true} accessibilityLabel="Login Issues? First, try your first name in capitals as the password. Second, visit the admin office for portal modifications.">

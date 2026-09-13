@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Animatable from 'react-native-animatable';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Header from '@/components/Header';
@@ -84,7 +85,10 @@ export default function AttendanceScreen({ navigation }) {
           <TouchableOpacity
             key={tab}
             style={[styles.tabButton, activeTab === tab && [styles.tabActive, { backgroundColor: theme.primary }]]}
-            onPress={() => setActiveTab(tab)}
+            onPress={() => {
+              Haptics.selectionAsync();
+              setActiveTab(tab);
+            }}
             activeOpacity={0.8}
             accessibilityRole="tab"
             accessibilityState={{ selected: activeTab === tab }}
@@ -140,7 +144,11 @@ export default function AttendanceScreen({ navigation }) {
                   <TouchableOpacity 
                     key={sub} 
                     style={[styles.dropdownItem, { borderBottomColor: theme.secondary }]} 
-                    onPress={() => { setSelectedSubject(sub); setShowDropdown(false); }}
+                    onPress={() => {
+                      Haptics.selectionAsync();
+                      setSelectedSubject(sub);
+                      setShowDropdown(false);
+                    }}
                     accessibilityRole="button"
                     accessibilityState={{ selected: selectedSubject === sub }}
                     accessibilityLabel={sub}
@@ -390,7 +398,10 @@ function PredictView({ fullData, selectedSubject }) {
       <Animatable.View animation='fadeInRight' duration={500} useNativeDriver style={{ marginBottom: 15 }}>
         <TouchableOpacity 
           style={[styles.compactPill, { borderColor: theme.secondary, backgroundColor: theme.card }]} 
-          onPress={() => setSelectedType(selectedType === 'TH' ? 'PR' : 'TH')}
+          onPress={() => {
+            Haptics.selectionAsync();
+            setSelectedType(selectedType === 'TH' ? 'PR' : 'TH');
+          }}
           accessibilityRole="button"
           accessibilityLabel={`Toggle evaluation type. Currently evaluating: ${selectedType === 'TH' ? 'Theory Lectures' : 'Practical or Tutorials'}`}
           accessibilityHint="Double tap to switch between theory and practical evaluation"
@@ -471,7 +482,10 @@ function PredictView({ fullData, selectedSubject }) {
               <View style={styles.counterRow}>
                 <TouchableOpacity 
                   style={[styles.counterBtn, { backgroundColor: theme.background }]} 
-                  onPress={() => setAttendCount(Math.max(0, attendCount - 1))}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setAttendCount(Math.max(0, attendCount - 1));
+                  }}
                   accessibilityRole="button"
                   accessibilityLabel="Decrease classes to attend"
                 >
@@ -486,7 +500,12 @@ function PredictView({ fullData, selectedSubject }) {
                 </Text>
                 <TouchableOpacity 
                   style={[styles.counterBtn, { backgroundColor: theme.background }]} 
-                  onPress={() => { if (attendCount < 15) setAttendCount(Math.max(0, attendCount + 1)); }}
+                  onPress={() => { 
+                    if (attendCount < 15) {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setAttendCount(Math.max(0, attendCount + 1));
+                    }
+                  }}
                   accessibilityRole="button"
                   accessibilityLabel="Increase classes to attend"
                 >
@@ -500,7 +519,10 @@ function PredictView({ fullData, selectedSubject }) {
               <View style={styles.counterRow}>
                 <TouchableOpacity 
                   style={[styles.counterBtn, { backgroundColor: theme.background }]} 
-                  onPress={() => setBunkCount(Math.max(0, bunkCount - 1))}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setBunkCount(Math.max(0, bunkCount - 1));
+                  }}
                   accessibilityRole="button"
                   accessibilityLabel="Decrease classes to miss"
                 >
@@ -515,7 +537,19 @@ function PredictView({ fullData, selectedSubject }) {
                 </Text>
                 <TouchableOpacity 
                   style={[styles.counterBtn, { backgroundColor: theme.background }]} 
-                  onPress={() => { if (bunkCount < 15) setBunkCount(Math.max(0, bunkCount + 1)); }}
+                  onPress={() => { 
+                    if (bunkCount < 15) {
+                      const nextBunk = bunkCount + 1;
+                      setBunkCount(nextBunk);
+                      const nextHeld = currentStats.held + attendCount + nextBunk;
+                      const nextAtt = currentStats.attended + attendCount;
+                      if (nextHeld > 0 && (nextAtt / nextHeld) < 0.67) {
+                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+                      } else {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                    }
+                  }}
                   accessibilityRole="button"
                   accessibilityLabel="Increase classes to miss"
                 >

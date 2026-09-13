@@ -10,6 +10,7 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import LZString from 'lz-string';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import * as Haptics from 'expo-haptics';
 import { titleCase } from 'title-case';
 
 import Header from '@/components/Header';
@@ -100,6 +101,8 @@ export default function Timetable({ route, navigation }) {
   const [formType, setFormType] = useState('TH');
   const [formDuration, setFormDuration] = useState(1);
   const [formLabel, setFormLabel] = useState('');
+  const [customSubjectInput, setCustomSubjectInput] = useState('');
+  const [isAddingCustom, setIsAddingCustom] = useState(false);
 
   const [importCode, setImportCode] = useState('');
   const [shareLink, setShareLink] = useState('');
@@ -108,37 +111,54 @@ export default function Timetable({ route, navigation }) {
   useEffect(() => {
     const initialize = async () => {
       try {
-        let extractedSubjects = [];
+        const normalizedMap = new Map();
 
-        // 1. Attempt to get subjects from Attendance Data
+        const addSubject = (rawName) => {
+          if (!rawName || typeof rawName !== 'string') return;
+          const cleaned = rawName.trim();
+          if (!cleaned) return;
+          const key = cleaned.toLowerCase();
+          if (!normalizedMap.has(key)) {
+            normalizedMap.set(key, cleaned);
+          }
+        };
+
+        // 1. Collect subjects from Attendance Data
         const attRaw = await AsyncStorage.getItem('ATTENDANCE_DATA');
         if (attRaw) {
           const data = JSON.parse(attRaw);
-          const theory = data.theory ? Object.keys(data.theory) : [];
-          const practical = data.practical ? Object.keys(data.practical) : [];
-          extractedSubjects = [...new Set([...theory, ...practical])];
+          if (data.theory) Object.keys(data.theory).forEach(addSubject);
+          if (data.practical) Object.keys(data.practical).forEach(addSubject);
         }
 
-        // 2. Fetch Faculty Data and apply fallback if Attendance subjects are empty
+        // 2. Collect subjects from Faculty Data
         const facRaw = await AsyncStorage.getItem('FACULTY_DATA');
         if (facRaw) {
           const parsedFaculty = JSON.parse(facRaw);
           setFacultyList(parsedFaculty);
-
-          if (extractedSubjects.length === 0 && Array.isArray(parsedFaculty)) {
-            const facultySubjects = parsedFaculty
-              .map(f => f.PAPER_NAME ? f.PAPER_NAME.trim() : '')
-              .filter(name => name !== '');
-            extractedSubjects = [...new Set(facultySubjects)];
+          if (Array.isArray(parsedFaculty)) {
+            parsedFaculty.forEach(f => {
+              if (f.PAPER_NAME) addSubject(f.PAPER_NAME);
+            });
           }
         }
 
-        // 3. Set the final subject list (will be empty if both sources lacked subjects)
-        setAvailableSubjects(extractedSubjects);
-
-        // 4. Fetch existing timetable
+        // 3. Collect subjects from existing Timetable Data
         const ttRaw = await AsyncStorage.getItem('TIMETABLE_DATA');
-        if (ttRaw) setTimetable(JSON.parse(ttRaw));
+        if (ttRaw) {
+          const parsedTT = JSON.parse(ttRaw);
+          setTimetable(parsedTT);
+          Object.values(parsedTT).forEach(dayClasses => {
+            if (Array.isArray(dayClasses)) {
+              dayClasses.forEach(c => {
+                if (c.subject) addSubject(c.subject);
+              });
+            }
+          });
+        }
+
+        const finalSubjects = Array.from(normalizedMap.values()).sort((a, b) => a.localeCompare(b));
+        setAvailableSubjects(finalSubjects);
 
       } catch (error) { 
         console.error(error); 
@@ -185,9 +205,11 @@ export default function Timetable({ route, navigation }) {
 
   const handleSaveClass = () => {
     if (!formSubject) { 
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       Toast.show({position: 'top', topOffset:50, type:'success', text1:'Required!', text2: 'Please select a subject.', props: {borderColor: theme.error, bg: theme.card, text1Color: theme.error, text2Color: theme.secondary}});
       return; 
     }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const newClass = { id: `${selectedDay}-${editingSlot}`, slot: editingSlot, subject: formSubject, room: formRoom, type: formType, duration: formDuration, label: formLabel };
     let updatedDay = timetable[selectedDay].filter(item => item.slot !== editingSlot);
     if (formDuration === 2) {
@@ -204,6 +226,7 @@ export default function Timetable({ route, navigation }) {
   };
 
   const handleDeleteClass = (slotTime) => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     const updatedDay = timetable[selectedDay].filter(item => item.slot !== slotTime);
     saveTimetable({ ...timetable, [selectedDay]: updatedDay });
     setShowSubjectModal(false);
@@ -222,6 +245,7 @@ export default function Timetable({ route, navigation }) {
         Toast.show({position: 'top', topOffset:50, type:'success', text1:'Error!', text2: 'Kindly create your timetable first.', props: {borderColor: theme.error, bg: theme.card, text1Color: theme.error, text2Color: theme.secondary}});
         return;
       }
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       const tinyCode = LZString.compressToEncodedURIComponent(flatString);
       const link = Linking.createURL(`Timetable?data=${tinyCode}`);
       setShareLink(link);
@@ -247,9 +271,11 @@ export default function Timetable({ route, navigation }) {
       saveTimetable({...DEFAULT_TIMETABLE, ...expandedData});
       setImportCode('');
       setShowQRModal(false);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Toast.show({position: 'top', topOffset:50, type:'success', text1:'Timetable Imported!', text2: 'Changes have been done to your schedule.', props: {borderColor: theme.success, bg: theme.card, text1Color: theme.success, text2Color: theme.secondary}});
       setActiveTab('view');
     } catch (e) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Toast.show({position: 'top', topOffset:50, type:'success', text1:'Invalid!', text2: 'Seems like the QR / Link is broken,', props: {borderColor: theme.error, bg: theme.card, text1Color: theme.error, text2Color: theme.secondary}});
       console.log(e);
     }
@@ -390,7 +416,10 @@ export default function Timetable({ route, navigation }) {
           <TouchableOpacity
             key={tab}
             style={[styles.tabButton, activeTab === tab && [styles.tabActive, { backgroundColor: theme.primary }]]}
-            onPress={() => setActiveTab(tab)}
+            onPress={() => {
+              Haptics.selectionAsync();
+              setActiveTab(tab);
+            }}
             activeOpacity={0.8}
             accessibilityRole="tab"
             accessibilityState={{ selected: activeTab === tab }}
@@ -408,7 +437,10 @@ export default function Timetable({ route, navigation }) {
             <TouchableOpacity
               key={day}
               style={[styles.dayPill, { backgroundColor: theme.card, borderColor:theme.primary, borderWidth:1 }, selectedDay === index && { backgroundColor: theme.primary }]}
-              onPress={() => setSelectedDay(index)}
+              onPress={() => {
+                Haptics.selectionAsync();
+                setSelectedDay(index);
+              }}
               activeOpacity={0.7}
               accessibilityRole="tab"
               accessibilityState={{ selected: selectedDay === index }}
@@ -503,7 +535,7 @@ export default function Timetable({ route, navigation }) {
             <View style={{ backgroundColor: '#FFF', borderRadius: 15, marginBottom: 10 }} importantForAccessibility="no">
               {shareLink ? <QRCode value={shareLink} size={220} /> : null}
             </View>
-            <Text style={[styles.shareDesc, { color: theme.secondary }]}>Scan with your phone's QR scanner app.</Text>
+            <Text style={[styles.shareDesc, { color: theme.secondary }]}>{"Scan with your phone's QR scanner app."}</Text>
             <TouchableOpacity
               style={[styles.primaryButton, { backgroundColor: theme.background, borderColor: theme.primary, borderWidth: 1, width: '100%' }]}
               onPress={async () => await Share.share({ message: `Sync my ArsdSaathi timetable!\n\n${shareLink}` })}
@@ -529,13 +561,65 @@ export default function Timetable({ route, navigation }) {
                 </TouchableOpacity>
               </View>
               <ScrollView style={{ padding: 20, maxHeight: 400 }} showsVerticalScrollIndicator={false}>
-                <Text style={[styles.inputLabel, { color: theme.secondary }]}>Select Subject</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <Text style={[styles.inputLabel, { color: theme.secondary, marginBottom: 0 }]}>Select Subject</Text>
+                  <TouchableOpacity 
+                    onPress={() => {
+                      Haptics.selectionAsync();
+                      setIsAddingCustom(!isAddingCustom);
+                    }}
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+                    accessibilityRole="button"
+                    accessibilityLabel={isAddingCustom ? "Hide custom subject input" : "Add custom subject"}
+                  >
+                    <Ionicons name={isAddingCustom ? "close-circle" : "add-circle"} size={16} color={theme.primary} />
+                    <Text style={{ color: theme.primary, fontSize: 13, fontWeight: '600' }}>
+                      {isAddingCustom ? "Cancel" : "Add Custom"}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                {isAddingCustom && (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+                    <TextInput
+                      style={[styles.inputField, { flex: 1, borderColor: theme.primary, color: theme.text, paddingVertical: 8, paddingHorizontal: 12 }]}
+                      placeholder="Enter custom subject name..."
+                      placeholderTextColor={theme.secondary}
+                      value={customSubjectInput}
+                      onChangeText={setCustomSubjectInput}
+                      accessibilityLabel="Custom subject name input"
+                    />
+                    <TouchableOpacity
+                      style={{ backgroundColor: theme.primary, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10 }}
+                      onPress={() => {
+                        const trimmed = customSubjectInput.trim();
+                        if (trimmed) {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          if (!availableSubjects.some(s => s.toLowerCase() === trimmed.toLowerCase())) {
+                            setAvailableSubjects(prev => [...prev, trimmed].sort((a, b) => a.localeCompare(b)));
+                          }
+                          setFormSubject(trimmed);
+                          setCustomSubjectInput('');
+                          setIsAddingCustom(false);
+                        }
+                      }}
+                      accessibilityRole="button"
+                      accessibilityLabel="Save custom subject"
+                    >
+                      <Text style={{ color: theme.background, fontWeight: '700' }}>Add</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
                   {availableSubjects.map((sub) => (
                     <TouchableOpacity
                       key={sub}
                       style={[styles.chip, { backgroundColor: formSubject === sub ? theme.secondary : theme.background}]}
-                      onPress={() => setFormSubject(sub)}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setFormSubject(sub);
+                      }}
                       accessibilityRole="button"
                       accessibilityState={{ selected: formSubject === sub }}
                       accessibilityLabel={sub}

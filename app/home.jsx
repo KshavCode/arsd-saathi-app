@@ -3,12 +3,12 @@ import { Colors } from '@/constants/themeStyle';
 import { useTheme } from '@/hooks/useTheme';
 import ArsdScraper from '@/services/ArsdScraper';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckBox from 'expo-checkbox';
-import { TouchableWithoutFeedback } from 'react-native';
 import * as Linking from 'expo-linking';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Modal, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View, Image, Dimensions, RefreshControl } from 'react-native';
+import { ActivityIndicator, Alert, Modal, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View, Image, Dimensions, RefreshControl, TouchableWithoutFeedback } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import OfflineBanner from '@/components/NoInternet';
@@ -18,6 +18,42 @@ import Constants from 'expo-constants';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH * 0.62; 
 const CARD_GAP = 14;
+
+const calculateSubjectStats = (att) => {
+  if (!att) return {};
+  const subMap = {};
+  const processRows = (rows) => {
+    if (!rows || !Array.isArray(rows)) return { attended: 0, held: 0 };
+    let attended = 0;
+    let held = 0;
+    rows.forEach(r => {
+      const a = parseInt(r['Final Lect. Attended'] || r['LECT_ATTD'] || r['Lecture Attended'] || 0, 10);
+      const h = parseInt(r['Final Lect. Held'] || r['LECT_HELD'] || r['Lecture Delivered'] || 0, 10);
+      if (!isNaN(a)) attended += a;
+      if (!isNaN(h)) held += h;
+    });
+    return { attended, held };
+  };
+
+  const allSubjects = new Set([
+    ...Object.keys(att.theory || {}),
+    ...Object.keys(att.practical || {})
+  ]);
+
+  allSubjects.forEach(sub => {
+    const th = processRows(att.theory?.[sub]);
+    const pr = processRows(att.practical?.[sub]);
+    const totalAtt = th.attended + pr.attended;
+    const totalHeld = th.held + pr.held;
+    const percentage = totalHeld > 0 ? parseFloat(((totalAtt / totalHeld) * 100).toFixed(1)) : null;
+    subMap[sub.trim().toLowerCase()] = {
+      percentage,
+      totalAtt,
+      totalHeld
+    };
+  });
+  return subMap;
+};
 
 const handleFeedback = () => Linking.openURL(`mailto:${HELP_EMAIL}?subject=ArsdSaathi Feedback&body=Name: \nRoll Number: \nScreenshots: \n\nIssue/Feedback: `);
 
@@ -30,6 +66,7 @@ export default function HomeTab({ route, navigation }) {
   const [nextSync, setNextSync] = useState("Never");
   const [refreshing, setRefreshing] = useState(false);
   const [todaysRemainingClasses, setTodaysRemainingClasses] = useState([]);
+  const [subjectAttendanceMap, setSubjectAttendanceMap] = useState({});
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [updateInfo, setUpdateInfo] = useState({ version: '', url: '' });
@@ -145,6 +182,7 @@ export default function HomeTab({ route, navigation }) {
       const mentor = mentorRaw ? JSON.parse(mentorRaw) : null;
       if (timestampRaw) setNextSync(formatTimestamp(Number(timestampRaw)+(2 * 24 * 60 * 60 * 1000)));
       if (creds) setSavedCredentials(creds);
+      if (att) setSubjectAttendanceMap(calculateSubjectStats(att));
       if (basic || creds) {
         setUserData({
             name: basic?.name || creds?.name || "Student",
@@ -158,28 +196,22 @@ export default function HomeTab({ route, navigation }) {
     } catch (error) { console.error("Error loading Dashboard data:", error); }
   }, []);
 
-  const checkDevMessageAndLicense = useCallback(async () => {
+  const checkDevMessageAndLicense = useCallback(async (signal) => {
     try {
-      const res = await fetch(DEV_MESSAGE_URL + "?t=" + Date.now());
+      const res = await fetch(DEV_MESSAGE_URL + "?t=" + Date.now(), { signal });
       const json = await res.json();
       setDevMessage(json);
 
       if (json && json.licenseEnd) {
         const expirationTime = new Date(json.licenseEnd).getTime();
-
         if (!isNaN(expirationTime)) {
-          if (Date.now() > expirationTime) {
-            setIsLicenseExpired(true);
-          } else {
-            setIsLicenseExpired(false);
-          }
+          setIsLicenseExpired(Date.now() > expirationTime);
         }
       } else {
-        // If licenseEnd key is removed, unblock the app
         setIsLicenseExpired(false);
       }
     } catch (err) {
-      console.log("Dev Message Fetch Error: ", err);
+      if (err.name !== 'AbortError') console.log("Dev Message Fetch Error: ", err);
     }
   }, []);
 
@@ -199,9 +231,10 @@ export default function HomeTab({ route, navigation }) {
   useEffect(() => { const initialize = async () => { await validateDataStructure(); await loadData(); }; initialize(); }, [validateDataStructure, loadData]);
 
   useEffect(() => {
+    const controller = new AbortController();
     const checkForUpdates = async () => {
       try {
-        const res = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest'); 
+        const res = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest', { signal: controller.signal }); 
         if (!res.ok) return;
         const data = await res.json(); 
         const latestVersion = data.tag_name.replace('v', '');
@@ -209,16 +242,19 @@ export default function HomeTab({ route, navigation }) {
           setUpdateInfo({ version: latestVersion, url: data.assets?.[0]?.browser_download_url || data.html_url }); 
           setShowUpdateModal(true); 
         }
-      } catch (err) { console.log("Update check failed:", err); }
+      } catch (err) { 
+        if (err.name !== 'AbortError') console.log("Update check failed:", err); 
+      }
     }; 
     checkForUpdates();
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
+    const controller = new AbortController();
     const loadFooterLinks = async () => {
       try {
-        const res = await fetch(FOOTER_JSON_URL + "?t=" + Date.now(), { timeout: 5000 });
-        
+        const res = await fetch(FOOTER_JSON_URL + "?t=" + Date.now(), { timeout: 5000, signal: controller.signal });
         if (res.ok) {
           const json = await res.json();
           setFooterLinks(json);
@@ -227,42 +263,32 @@ export default function HomeTab({ route, navigation }) {
         }
         throw new Error("Network fetch failed");
       } catch (err) {
+        if (err.name === 'AbortError') return;
         try {
           const cachedLinks = await AsyncStorage.getItem("FOOTER_LINK");
-          if (cachedLinks) {
-            setFooterLinks(JSON.parse(cachedLinks));
-          }
+          if (cachedLinks) setFooterLinks(JSON.parse(cachedLinks));
         } catch (cacheErr) {
           console.log("Failed to load link cache:", cacheErr);
         }
       }
     };
-
     loadFooterLinks();
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
-    checkDevMessageAndLicense();
+    const controller = new AbortController();
+    checkDevMessageAndLicense(controller.signal);
+    return () => controller.abort();
   }, [checkDevMessageAndLicense]);
-  
-  useEffect(() => { 
-    fetch(DEV_MESSAGE_URL + "?t=" + Date.now())
-      .then(res => res.json())
-      .then(json => {
-        setDevMessage(json);
-        // Safely check for license expiration
-        if (json && json.licenseEnd) {
-          const expirationTime = new Date(json.licenseEnd).getTime();
-          if (!isNaN(expirationTime) && Date.now() > expirationTime) {
-            setIsLicenseExpired(true);
-          }
-        }
-      })
-      .catch(err => console.log("Dev Message Fetch Error: ", err)); 
-  }, []);
-
 
   useEffect(() => { if (requiresSync) setIsSyncing(true); }, [requiresSync]);
+
+  const handleSyncProgress = useCallback(async (msg) => {
+    console.log("Background Sync Progress:", msg);
+    // Incrementally load data as it arrives to show updates one by one
+    await loadData();
+  }, [loadData]);
 
   const handleSyncCompletion = async (status) => {
     if (status === 'DONE') {
@@ -270,6 +296,7 @@ export default function HomeTab({ route, navigation }) {
       await loadData();
       setIsSyncing(false);
       navigation.setParams({ requiresSync: false });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
   };
   
@@ -286,9 +313,16 @@ export default function HomeTab({ route, navigation }) {
     } catch (error) { console.error("Logout failed:", error); }
   };
   
-  const handleCarouselScroll = (event) => setActiveCardIndex(Math.round(event.nativeEvent.contentOffset.x / (CARD_WIDTH + CARD_GAP)));
+  const handleCarouselScroll = (event) => {
+    const newIndex = Math.round(event.nativeEvent.contentOffset.x / (CARD_WIDTH + CARD_GAP));
+    if (newIndex !== activeCardIndex) {
+      setActiveCardIndex(newIndex);
+      Haptics.selectionAsync();
+    }
+  };
   
   const onRefresh = useCallback(async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setRefreshing(true);
     try { 
       await checkDevMessageAndLicense(); // Checks for license updates on swipe-down
@@ -330,14 +364,14 @@ export default function HomeTab({ route, navigation }) {
             <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
               <View style={[styles.modalIconContainer, { backgroundColor: theme.background + '70' }]} importantForAccessibility="no-hide-descendants"><Ionicons name="rocket" size={36} color={theme.primary} /></View>
               <Text style={[styles.modalTitle, { color: theme.text }]} accessibilityRole="header">Update Available!</Text>
-              <Text style={[styles.modalText, { color: theme.secondary }]}>Version {updateInfo.version} is ready. We've crushed some bugs and added improvements.</Text>
+              <Text style={[styles.modalText, { color: theme.secondary }]}>Version {updateInfo.version} is ready. {"We've"} crushed some bugs and added improvements.</Text>
               <View style={styles.modalActions}>
                 <TouchableOpacity style={[styles.modalButtonPrimary, { backgroundColor: theme.primary }]} onPress={() => { Linking.openURL(updateInfo.url); setShowUpdateModal(false); }} accessibilityRole="button">
                   <Ionicons name="download-outline" size={18} color={theme.background} style={{marginRight: 6}} importantForAccessibility="no" />
                   <Text style={[styles.modalButtonPrimaryText, {color:theme.background}]}>Update Now</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.modalButtonSecondary, { borderColor: theme.separator }]} onPress={() => Linking.openURL(CHANGELOG_URL)} accessibilityRole="button">
-                  <Text style={[styles.modalButtonSecondaryText, { color: theme.text }]}>What's New</Text>
+                  <Text style={[styles.modalButtonSecondaryText, { color: theme.text }]}>{"What's New"}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={{ marginTop: 15, paddingVertical: 5 }} onPress={() => setShowUpdateModal(false)} accessibilityRole="button">
                   <Text style={{ color: theme.secondary, fontSize: 13, fontWeight: '500' }}>Not Now</Text>
@@ -414,7 +448,7 @@ export default function HomeTab({ route, navigation }) {
         FIXED HERE: Removed `licenseEnd` from the condition. 
         It now only checks if the user is actively syncing, has credentials, and isn't blocked by the license.
       */}
-      {isSyncing && savedCredentials && !isLicenseExpired && <ArsdScraper credentials={savedCredentials} onProgress={(msg) => console.log("Background Sync:", msg)} onFinish={handleSyncCompletion} onError={handleSyncError} />}
+      {isSyncing && savedCredentials && !isLicenseExpired && <ArsdScraper credentials={savedCredentials} onProgress={handleSyncProgress} onFinish={handleSyncCompletion} onError={handleSyncError} />}
       
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.primary]} tintColor={theme.primary} />}>
         {/* Header Section */}
@@ -493,6 +527,12 @@ export default function HomeTab({ route, navigation }) {
             <ScrollView horizontal showsHorizontalScrollIndicator={false} snapToInterval={CARD_WIDTH + CARD_GAP} decelerationRate="fast" contentContainerStyle={{ paddingRight: 20 }} onScroll={handleCarouselScroll} scrollEventThrottle={16}>
               {todaysRemainingClasses.map((clsItem, idx) => {
                 const isCurrentActive = (idx === activeCardIndex);
+                const subStat = subjectAttendanceMap[clsItem.subject?.trim().toLowerCase()];
+                const hasAttendance = subStat && subStat.percentage !== null;
+                const isAttLow = hasAttendance && subStat.percentage < 67;
+                const isAttBorderline = hasAttendance && subStat.percentage >= 67 && subStat.percentage < 75;
+                const badgeColor = hasAttendance ? (subStat.percentage >= 75 ? '#10B981' : (isAttBorderline ? '#F59E0B' : theme.error)) : theme.secondary;
+
                   return (
                     <TouchableOpacity 
                       key={clsItem.slot + idx}
@@ -501,19 +541,33 @@ export default function HomeTab({ route, navigation }) {
                       activeOpacity={0.8}
                       accessible={true}
                       accessibilityRole="button"
-                      accessibilityLabel={`Upcoming Class: ${clsItem.subject} at ${clsItem.slot}. Room ${clsItem.room || 'Not specified'}. Duration ${clsItem.duration} hours, type ${clsItem.type || 'Regular'}. ${clsItem.label || ''}. Double tap to open timetable.`}
+                      accessibilityLabel={`Upcoming Class: ${clsItem.subject} at ${clsItem.slot}. Room ${clsItem.room || 'Not specified'}. Duration ${clsItem.duration} hours, type ${clsItem.type || 'Regular'}. ${hasAttendance ? `Current attendance is ${subStat.percentage} percent. ${isAttLow ? 'Warning: Attendance is below 67 percent.' : ''}` : ''} ${clsItem.label || ''}. Double tap to open timetable.`}
                     >
                       <View style={styles.cardHeaderRow} importantForAccessibility="no-hide-descendants">
                         <View style={[styles.timetablePill, { backgroundColor: theme.background }]}>
                           <Ionicons name="time" size={13} color={theme.primary} style={{ marginRight: 5 }} />
                           <Text style={[styles.timetablePillText, { color: theme.text }]}>{clsItem.slot}</Text>
                         </View>
-                        {clsItem.label && (
-                          <View style={[styles.metaBadge, { backgroundColor: theme.error + '20', alignSelf: 'flex-start' }]}>
-                            <Ionicons name="alert-circle" size={12} color={theme.error} />
-                            <Text style={[styles.metaText, { color: theme.error }]}>{clsItem.label}</Text>
-                          </View>
-                        )}
+                        <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
+                          {clsItem.label && (
+                            <View style={[styles.metaBadge, { backgroundColor: theme.error + '20' }]}>
+                              <Ionicons name="alert-circle" size={12} color={theme.error} />
+                              <Text style={[styles.metaText, { color: theme.error }]}>{clsItem.label}</Text>
+                            </View>
+                          )}
+                          {hasAttendance && (
+                            <View style={[styles.metaBadge, { backgroundColor: badgeColor + '20' }]}>
+                              <Ionicons 
+                                name={subStat.percentage >= 75 ? "checkmark-circle" : (isAttBorderline ? "alert-circle" : "warning")} 
+                                size={12} 
+                                color={badgeColor} 
+                              />
+                              <Text style={[styles.metaText, { color: badgeColor, fontSize: 11, fontWeight: '800' }]}>
+                                {subStat.percentage}% {isAttLow ? '⚠️' : ''}
+                              </Text>
+                            </View>
+                          )}
+                        </View>
                       </View>
                       <Text style={[styles.mainCardSubject, { color: theme.text }]} numberOfLines={2} importantForAccessibility="no-hide-descendants">{clsItem.subject}</Text>
                       <View style={[styles.nextClassMetaRow, { flexWrap: 'wrap' }]} importantForAccessibility="no-hide-descendants">
@@ -527,8 +581,8 @@ export default function HomeTab({ route, navigation }) {
                         </View>
                       </View>
                     </TouchableOpacity>
-                      );
-                  })}
+                  );
+                })}
               </ScrollView>
               {todaysRemainingClasses.length > 1 && (
                 <View style={styles.paginationIndicatorRow} accessible={true} accessibilityLabel={`Showing class ${activeCardIndex + 1} of ${todaysRemainingClasses.length}`}>
@@ -587,9 +641,9 @@ export default function HomeTab({ route, navigation }) {
         <View style={[styles.heroDivider, { backgroundColor: theme.separator+'A0' }]} />
 
         <View style={[{backgroundColor: theme.card, padding: 20, borderRadius: 30}]} accessible={true} accessibilityRole="text" accessibilityLabel="Principal's Note: A heartfelt welcome to all our students. Our institution prides itself on a legacy of excellence in education, holistic development, and innovation, making it a vibrant place for learners from diverse backgrounds. The College holds the distinction of being accredited with an A++ NAAC grade with a score of 3.77, the highest to date. The College has also attained All India 7th Rank in the NIRF rankings. These accomplishments testify to our commitment to excellence in every aspect of our institution.">
-          <Text style={[styles.mainCardSubject, { color: theme.text }]} importantForAccessibility="no">PRINCIPAL'S NOTE</Text>
+          <Text style={[styles.mainCardSubject, { color: theme.text }]} importantForAccessibility="no">{"PRINCIPAL'S NOTE"}</Text>
           <View style={[styles.heroDivider, { backgroundColor: theme.secondary+'60', marginTop: 0 }]} />
-          <Text style={[styles.metaText, { color: theme.secondary, textAlign: 'justify' }]} importantForAccessibility="no">"A heartfelt welcome to all our students. Our institution prides itself on a legacy of excellence in education, holistic development, and innovation, making it a vibrant place for learners from diverse backgrounds. The College holds the distinction of being accredited with an A++ NAAC grade with a score of 3.77, the highest to date. The College has also attained All India 7th Rank in the NIRF rankings. These accomplishments testify to our commitment to excellence in every aspect of our institution."</Text>
+          <Text style={[styles.metaText, { color: theme.secondary, textAlign: 'justify' }]} importantForAccessibility="no">&ldquo;A heartfelt welcome to all our students. Our institution prides itself on a legacy of excellence in education, holistic development, and innovation, making it a vibrant place for learners from diverse backgrounds. The College holds the distinction of being accredited with an A++ NAAC grade with a score of 3.77, the highest to date. The College has also attained All India 7th Rank in the NIRF rankings. These accomplishments testify to our commitment to excellence in every aspect of our institution.&rdquo;</Text>
         </View>
       </ScrollView>
       <OfflineBanner />

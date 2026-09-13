@@ -211,7 +211,7 @@ export default function FaqTab({ navigation }) {
         
         <Animatable.View animation="fadeIn" delay={600} useNativeDriver style={styles.footerLegal}>
           <TouchableOpacity style={styles.footerItem} onPress={handleFeedback} accessibilityRole="button" accessibilityLabel="Can't find your answer? Email Us!">
-            <Text style={[styles.footerLink, { color: theme.footer }]} importantForAccessibility="no">Can't find your answer? Email Us!</Text>
+            <Text style={[styles.footerLink, { color: theme.footer }]} importantForAccessibility="no">{"Can't find your answer? Email Us!"}</Text>
           </TouchableOpacity>
         </Animatable.View>
       </ScrollView>

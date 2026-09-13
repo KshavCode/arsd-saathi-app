@@ -53,7 +53,7 @@ const FALLBACK_CONFIG = {
   redirect: { path_match: "Home.aspx" },
 };
 
-const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
+const ArsdScraper = ({ credentials, onProgress, onLoginSuccess, onFinish, onError }) => {
   const webViewRef = useRef(null);
   const [websiteLinks, setWebsiteLinks] = useState(null);
   const [scraperConfig, setScraperConfig] = useState(null);
@@ -193,6 +193,7 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
       // --- 2. BASIC DETAILS ---
       else if (url.includes(CFG.basic_details.path_match)) {
         sessionStorage.removeItem("login_attempted");
+        post('login_success', {});
 
         waitForElement(CFG.basic_details.wait_for, (el) => {
           if (!el) return;
@@ -354,6 +355,7 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
       // REDIRECT
       else if (url.includes(CFG.redirect.path_match) || document.body.innerText.includes("Welcome")) {
         sessionStorage.removeItem("login_attempted");
+        post('login_success', {});
         log("Retrieving data...");
         window.location.href = LINKS.STUDENT_BASIC_DETAILS_URL;
       }
@@ -368,12 +370,15 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
       const { type, payload } = data;
 
       if (type === "log") {
-        onProgress(payload.message);
+        if (onProgress) onProgress(payload.message);
+      } else if (type === "login_success") {
+        if (onLoginSuccess) onLoginSuccess();
       } else if (type === "error") {
         console.warn("⚠️ Scraper Error:", payload.message);
-        onError(payload.message);
+        if (onError) onError(payload.message);
       } else if (type === "data_basic") {
         await AsyncStorage.setItem("BASIC_DETAILS", JSON.stringify(payload));
+        if (onLoginSuccess) onLoginSuccess();
       } else if (type === "data_attendance") {
         await AsyncStorage.setItem("ATTENDANCE_DATA", JSON.stringify(payload));
       } else if (type === "data_faculty") {
@@ -385,11 +390,11 @@ const ArsdScraper = ({ credentials, onProgress, onFinish, onError }) => {
           "USER_CREDENTIALS",
           JSON.stringify(credentials),
         );
-        onFinish("DONE");
+        if (onFinish) onFinish("DONE");
       }
     } catch (e) {
       console.error("Parser Error:", e);
-      onError("Data parsing failed.");
+      if (onError) onError("Data parsing failed.");
     }
   };
 

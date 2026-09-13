@@ -1,14 +1,38 @@
 import Constants from 'expo-constants';
 
 export const UPDATES_DATA = {
-    version: Constants.expoConfig.version,
-    date: "August 2026",
+    version: Constants.expoConfig?.version || "2.0",
+    date: "September 2026",
     updates: [
-        { title: "App Launch", desc: "ArsdSaathi is now the official app. Congratulations to the development team and the student community!"},
-        { title: "Play Store Soon", desc: "We are trying our best to get the app on the Play Store. Please have some patience." },
+        { 
+            title: "Fast Login & Background Sync", 
+            desc: "Credentials verify in seconds, routing you straight to your dashboard while details load smoothly in the background." 
+        },
+        { 
+            title: "Today's Attendance Badges", 
+            desc: "Upcoming class cards now display live color-coded attendance percentage (Safe, Borderline, or Must Attend)." 
+        },
+        { 
+            title: "Smart Timetable & Custom Subjects", 
+            desc: "Combined attendance and faculty subject lists with deduplication, plus an 'Add Custom' button for electives." 
+        },
+        { 
+            title: "Tactile Haptic Feedback", 
+            desc: "Native subtle vibrations when switching tabs, stepping attendance counters, and saving timetable slots." 
+        }
     ],
     fixes: [
-        { title: "Notices Screen", desc: "Updated the screen to reflect recent changes to the website." },
-        { title: "Fetch Error", desc: "The data fetching is fixed and now working fine." },
+        { 
+            title: "Login Error Detection", 
+            desc: "Incorrect credentials or portal issues are now clearly flagged on the login screen instead of failing silently." 
+        },
+        { 
+            title: "Missing Timetable Subjects", 
+            desc: "Fixed subject omissions when some teachers have not yet published attendance data." 
+        },
+        { 
+            title: "Memory & Battery Optimization", 
+            desc: "Cleaned up memory leaks, dangling timers, and duplicate fetches for improved battery life and stability." 
+        }
     ]
 };
