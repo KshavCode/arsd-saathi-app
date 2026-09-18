@@ -1,7 +1,4 @@
-import Constants from 'expo-constants';
-
 export const UPDATES_DATA = {
-    version: Constants.expoConfig?.version || "2.0",
     date: "September 2026",
     updates: [
         { 

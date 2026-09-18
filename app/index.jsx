@@ -1,4 +1,5 @@
-import { CHANGELOG_URL, DEV_MESSAGE_URL, GENERATE_PASSWORD_URL, FOOTER_JSON_URL, HELP_EMAIL } from '@/constants/links';
+import OfflineBanner from '@/components/NoInternet';
+import { CREDITS_JSON_URL, DEV_MESSAGE_URL, FOOTER_JSON_URL, GENERATE_PASSWORD_URL, HELP_EMAIL } from '@/constants/links';
 import { Colors } from "@/constants/themeStyle";
 import ArsdScraper from '@/services/ArsdScraper';
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -7,10 +8,9 @@ import NetInfo from '@react-native-community/netinfo';
 import Constants from 'expo-constants';
 import * as Linking from "expo-linking";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Dimensions, Image, Keyboard, KeyboardAvoidingView, Modal, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Dimensions, Image, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from 'react-native-toast-message';
-import OfflineBanner from '@/components/NoInternet';
 
 const { height } = Dimensions.get("window");
 
@@ -28,6 +28,8 @@ export default function Login({ navigation }) {
   const [updateInfo, setUpdateInfo] = useState({ version: '', url: '' });
   const [isOffline, setIsOffline] = useState(false);
   const [footerLinks, setFooterLinks] = useState({});
+  const [showPassword, setShowPassword] = useState(true)
+  const [creditsData, setCreditsData] = useState([])
 
   const verificationTimeoutRef = useRef(null);
   const loginHandledRef = useRef(false);
@@ -122,26 +124,6 @@ export default function Login({ navigation }) {
 
   useEffect(() => {
     const controller = new AbortController();
-    const checkForUpdates = async () => {
-      try {
-        const res = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest', { signal: controller.signal }); 
-        if (!res.ok) return;
-        const data = await res.json(); 
-        const latestVersion = data.tag_name.replace('v', '');
-        if (latestVersion !== Constants.expoConfig.version) { 
-          setUpdateInfo({ version: latestVersion, url: data.assets?.[0]?.browser_download_url || data.html_url }); 
-          setShowUpdateModal(true); 
-        }
-      } catch (err) { 
-        if (err.name !== 'AbortError') console.log("Update check failed:", err); 
-      }
-    }; 
-    checkForUpdates();
-    return () => controller.abort();
-  }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
     const loadFooterLinks = async () => {
       try {
         const res = await fetch(FOOTER_JSON_URL + "?t=" + Date.now(), { timeout: 5000, signal: controller.signal });
@@ -166,6 +148,32 @@ export default function Login({ navigation }) {
     return () => controller.abort();
   }, []);
 
+  useEffect(() => {
+      const controller = new AbortController();
+      const loadCreditsData = async () => {
+        try {
+          const res = await fetch(CREDITS_JSON_URL + "?t=" + Date.now(), { timeout: 5000, signal: controller.signal });
+          if (res.ok) {
+            const json = await res.json();
+            setCreditsData(json);
+            await AsyncStorage.setItem("CREDITS_DATA", JSON.stringify(json));
+            return;
+          }
+          throw new Error("Network fetch failed");
+        } catch (err) {
+          if (err.name === 'AbortError') return;
+          try {
+            const cachedLinks = await AsyncStorage.getItem("CREDITS_DATA");
+            if (cachedLinks) setCreditsData(JSON.parse(cachedLinks));
+          } catch (cacheErr) {
+            console.log("Failed to load link cache:", cacheErr);
+          }
+        }
+      };
+      loadCreditsData();
+      return () => controller.abort();
+    }, []);
+
   useEffect(() => { 
     const controller = new AbortController();
     fetch(DEV_MESSAGE_URL + "?t=" + Date.now(), { signal: controller.signal })
@@ -175,29 +183,57 @@ export default function Login({ navigation }) {
     return () => controller.abort();
   }, []);
 
+  const CreditsItem = ({ item, theme }) => {
+    if (!item || !item.name) return null;
+  
+    const handleOpenLink = () => {
+      if (!item.link) return;
+      let formattedUrl = item.link.trim();
+      if (formattedUrl.startsWith('https:') && !formattedUrl.startsWith('https://')) {
+        formattedUrl = formattedUrl.replace('https:', 'https://');
+      } else if (formattedUrl.startsWith('http:') && !formattedUrl.startsWith('http://')) {
+        formattedUrl = formattedUrl.replace('http:', 'http://');
+      } else if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
+        formattedUrl = 'https://' + formattedUrl;
+      }
+      Linking.openURL(formattedUrl).catch((err) => console.log("Failed to open credits link:", err));
+    };
+  
+    return (
+      <View style={[ styles.contributorChipWrapper, { width: '48.5%' }]}
+        accessible={true}
+        accessibilityRole={item.link ? "link" : "text"}
+        accessibilityLabel={`${item.name}, ${item.role || 'Contributor'}`}
+      >
+        <TouchableOpacity
+          onPress={handleOpenLink}
+          disabled={!item.link}
+          activeOpacity={0.5}
+          style={[styles.contributorChip, { backgroundColor: theme.background + '80', borderColor: theme.primary + '30', width: '100%'}]}
+        >
+          <View style={styles.contributorInfo} importantForAccessibility="no-hide-descendants">
+            <Text style={[styles.contributorName, { color: theme.text }]} numberOfLines={1}>
+              {item.name}
+            </Text>
+            {item.role ? (
+              <View style={[styles.roleBadge, { backgroundColor: theme.primary + '15' }]}>
+                <Text style={[styles.roleText, { color: theme.primary }]} numberOfLines={1}>
+                  {item.role}
+                </Text>
+              </View>
+            ) : null}
+          </View>
+          {item.link ? (
+            <Ionicons name="open-outline" size={17} color={theme.primary} style={styles.linkIcon} importantForAccessibility="no" />
+          ) : null}
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#F4F7FC" />
-      
-      <Modal animationType="fade" transparent visible={showUpdateModal} onRequestClose={() => setShowUpdateModal(false)} statusBarTranslucent accessibilityViewIsModal={true}>
-        <TouchableOpacity style={styles.modalBackdrop} onPressOut={() => setShowUpdateModal(false)} activeOpacity={1} accessibilityRole="button" accessibilityLabel="Dismiss update modal">
-          <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
-            <View style={styles.modalIconBox} importantForAccessibility="no-hide-descendants"><Ionicons name="rocket" size={32} color={Colors.Default.primary} /></View>
-            <Text style={styles.modalTitle} accessibilityRole="header">Update Available!</Text>
-            <Text style={styles.modalText}>Version {updateInfo.version} is ready with bug fixes and improvements.</Text>
-            <TouchableOpacity style={styles.btnPrimary} onPress={() => { Linking.openURL(updateInfo.url); setShowUpdateModal(false); }} accessibilityRole="button" accessibilityLabel="Download and install update">
-              <Ionicons name="download-outline" size={18} color="#FFF" style={{marginRight: 6}} importantForAccessibility="no" />
-              <Text style={styles.btnTextLight} importantForAccessibility="no">Update Now</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.btnSecondary} onPress={() => Linking.openURL(CHANGELOG_URL)} accessibilityRole="link" accessibilityLabel="Read what's new in this version">
-              <Text style={styles.btnTextDark}>{"What's New"}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={{marginTop: 15, padding: 5}} onPress={() => setShowUpdateModal(false)} accessibilityRole="button" accessibilityLabel="Remind me later">
-              <Text style={styles.textMuted}>Not Now</Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
@@ -229,14 +265,18 @@ export default function Login({ navigation }) {
               </View>
               <View style={styles.inputWrap}>
                 <Ionicons name="key-outline" size={20} color="#8E9EAF" style={styles.inputIcon} importantForAccessibility="no" />
-                <TextInput style={styles.input} placeholder="Portal Password" placeholderTextColor="#8E9EAF" value={passw} onChangeText={setPassw} keyboardType="default" secureTextEntry accessibilityLabel="Portal Password" accessibilityHint="Enter your college portal password" />
+                <TextInput style={styles.input} placeholder="Portal Password" placeholderTextColor="#8E9EAF" value={passw} onChangeText={setPassw} keyboardType="default" secureTextEntry={showPassword} accessibilityLabel="Portal Password" accessibilityHint="Enter your college portal password" />
+                <TouchableOpacity onPress={()=>setShowPassword(!showPassword)} style={{height: "70%", width: "10%", alignItems:'center', justifyContent:'center'}}>
+                  <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={25} color={Colors.Default.primary} />
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity style={{marginBottom: 15, marginLeft:10, marginTop:-10}} onPress={() => Linking.openURL(GENERATE_PASSWORD_URL)} accessibilityRole="link" accessibilityLabel="Need to generate a password? Opens in web browser.">
-                <Text style={styles.linkText} importantForAccessibility="no">Generate Password?</Text>
+              <TouchableOpacity style={{marginBottom: 25, marginLeft:10, marginTop:-5, flexDirection: "row", gap: 5}} onPress={() => Linking.openURL(GENERATE_PASSWORD_URL)} accessibilityRole="link" accessibilityLabel="Need to generate a password? Opens in web browser.">
+                <Text style={[styles.linkText, {fontSize: 13}]} importantForAccessibility="no">First Time? Generate your Password?</Text>
+                <Ionicons name='open-outline' size={15} color={Colors.Default.primary} />
               </TouchableOpacity>
               
-              <TouchableOpacity style={styles.consentWrap} onPress={() => setConsentGiven(!consentGiven)} activeOpacity={0.7} accessibilityRole="checkbox" accessibilityState={{ checked: consentGiven }} accessibilityLabel="I agree to the Terms and Privacy Policy">
-                <Ionicons name={consentGiven ? "checkmark-circle" : "ellipse-outline"} size={22} color={consentGiven ? Colors.Default.primary : "#CBD5E1"} style={{marginRight: 10}} importantForAccessibility="no" />
+              <TouchableOpacity style={styles.consentWrap} onPress={() => setConsentGiven(!consentGiven)} activeOpacity={0.6} accessibilityRole="checkbox" accessibilityState={{ checked: consentGiven }} accessibilityLabel="I agree to the Terms and Privacy Policy">
+                <Ionicons name={consentGiven ? "checkmark-circle" : "ellipse-outline"} size={22} color={consentGiven ? Colors.Default.primary : "#CBD5E1"} style={{marginRight: 5}} importantForAccessibility="no" />
                 <Text style={styles.consentText} importantForAccessibility="no">I agree to the <Text style={styles.linkText} onPress={() => footerLinks.TERMS_URL && Linking.openURL(footerLinks.TERMS_URL)}>Terms</Text> & <Text style={styles.linkText} onPress={() => footerLinks.PRIVACY_URL && Linking.openURL(footerLinks.PRIVACY_URL)}>Privacy</Text></Text>
               </TouchableOpacity>
               
@@ -266,27 +306,9 @@ export default function Login({ navigation }) {
 
             <View style={styles.helpSection} accessible={true} accessibilityLabel="Login Issues? First, try your first name in capitals as the password. Second, visit the admin office for portal modifications.">
               <Text style={styles.helpTitle} importantForAccessibility="no">Login Issues?</Text>
-              <Text style={styles.helpText} importantForAccessibility="no">• Try your FIRST NAME IN CAPITALS as the password.</Text>
-              <Text style={styles.helpText} importantForAccessibility="no">• Visit the admin office for portal modifications.</Text>
-              <TouchableOpacity onPress={handleFeedback} style={styles.bugBtn} accessibilityRole="button" accessibilityLabel="Report a login issue via email">
-                <Ionicons name="bug-outline" size={16} color="#64748B" importantForAccessibility="no" />
-                <Text style={styles.bugText} importantForAccessibility="no">Report an Issue</Text>
-              </TouchableOpacity>
+              <Text style={styles.helpText} importantForAccessibility="no">Visit the admin office for portal modifications.</Text>
             </View>
-      <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, marginTop:20}}>
-          <Text style={{ color: Colors.Default.secondary, fontSize:17}}>Developed by</Text>
-          <TouchableOpacity onPress={()=>Linking.openURL(footerLinks.KESHAV_URL)} accessibilityRole="link" style={{flexDirection: 'row', gap: 4,  alignItems: "center"}}>
-            <Text style={{ color: Colors.Default.primary, fontWeight: 'bold', fontSize:17 }}>Keshav Pal</Text>
-            <Ionicons name="information-circle" size={13} color={Colors.Default.primary} />
-          </TouchableOpacity>
-        </View>
-        <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4}}>
-          <Text style={{ color: Colors.Default.secondary, fontSize:13}}>with</Text>
-          <TouchableOpacity onPress={()=>Linking.openURL(footerLinks.SHIVAM_URL)} accessibilityRole="link" style={{flexDirection: 'row', gap: 2,  alignItems: "center"}}>
-            <Text style={{ color: Colors.Default.primary, fontWeight: 'bold', fontSize:13 }}>Shivam Yadav</Text>
-            <Ionicons name="information-circle" size={13} color={Colors.Default.primary} />
-          </TouchableOpacity>
-        </View>
+
         {/* Footer Section */}
         <View style={[styles.footerContainer, { backgroundColor: Colors.Default.card, marginTop: 30 }]}>
           <View style={styles.footerGrid}>
@@ -315,12 +337,28 @@ export default function Login({ navigation }) {
             <TouchableOpacity onPress={()=>Linking.openURL(footerLinks.LINKEDIN_LINK)} accessibilityRole="link" accessibilityLabel="LinkedIn"><Ionicons name='logo-linkedin' size={20} color={Colors.Default.primary} importantForAccessibility="no" /></TouchableOpacity>
           </View>
         </View>
-
-          </SafeAreaView>
-        </ScrollView>
-      </KeyboardAvoidingView>
-      <OfflineBanner />
-    </View>
+        <View style={[styles.creditsContainer, { backgroundColor: Colors.Default.card, borderColor: Colors.Default.border || Colors.Default.secondary + '25' }]}>
+          <View style={styles.creditsHeader}>
+            <Text style={[styles.creditsText, { color: "#b61b2d" }]}>ArsdSaathi© v{Constants.expoConfig?.version || '2.0'}</Text>
+          </View>
+              
+          <View style={styles.creditsGrid}>
+            {(Array.isArray(creditsData) && creditsData.length > 0 ? creditsData : [
+              { name: "Keshav Pal", role: "Developer", link: footerLinks.KESHAV_URL || "https://kshavcode.me" }
+            ]).map((credit, idx, arr) => (
+              <CreditsItem
+                key={`${credit.name}-${idx}`}
+                item={credit}
+                theme={Colors.Default}
+              />
+            ))}
+          </View>
+        </View>       
+        </SafeAreaView>
+      </ScrollView>
+    </KeyboardAvoidingView>
+    <OfflineBanner />
+  </View>
   );
 }
 
@@ -339,14 +377,14 @@ const styles = StyleSheet.create({
   input: { flex: 1, fontSize: 15, color: "#0F172A", fontWeight: "500", height: "100%" },
   consentWrap: { flexDirection: 'row', alignItems: 'center', marginBottom: 7, backgroundColor: "#F8FAFC", borderRadius: 14 },
   consentText: { flex: 1, fontSize: 13, color: '#64748B' },
-  linkText: { color: Colors.Default.primary, fontWeight: '700' },
+  linkText: { color: Colors.Default.primary, fontWeight: '700', textDecorationLine: 'underline' },
   actionWrap: { minHeight: 60, justifyContent: 'center' },
   submitBtn: { backgroundColor: Colors.Default.primary, flexDirection: "row", alignItems: "center", justifyContent: "center", height: 56, borderRadius: 16, elevation: 6, shadowColor: Colors.Default.primary, shadowOpacity: 0.3, shadowRadius: 10, shadowOffset: {width: 0, height: 5} },
   submitText: { color: "#FFF", fontSize: 16, fontWeight: "700", marginRight: 8 },
   loaderWrap: { alignItems: "center", gap: 10, paddingVertical: 10 },
   loaderText: { fontSize: 14, color: Colors.Default.primary, fontWeight: "700" },
   helpSection: { paddingHorizontal: 10 },
-  helpTitle: { fontSize: 16, fontWeight: "700", color: "#334155", marginBottom: 10 },
+  helpTitle: { fontSize: 16, fontWeight: "700", color: "#334155" },
   helpText: { fontSize: 13, color: "#64748B", lineHeight: 22 },
   bugBtn: { flexDirection: "row", alignItems: "center", marginTop: 15, paddingVertical: 8 },
   bugText: { fontSize: 13, color: "#64748B", fontWeight: "600", marginLeft: 6 },
@@ -368,4 +406,16 @@ const styles = StyleSheet.create({
   footerDivider: { height: 1, width: '100%', marginVertical: 16 },
   footerLegal: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 12 },
   footerLegalText: { fontSize: 11, fontWeight: '500' },
+
+  creditsContainer: { marginTop: 32, marginBottom: 20, paddingVertical: 18, paddingHorizontal: 16, borderRadius: 20, borderWidth: 1, alignItems: 'center', gap: 12 },
+  creditsHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  creditsText: { fontSize: 14, fontWeight: '800', letterSpacing: 1.2, textTransform: 'uppercase' },
+  creditsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 10, width: '100%' },
+  contributorChipWrapper: { minWidth: 120, maxWidth: '100%' },
+  contributorChip: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 10, paddingHorizontal: 10, borderRadius: 14, borderWidth: 1 },
+  contributorInfo: { flex: 1, flexDirection: 'column', gap: 3, marginRight: 4 },
+  contributorName: { fontSize: 13, fontWeight: '700' },
+  roleBadge: { alignSelf: 'flex-start', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, marginTop: 5 },
+  roleText: { fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
+  linkIcon: { marginLeft: 4, flexShrink: 0 },
 });

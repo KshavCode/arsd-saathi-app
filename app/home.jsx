@@ -1,19 +1,19 @@
-import { CHANGELOG_URL, DEV_MESSAGE_URL, FOOTER_JSON_URL, HELP_EMAIL } from '@/constants/links';
+import OfflineBanner from '@/components/NoInternet';
+import { CREDITS_JSON_URL, DEV_MESSAGE_URL, FOOTER_JSON_URL, HELP_EMAIL } from '@/constants/links';
 import { Colors } from '@/constants/themeStyle';
 import { useTheme } from '@/hooks/useTheme';
 import ArsdScraper from '@/services/ArsdScraper';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckBox from 'expo-checkbox';
+import Constants from 'expo-constants';
+import * as Haptics from 'expo-haptics';
 import * as Linking from 'expo-linking';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Modal, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View, Image, Dimensions, RefreshControl, TouchableWithoutFeedback } from 'react-native';
+import { ActivityIndicator, Alert, Dimensions, Image, Modal, RefreshControl, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import OfflineBanner from '@/components/NoInternet';
 import { titleCase } from 'title-case';
-import Constants from 'expo-constants';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH * 0.62; 
@@ -68,13 +68,12 @@ export default function HomeTab({ route, navigation }) {
   const [todaysRemainingClasses, setTodaysRemainingClasses] = useState([]);
   const [subjectAttendanceMap, setSubjectAttendanceMap] = useState({});
   const [activeCardIndex, setActiveCardIndex] = useState(0);
-  const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const [updateInfo, setUpdateInfo] = useState({ version: '', url: '' });
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [deleteTimetable, setDeleteTimetable] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [isLicenseExpired, setIsLicenseExpired] = useState(false);
   const [footerLinks, setFooterLinks] = useState({})
+  const [creditsData, setCreditsData] = useState([])
   const requiresSync = route.params?.requiresSync;
   
   const actions = [
@@ -137,6 +136,54 @@ export default function HomeTab({ route, navigation }) {
       </>
     );
   };
+
+const CreditsItem = ({ item, theme }) => {
+  if (!item || !item.name) return null;
+
+  const handleOpenLink = () => {
+    if (!item.link) return;
+    let formattedUrl = item.link.trim();
+    if (formattedUrl.startsWith('https:') && !formattedUrl.startsWith('https://')) {
+      formattedUrl = formattedUrl.replace('https:', 'https://');
+    } else if (formattedUrl.startsWith('http:') && !formattedUrl.startsWith('http://')) {
+      formattedUrl = formattedUrl.replace('http:', 'http://');
+    } else if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
+      formattedUrl = 'https://' + formattedUrl;
+    }
+    Linking.openURL(formattedUrl).catch((err) => console.log("Failed to open credits link:", err));
+  };
+
+  return (
+    <View style={[ styles.contributorChipWrapper, { width: '48.5%' }]}
+      accessible={true}
+      accessibilityRole={item.link ? "link" : "text"}
+      accessibilityLabel={`${item.name}, ${item.role || 'Contributor'}`}
+    >
+      <TouchableOpacity
+        onPress={handleOpenLink}
+        disabled={!item.link}
+        activeOpacity={0.5}
+        style={[styles.contributorChip, { backgroundColor: theme.background + '80', borderColor: theme.primary + '30', width: '100%'}]}
+      >
+        <View style={styles.contributorInfo} importantForAccessibility="no-hide-descendants">
+          <Text style={[styles.contributorName, { color: theme.text }]} numberOfLines={1}>
+            {item.name}
+          </Text>
+          {item.role ? (
+            <View style={[styles.roleBadge, { backgroundColor: theme.primary + '15' }]}>
+              <Text style={[styles.roleText, { color: theme.primary }]} numberOfLines={1}>
+                {item.role}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+        {item.link ? (
+          <Ionicons name="open-outline" size={17} color={theme.primary} style={styles.linkIcon} importantForAccessibility="no" />
+        ) : null}
+      </TouchableOpacity>
+    </View>
+  );
+};
 
   const parseTimeToMinutes = (timeStr) => {
     if (!timeStr) return 0;
@@ -230,25 +277,25 @@ export default function HomeTab({ route, navigation }) {
 
   useEffect(() => { const initialize = async () => { await validateDataStructure(); await loadData(); }; initialize(); }, [validateDataStructure, loadData]);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const checkForUpdates = async () => {
-      try {
-        const res = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest', { signal: controller.signal }); 
-        if (!res.ok) return;
-        const data = await res.json(); 
-        const latestVersion = data.tag_name.replace('v', '');
-        if (latestVersion !== Constants.expoConfig.version) { 
-          setUpdateInfo({ version: latestVersion, url: data.assets?.[0]?.browser_download_url || data.html_url }); 
-          setShowUpdateModal(true); 
-        }
-      } catch (err) { 
-        if (err.name !== 'AbortError') console.log("Update check failed:", err); 
-      }
-    }; 
-    checkForUpdates();
-    return () => controller.abort();
-  }, []);
+  // useEffect(() => {
+  //   const controller = new AbortController();
+  //   const checkForUpdates = async () => {
+  //     try {
+  //       const res = await fetch('https://api.github.com/repos/KshavCode/arsd-saathi-app/releases/latest', { signal: controller.signal }); 
+  //       if (!res.ok) return;
+  //       const data = await res.json(); 
+  //       const latestVersion = data.tag_name.replace('v', '');
+  //       if (latestVersion !== Constants.expoConfig.version) { 
+  //         setUpdateInfo({ version: latestVersion, url: data.assets?.[0]?.browser_download_url || data.html_url }); 
+  //         setShowUpdateModal(true); 
+  //       }
+  //     } catch (err) { 
+  //       if (err.name !== 'AbortError') console.log("Update check failed:", err); 
+  //     }
+  //   }; 
+  //   checkForUpdates();
+  //   return () => controller.abort();
+  // }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -273,6 +320,32 @@ export default function HomeTab({ route, navigation }) {
       }
     };
     loadFooterLinks();
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const loadCreditsData = async () => {
+      try {
+        const res = await fetch(CREDITS_JSON_URL + "?t=" + Date.now(), { timeout: 5000, signal: controller.signal });
+        if (res.ok) {
+          const json = await res.json();
+          setCreditsData(json);
+          await AsyncStorage.setItem("CREDITS_DATA", JSON.stringify(json));
+          return;
+        }
+        throw new Error("Network fetch failed");
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+        try {
+          const cachedLinks = await AsyncStorage.getItem("CREDITS_DATA");
+          if (cachedLinks) setCreditsData(JSON.parse(cachedLinks));
+        } catch (cacheErr) {
+          console.log("Failed to load link cache:", cacheErr);
+        }
+      }
+    };
+    loadCreditsData();
     return () => controller.abort();
   }, []);
 
@@ -356,31 +429,6 @@ export default function HomeTab({ route, navigation }) {
           </View>
         </TouchableOpacity>
       </Modal>
-                
-      {/* UPDATE MODAL */}
-      <Modal animationType="fade" transparent={true} visible={showUpdateModal} onRequestClose={() => setShowUpdateModal(false)} statusBarTranslucent={true} accessibilityViewIsModal={true}>
-        <TouchableOpacity style={styles.modalBackdropCenter} onPressOut={()=>setShowUpdateModal(false)} activeOpacity={1}>
-          <View style={[styles.modalOverlay, { backgroundColor: theme.modalOverlay }]} onStartShouldSetResponder={() => true}>
-            <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
-              <View style={[styles.modalIconContainer, { backgroundColor: theme.background + '70' }]} importantForAccessibility="no-hide-descendants"><Ionicons name="rocket" size={36} color={theme.primary} /></View>
-              <Text style={[styles.modalTitle, { color: theme.text }]} accessibilityRole="header">Update Available!</Text>
-              <Text style={[styles.modalText, { color: theme.secondary }]}>Version {updateInfo.version} is ready. {"We've"} crushed some bugs and added improvements.</Text>
-              <View style={styles.modalActions}>
-                <TouchableOpacity style={[styles.modalButtonPrimary, { backgroundColor: theme.primary }]} onPress={() => { Linking.openURL(updateInfo.url); setShowUpdateModal(false); }} accessibilityRole="button">
-                  <Ionicons name="download-outline" size={18} color={theme.background} style={{marginRight: 6}} importantForAccessibility="no" />
-                  <Text style={[styles.modalButtonPrimaryText, {color:theme.background}]}>Update Now</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.modalButtonSecondary, { borderColor: theme.separator }]} onPress={() => Linking.openURL(CHANGELOG_URL)} accessibilityRole="button">
-                  <Text style={[styles.modalButtonSecondaryText, { color: theme.text }]}>{"What's New"}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={{ marginTop: 15, paddingVertical: 5 }} onPress={() => setShowUpdateModal(false)} accessibilityRole="button">
-                  <Text style={{ color: theme.secondary, fontSize: 13, fontWeight: '500' }}>Not Now</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </TouchableOpacity>
-      </Modal>
                             
       {/* LOGOUT MODAL */}
       <Modal animationType="fade" transparent={true} visible={showLogoutModal} onRequestClose={() => setShowLogoutModal(false)} statusBarTranslucent={true} accessibilityViewIsModal={true}>
@@ -444,21 +492,18 @@ export default function HomeTab({ route, navigation }) {
         </View>
       </Modal>
                             
-      {/* 
-        FIXED HERE: Removed `licenseEnd` from the condition. 
-        It now only checks if the user is actively syncing, has credentials, and isn't blocked by the license.
-      */}
       {isSyncing && savedCredentials && !isLicenseExpired && <ArsdScraper credentials={savedCredentials} onProgress={handleSyncProgress} onFinish={handleSyncCompletion} onError={handleSyncError} />}
       
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.primary]} tintColor={theme.primary} />}>
         {/* Header Section */}
         <View style={styles.header}>
           <View style={{flex: 1}} accessible={true} accessibilityLabel={`ARSD App. Next data sync is scheduled on ${nextSync}.`}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }} importantForAccessibility="no-hide-descendants">
+            <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }} importantForAccessibility="no-hide-descendants" onPress={()=>Linking.openURL(footerLinks.COLLEGE_WEBSITE_URL)}>
               <Image style={styles.collegeLogo} source={require("@/assets/images/arsdlogo.png")} />
-              <Text style={[styles.appName, { color: theme.primary }]} numberOfLines={1}>ARSD</Text>
+              <Text style={[styles.appName, { color: isDark? "#cc8d92" : "#b61b2d" }]} numberOfLines={1}>ARSD</Text>
+              <Ionicons name='open-outline' size={15} color={isDark? "#cc8d92" : "#b61b2d"} />
               {isSyncing && <ActivityIndicator size="small" color={theme.primary} />}
-            </View>
+            </TouchableOpacity>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 4 }} importantForAccessibility="no-hide-descendants">
               <Ionicons name="time-outline" size={12} color={theme.secondary} />
               <Text style={{ fontSize: 12, color: theme.secondary, fontWeight: '500' }}>Next Sync on: {nextSync}</Text>
@@ -623,29 +668,25 @@ export default function HomeTab({ route, navigation }) {
           </View>
         </View>
     
-        <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4, marginTop:30}}>
-          <Text style={{ color: theme.secondary, fontSize:17}}>Developed by</Text>
-          <TouchableOpacity onPress={()=>Linking.openURL(footerLinks.KESHAV_URL)} accessibilityRole="link" style={{flexDirection: 'row', gap: 4,  alignItems: "center"}}>
-            <Text style={{ color: theme.primary, fontWeight: 'bold', fontSize:17 }}>Keshav Pal</Text>
-            <Ionicons name="information-circle" size={13} color={theme.primary} />
-          </TouchableOpacity>
-        </View>
-        <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', gap:4}}>
-          <Text style={{ color: theme.secondary, fontSize:13}}>with</Text>
-          <TouchableOpacity onPress={()=>Linking.openURL(footerLinks.SHIVAM_URL)} accessibilityRole="link" style={{flexDirection: 'row', gap: 2,  alignItems: "center"}}>
-            <Text style={{ color: theme.primary, fontWeight: 'bold', fontSize:13 }}>Shivam Yadav</Text>
-            <Ionicons name="information-circle" size={13} color={theme.primary} />
-          </TouchableOpacity>
-        </View>
-        
-        <View style={[styles.heroDivider, { backgroundColor: theme.separator+'A0' }]} />
-
-        <View style={[{backgroundColor: theme.card, padding: 20, borderRadius: 30}]} accessible={true} accessibilityRole="text" accessibilityLabel="Principal's Note: A heartfelt welcome to all our students. Our institution prides itself on a legacy of excellence in education, holistic development, and innovation, making it a vibrant place for learners from diverse backgrounds. The College holds the distinction of being accredited with an A++ NAAC grade with a score of 3.77, the highest to date. The College has also attained All India 7th Rank in the NIRF rankings. These accomplishments testify to our commitment to excellence in every aspect of our institution.">
-          <Text style={[styles.mainCardSubject, { color: theme.text }]} importantForAccessibility="no">{"PRINCIPAL'S NOTE"}</Text>
-          <View style={[styles.heroDivider, { backgroundColor: theme.secondary+'60', marginTop: 0 }]} />
-          <Text style={[styles.metaText, { color: theme.secondary, textAlign: 'justify' }]} importantForAccessibility="no">&ldquo;A heartfelt welcome to all our students. Our institution prides itself on a legacy of excellence in education, holistic development, and innovation, making it a vibrant place for learners from diverse backgrounds. The College holds the distinction of being accredited with an A++ NAAC grade with a score of 3.77, the highest to date. The College has also attained All India 7th Rank in the NIRF rankings. These accomplishments testify to our commitment to excellence in every aspect of our institution.&rdquo;</Text>
+        <View style={[styles.creditsContainer, { backgroundColor: theme.card, borderColor: theme.border || theme.secondary + '25' }]}>
+          <View style={styles.creditsHeader}>
+            <Text style={[styles.creditsText, { color: isDark? "#cc8d92" : "#b61b2d" }]}>ArsdSaathi© v{Constants.expoConfig?.version || '2.0'}</Text>
+          </View>
+              
+          <View style={styles.creditsGrid}>
+            {(Array.isArray(creditsData) && creditsData.length > 0 ? creditsData : [
+              { name: "Keshav Pal", role: "Developer", link: footerLinks.KESHAV_URL || "https://kshavcode.me" }
+            ]).map((credit, idx, arr) => (
+              <CreditsItem
+                key={`${credit.name}-${idx}`}
+                item={credit}
+                theme={theme}
+              />
+            ))}
+          </View>
         </View>
       </ScrollView>
+      
       <OfflineBanner />
       <CustomFAB actions={actions} theme={theme} />
     </SafeAreaView>
@@ -707,6 +748,19 @@ const styles = StyleSheet.create({
   footerDivider: { height: 1, width: '100%', marginVertical: 16 },
   footerLegal: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 12 },
   footerLegalText: { fontSize: 11, fontWeight: '500' },
+
+  creditsContainer: { marginTop: 32, marginBottom: 20, paddingVertical: 18, paddingHorizontal: 16, borderRadius: 20, borderWidth: 1, alignItems: 'center', gap: 12 },
+  creditsHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  creditsText: { fontSize: 14, fontWeight: '800', letterSpacing: 1.2, textTransform: 'uppercase' },
+  creditsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 10, width: '100%' },
+  contributorChipWrapper: { minWidth: 120, maxWidth: '100%' },
+  contributorChip: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 10, paddingHorizontal: 10, borderRadius: 14, borderWidth: 1 },
+  contributorInfo: { flex: 1, flexDirection: 'column', gap: 3, marginRight: 4 },
+  contributorName: { fontSize: 13, fontWeight: '700' },
+  roleBadge: { alignSelf: 'flex-start', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, marginTop: 5 },
+  roleText: { fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
+  linkIcon: { marginLeft: 4, flexShrink: 0 },
+
 
   modalListContainer: { width: '100%', borderRadius: 16, borderWidth: 1, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 10, elevation: 10 },
   modalListHeader: { fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase', padding: 16 },
