@@ -1,13 +1,14 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Animatable from 'react-native-animatable';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import Header from '@/components/Header';
 import OfflineBanner from '@/components/NoInternet';
 import { UPDATES_DATA } from '@/constants/changelog';
 import { useTheme } from '@/hooks/useTheme';
+import Constants from 'expo-constants';
 
 const UpdateItem = ({ item, theme, delay, isFix }) => (
   <Animatable.View 
@@ -39,10 +40,10 @@ export default function WhatsNewTab({ navigation }) {
           style={styles.versionHeader}
           accessible={true}
           accessibilityRole="header"
-          accessibilityLabel={`Release version ${UPDATES_DATA.version}, published in ${UPDATES_DATA.date}. This is the latest version.`}
+          accessibilityLabel={`Release version ${Constants.expoConfig.version}, published in ${UPDATES_DATA.date}. This is the latest version.`}
         >
           <View style={styles.versionTextContainer} importantForAccessibility="no-hide-descendants">
-            <Text style={[styles.versionTitle, { color: theme.text }]}>Version {UPDATES_DATA.version}</Text>
+            <Text style={[styles.versionTitle, { color: theme.text }]}>Version {Constants.expoConfig.version}</Text>
             <Text style={[styles.versionDate, { color: theme.secondary }]}>{UPDATES_DATA.date}</Text>
           </View>
           <View style={[styles.badge, { backgroundColor: theme.primary + '20' }]} importantForAccessibility="no-hide-descendants">

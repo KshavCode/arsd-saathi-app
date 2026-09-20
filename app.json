@@ -2,26 +2,22 @@
   "expo": {
     "name": "ArsdSaathi",
     "slug": "arsdsaathi",
-    "version": "2.1",
+    "version": "2.2.1",
     "orientation": "portrait",
-    "jsEngine": "hermes",
     "icon": "./assets/images/icon.png",
     "scheme": "arsdsaathi",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.keshav.arsdsaathi"
     },
     "android": {
-      "edgeToEdgeEnabled": true,
-      "enableProguardInReleaseBuilds": true,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/icon.png"
       },
       "package": "com.keshav.arsdsaathi",
-      "versionCode": 9,
+      "versionCode": 10,
       "intentFilters": [
         {
           "action": "VIEW",
@@ -31,12 +27,24 @@
               "scheme": "arsdsaathi"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
     "plugins": [
-      "expo-router",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "extraProguardRules": "-keep class com.facebook.react.** { *; }\n-keep class com.facebook.jni.** { *; }\n-keep public class com.reactnativecommunity.webview.** { *; }\n-keep class com.reactnativecommunity.asyncstorage.** { *; }"
+          }
+        }
+      ],
       [
         "expo-splash-screen",
         {
@@ -48,7 +56,8 @@
             "backgroundColor": "#0F172A"
           }
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true

@@ -1,7 +1,4 @@
-import Constants from 'expo-constants';
-
 export const UPDATES_DATA = {
-    version: Constants.expoConfig?.version || "2.2",
     date: "September 2026",
     updates: [
         { 
@@ -17,13 +14,17 @@ export const UPDATES_DATA = {
             desc: "Combined attendance and faculty subject lists with deduplication, plus an 'Add Custom' button for electives." 
         },
         { 
+            title: "Proper Layout for Contributors", 
+            desc: "We thank all the testers for investing their time into supporting our app to publish on Play Store." 
+        },
+        { 
             title: "Tactile Haptic Feedback", 
             desc: "Native subtle vibrations when switching tabs, stepping attendance counters, and saving timetable slots." 
-        }
+        },
     ],
     fixes: [
         { 
-            title: "Login Error Detection", 
+            title: "Login Page Cleanup", 
             desc: "Incorrect credentials or portal issues are now clearly flagged on the login screen instead of failing silently." 
         },
         { 
@@ -33,6 +34,10 @@ export const UPDATES_DATA = {
         { 
             title: "Memory & Battery Optimization", 
             desc: "Cleaned up memory leaks, dangling timers, and duplicate fetches for improved battery life and stability." 
-        }
+        },
+        { 
+            title: "Name & Logo Rework", 
+            desc: "Navigates to the college website on pressing it." 
+        },
     ]
 };
