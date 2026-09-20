@@ -14,7 +14,7 @@ import Toast from 'react-native-toast-message';
 
 const { height } = Dimensions.get("window");
 
-const handleFeedback = () => Linking.openURL(`mailto:${HELP_EMAIL}subject=ArsdSaathi Feedback&body=Name: \nRoll Number: \nScreenshots: \n\nIssue/Feedback: `);
+const handleFeedback = () => Linking.openURL(`mailto:${HELP_EMAIL}?subject=ArsdSaathi Feedback&body=Name: \nRoll Number: \nScreenshots: \n\nIssue/Feedback: `);
 
 export default function Login({ navigation }) {
   const [roll, setRoll] = useState(""); 

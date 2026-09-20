@@ -574,9 +574,6 @@ const CreditsItem = ({ item, theme }) => {
                 const isCurrentActive = (idx === activeCardIndex);
                 const subStat = subjectAttendanceMap[clsItem.subject?.trim().toLowerCase()];
                 const hasAttendance = subStat && subStat.percentage !== null;
-                const isAttLow = hasAttendance && subStat.percentage < 67;
-                const isAttBorderline = hasAttendance && subStat.percentage >= 67 && subStat.percentage < 75;
-                const badgeColor = hasAttendance ? (subStat.percentage >= 75 ? '#10B981' : (isAttBorderline ? '#F59E0B' : theme.error)) : theme.secondary;
 
                   return (
                     <TouchableOpacity 
@@ -586,7 +583,7 @@ const CreditsItem = ({ item, theme }) => {
                       activeOpacity={0.8}
                       accessible={true}
                       accessibilityRole="button"
-                      accessibilityLabel={`Upcoming Class: ${clsItem.subject} at ${clsItem.slot}. Room ${clsItem.room || 'Not specified'}. Duration ${clsItem.duration} hours, type ${clsItem.type || 'Regular'}. ${hasAttendance ? `Current attendance is ${subStat.percentage} percent. ${isAttLow ? 'Warning: Attendance is below 67 percent.' : ''}` : ''} ${clsItem.label || ''}. Double tap to open timetable.`}
+                      accessibilityLabel={`Upcoming Class: ${clsItem.subject} at ${clsItem.slot}. Room ${clsItem.room || 'Not specified'}. Duration ${clsItem.duration} hours, type ${clsItem.type || 'Regular'}. ${hasAttendance ? `Current attendance is ${subStat.percentage} percent. Tap to open timetable.` : `Tap to open timetable`}`}
                     >
                       <View style={styles.cardHeaderRow} importantForAccessibility="no-hide-descendants">
                         <View style={[styles.timetablePill, { backgroundColor: theme.background }]}>
@@ -600,18 +597,23 @@ const CreditsItem = ({ item, theme }) => {
                               <Text style={[styles.metaText, { color: theme.error }]}>{clsItem.label}</Text>
                             </View>
                           )}
-                          {hasAttendance && (
-                            <View style={[styles.metaBadge, { backgroundColor: badgeColor + '20' }]}>
-                              <Ionicons 
-                                name={subStat.percentage >= 75 ? "checkmark-circle" : (isAttBorderline ? "alert-circle" : "warning")} 
-                                size={12} 
-                                color={badgeColor} 
-                              />
-                              <Text style={[styles.metaText, { color: badgeColor, fontSize: 11, fontWeight: '800' }]}>
-                                {subStat.percentage}% {isAttLow ? '⚠️' : ''}
-                              </Text>
-                            </View>
-                          )}
+                          {hasAttendance && (() => {
+                            const isSafe = subStat.percentage >= 67;
+                            const badgeColor = isSafe ? theme.success  : theme.error;
+                            const badgeBg = badgeColor + '18'; 
+                            return (
+                              <View style={[styles.metaBadge, { backgroundColor: badgeBg }]}>
+                                <Ionicons 
+                                  name={isSafe ? "checkmark-circle" : "warning"} 
+                                  size={12} 
+                                  color={badgeColor} 
+                                />
+                                <Text style={[styles.metaText, { color: badgeColor, fontSize: 11, fontWeight: '800' }]}>
+                                  {subStat.percentage}% 
+                                </Text>
+                              </View>
+                            );
+                          })()}
                         </View>
                       </View>
                       <Text style={[styles.mainCardSubject, { color: theme.text }]} numberOfLines={2} importantForAccessibility="no-hide-descendants">{clsItem.subject}</Text>
