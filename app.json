@@ -57,9 +57,7 @@
           }
         }
       ],
-      "expo-font",
-      "expo-sharing",
-      "expo-status-bar"
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true

@@ -1,4 +1,4 @@
-import { WEBSITE_JSON_URL, REMOTE_MANIFEST_URL } from "@/constants/links";
+import { REMOTE_MANIFEST_URL, WEBSITE_JSON_URL } from "@/constants/links";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
@@ -244,6 +244,12 @@ const ArsdScraper = ({ credentials, onProgress, onLoginSuccess, onFinish, onErro
         const currentVal = typeSelect ? typeSelect.value.replace(/'/g, "") : null;
 
         const scrapeTableData = () => {
+            // Check for the "no record found" label before scraping the table
+            const msgLabel = document.getElementById("lblmsg");
+            if (msgLabel && msgLabel.innerText.toLowerCase().includes("no record found")) {
+                return {};
+            }
+
             let extractedData = {};
             const table = document.getElementById(r.table_id);
             if (table) {
@@ -287,7 +293,7 @@ const ArsdScraper = ({ credentials, onProgress, onLoginSuccess, onFinish, onErro
                 
                 const theoryPercentLabel = document.getElementById(r.percent_label_id);
                 let theoryPercent = "0"; 
-                if (theoryPercentLabel) {
+                if (theoryPercentLabel && Object.keys(teData).length > 0) {
                     const parts = theoryPercentLabel.innerText.split(': '); 
                     if (parts.length > 1) theoryPercent = parts[1].trim(); 
                 }
@@ -305,7 +311,7 @@ const ArsdScraper = ({ credentials, onProgress, onLoginSuccess, onFinish, onErro
                 
                 const practicalPercentLabel = document.getElementById(r.percent_label_id);
                 let practicalPercent = "0"; 
-                if (practicalPercentLabel) {
+                if (practicalPercentLabel && Object.keys(prData).length > 0) {
                     const parts = practicalPercentLabel.innerText.split(': '); 
                     if (parts.length > 1) practicalPercent = parts[1].trim(); 
                 }
